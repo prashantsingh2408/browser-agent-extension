@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Assistant</title>
   <link rel="stylesheet" href="styles/sidepanel.css">
+  <link rel="stylesheet" href="styles/ux-enhancements.css">
 </head>
 <body>
   <div class="app">
@@ -34,18 +35,27 @@
 
     <!-- Chat Container -->
     <div class="chat-container" id="messages">
-      <!-- Welcome Message -->
+      <!-- Welcome Message - Enhanced with UX Laws -->
       <div class="welcome-message">
-        <div class="welcome-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="#4285f4" stroke-width="1.5"/>
-            <circle cx="9" cy="10" r="1.5" fill="#4285f4"/>
-            <circle cx="15" cy="10" r="1.5" fill="#4285f4"/>
-            <path d="M8 14c0 2.21 1.79 4 4 4s4-1.79 4-4" stroke="#4285f4" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+        <div class="welcome-animation">
+          <div class="welcome-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="url(#gradient)" stroke-width="1.5"/>
+              <circle cx="9" cy="10" r="1.5" fill="url(#gradient)"/>
+              <circle cx="15" cy="10" r="1.5" fill="url(#gradient)"/>
+              <path d="M8 14c0 2.21 1.79 4 4 4s4-1.79 4-4" stroke="url(#gradient)" stroke-width="1.5" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#4285f4;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="pulse-ring"></div>
         </div>
-        <h2>Hello! How can I help you?</h2>
-        <p>I'm your AI assistant powered by Chrome's built-in AI. Ask me anything!</p>
+        <h2 class="gradient-text">Hello! Ready to assist you</h2>
+        <p class="subtitle">Powered by Chrome AI • Lightning fast • Always private</p>
         <div class="suggestions">
           <button class="suggestion-chip action-chip" data-action="summarize">📄 Summarize this page</button>
           <button class="suggestion-chip action-chip" data-action="explain-selection">💡 Explain selected text</button>

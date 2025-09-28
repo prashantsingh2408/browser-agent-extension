@@ -5,7 +5,7 @@
 // DOM Elements
 const messagesContainer = document.getElementById('messages');
 const userInput = document.getElementById('userInput');
-const sendBtn = document.getElementById('sendBtn');
+let sendBtn = document.getElementById('sendBtn');
 const clearBtn = document.getElementById('clearBtn');
 const statusText = document.getElementById('statusText');
 const statusDot = document.querySelector('.status-dot');
@@ -14,6 +14,7 @@ const statusDot = document.querySelector('.status-dot');
 let aiSession = null;
 let isProcessing = false;
 let conversationHistory = [];
+let currentAbortController = null; // For canceling ongoing requests
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -91,13 +92,24 @@ function setupEventListeners() {
   // Send button
   sendBtn.addEventListener('click', handleSend);
   
-  // Enter key to send
+  // Enter key to send, ESC to stop
   userInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!isProcessing) {
         handleSend();
       }
+    } else if (e.key === 'Escape' && isProcessing) {
+      e.preventDefault();
+      handleStopGeneration();
+    }
+  });
+  
+  // Global ESC key listener for stopping generation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isProcessing) {
+      e.preventDefault();
+      handleStopGeneration();
     }
   });
   
@@ -197,7 +209,6 @@ function setupEventListeners() {
 async function handleSend() {
   // Check if already processing
   if (isProcessing) {
-    console.log('Already processing a request. Please wait...');
     return; // Silently ignore - don't show error
   }
   
@@ -206,9 +217,11 @@ async function handleSend() {
   
   // Set processing flag and disable ALL inputs
   isProcessing = true;
-  sendBtn.disabled = true;
   userInput.disabled = true;
   setButtonsDisabled(true);
+  
+  // Transform send button to stop button
+  transformToStopButton();
   
   // Hide welcome message if it exists
   const welcomeMessage = document.querySelector('.welcome-message');
@@ -223,34 +236,135 @@ async function handleSend() {
   userInput.value = '';
   adjustTextareaHeight();
   
-  // Show loading
+  // Show loading initially
   const loadingId = showLoading();
+  const loadingStartTime = Date.now();
+  
+  // Create abort controller for this request
+  currentAbortController = new AbortController();
+  
+  // Create streaming message container outside try block
+  let streamingMessage = null;
+  let fullResponse = '';
   
   try {
-    const response = await processMessage(message);
-    removeLoading(loadingId);
-    addMessage(response, 'bot');
+    let firstChunkReceived = false;
+    
+    // Process with streaming
+    const response = await processMessage(message, (chunk) => {
+      // Remove loading on first chunk (with minimum display time)
+      if (!firstChunkReceived) {
+        removeLoading(loadingId);
+        streamingMessage = addStreamingMessage('bot');
+        firstChunkReceived = true;
+      }
+      
+      // Append chunk to streaming message
+      if (streamingMessage) {
+        streamingMessage.appendChunk(chunk);
+        fullResponse += chunk;
+      }
+    }, currentAbortController.signal);
+    
+    // If no streaming happened (fallback to regular response)
+    if (!firstChunkReceived) {
+      removeLoading(loadingId);
+      addMessage(response, 'bot');
+    } else if (streamingMessage && fullResponse) {
+      // Finalize the streaming message with formatted content
+      streamingMessage.finalize(fullResponse);
+    }
   } catch (error) {
     removeLoading(loadingId);
-    showError('Failed to get response. Please try again.');
-    console.error('Error processing message:', error);
+    
+    // Handle abort separately
+    if (error.name === 'AbortError') {
+      // If we have a streaming message, finalize it as stopped
+      if (streamingMessage && fullResponse) {
+        streamingMessage.finalize(fullResponse, true);
+      } else if (streamingMessage) {
+        // Remove the streaming message if no content was received
+        const streamingElem = document.querySelector('.message.streaming');
+        if (streamingElem) streamingElem.remove();
+      }
+    } else {
+      // Remove any streaming message on error
+      const streamingElem = document.querySelector('.message.streaming');
+      if (streamingElem) streamingElem.remove();
+      
+      showError('Failed to get response. Please try again.');
+      console.error('Error processing message:', error);
+    }
   } finally {
+    // Clear abort controller
+    currentAbortController = null;
     // Reset processing state and re-enable inputs
     isProcessing = false;
     userInput.disabled = false;
     setButtonsDisabled(false);
-    sendBtn.disabled = !userInput.value.trim();
+    // Transform button back to send
+    transformToSendButton();
   }
 }
 
-// Process message with AI - simplified version
-async function processMessage(message) {
+// Process message with AI - with streaming support and cancellation
+async function processMessage(message, onChunk, abortSignal) {
   try {
     const session = await createAISession();
-    const response = await session.prompt(message, { language: 'en' });
-    return response;
+    
+    // Check if streaming is supported
+    if (session.promptStreaming) {
+      // Use streaming API if available
+      let fullResponse = '';
+      const stream = session.promptStreaming(message, { 
+        language: 'en',
+        signal: abortSignal // Pass abort signal if API supports it
+      });
+      
+      for await (const chunk of stream) {
+        // Check if aborted
+        if (abortSignal?.aborted) {
+          throw new DOMException('Generation stopped by user', 'AbortError');
+        }
+        
+        fullResponse += chunk;
+        if (onChunk) {
+          onChunk(chunk); // Call callback with each chunk
+        }
+      }
+      
+      return fullResponse;
+    } else {
+      // Fallback to regular prompt if streaming not available
+      const response = await session.prompt(message, { 
+        language: 'en',
+        signal: abortSignal // Pass abort signal if API supports it
+      });
+      
+      // Simulate streaming for better UX even without native support
+      if (onChunk) {
+        const words = response.split(' ');
+        for (let i = 0; i < words.length; i++) {
+          // Check if aborted during simulation
+          if (abortSignal?.aborted) {
+            throw new DOMException('Generation stopped by user', 'AbortError');
+          }
+          
+          const word = words[i] + (i < words.length - 1 ? ' ' : '');
+          onChunk(word);
+          // Small delay to simulate streaming
+          await new Promise(resolve => setTimeout(resolve, 30));
+        }
+      }
+      
+      return response;
+    }
   } catch (error) {
-    console.error('Failed to process message:', error);
+    if (error.name === 'AbortError') {
+      console.log('Generation was stopped by user');
+    } else {
+      console.error('Failed to process message:', error);
+    }
     throw error;
   }
 }
@@ -277,6 +391,81 @@ function addMessage(content, type) {
   
   // Scroll to bottom
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Add streaming message to chat
+function addStreamingMessage(type = 'bot') {
+  // Remove any existing streaming messages first to prevent duplicates
+  const existingStreaming = document.querySelector('.message.streaming');
+  if (existingStreaming) {
+    existingStreaming.remove();
+  }
+  
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${type} streaming`;
+  messageDiv.id = 'streaming-' + Date.now();
+  
+  const avatarDiv = document.createElement('div');
+  avatarDiv.className = 'message-avatar';
+  avatarDiv.textContent = type === 'user' ? '👤' : '🤖';
+  
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content streaming-content';
+  
+  // Add cursor for streaming effect directly (no stop button needed here)
+  const cursorSpan = document.createElement('span');
+  cursorSpan.className = 'streaming-cursor';
+  cursorSpan.textContent = '▊';
+  contentDiv.appendChild(cursorSpan);
+  
+  messageDiv.appendChild(avatarDiv);
+  messageDiv.appendChild(contentDiv);
+  messagesContainer.appendChild(messageDiv);
+  
+  // Scroll to bottom
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  return {
+    messageDiv,
+    contentDiv,
+    appendChunk: function(chunk) {
+      // Remove cursor temporarily
+      const cursor = contentDiv.querySelector('.streaming-cursor');
+      if (cursor) cursor.remove();
+      
+      // Append the new chunk
+      const textSpan = document.createElement('span');
+      textSpan.textContent = chunk;
+      contentDiv.appendChild(textSpan);
+      
+      // Re-add cursor
+      contentDiv.appendChild(cursorSpan);
+      
+      // Scroll to bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    },
+    finalize: function(fullText, wasStopped = false) {
+      // Remove cursor
+      const cursor = contentDiv.querySelector('.streaming-cursor');
+      if (cursor) cursor.remove();
+      
+      // Remove streaming class
+      messageDiv.classList.remove('streaming');
+      
+      // Apply formatting to the complete text
+      if (wasStopped && fullText) {
+        contentDiv.innerHTML = formatMessage(fullText) + 
+          '<div class="stopped-indicator">⏸ Response stopped by user</div>';
+      } else if (fullText) {
+        contentDiv.innerHTML = formatMessage(fullText);
+      } else {
+        contentDiv.innerHTML = '<div class="stopped-indicator">⏸ Response stopped</div>';
+      }
+      
+      // Scroll to bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  };
 }
 
 // Format message with basic markdown
@@ -312,7 +501,7 @@ function formatMessage(text) {
   return formatted;
 }
 
-// Show loading animation
+// Show loading animation with timer, stop button, and skeleton
 function showLoading() {
   const loadingId = 'loading-' + Date.now();
   const messageDiv = document.createElement('div');
@@ -325,13 +514,52 @@ function showLoading() {
   
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
-  contentDiv.innerHTML = `
+  
+  // Create timer display without stop button (it's now in the send button position)
+  const timerDiv = document.createElement('div');
+  timerDiv.className = 'loading-timer';
+  timerDiv.innerHTML = `
+    <div class="timer-container">
+      <span class="timer-icon">⏱️</span>
+      <span class="timer-text">Processing...</span>
+      <span class="timer-seconds">0s</span>
+    </div>
+    <div class="skeleton-container">
+      <div class="skeleton-line skeleton-line-full"></div>
+      <div class="skeleton-line skeleton-line-three-quarters"></div>
+      <div class="skeleton-line skeleton-line-half"></div>
+    </div>
     <div class="loading">
       <div class="loading-dot"></div>
       <div class="loading-dot"></div>
       <div class="loading-dot"></div>
     </div>
   `;
+  contentDiv.appendChild(timerDiv);
+  
+  // Start timer
+  let seconds = 0;
+  const timerSpan = timerDiv.querySelector('.timer-seconds');
+  
+  const intervalId = setInterval(() => {
+    seconds++;
+    if (timerSpan) {
+      timerSpan.textContent = `${seconds}s`;
+    }
+    
+    // Update text based on time elapsed
+    const timerText = timerDiv.querySelector('.timer-text');
+    if (timerText) {
+      if (seconds > 10) {
+        timerText.textContent = 'Still thinking...';
+      } else if (seconds > 5) {
+        timerText.textContent = 'Analyzing...';
+      }
+    }
+  }, 1000);
+  
+  // Store interval ID on the element for cleanup
+  messageDiv.dataset.intervalId = intervalId;
   
   messageDiv.appendChild(avatarDiv);
   messageDiv.appendChild(contentDiv);
@@ -346,6 +574,11 @@ function showLoading() {
 function removeLoading(loadingId) {
   const loadingElement = document.getElementById(loadingId);
   if (loadingElement) {
+    // Clear the timer interval if it exists
+    const intervalId = loadingElement.dataset.intervalId;
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
     loadingElement.remove();
   }
 }
@@ -364,6 +597,20 @@ function clearChat() {
     messagesContainer.appendChild(welcomeMessage);
     welcomeMessage.style.display = 'flex';
   }
+  
+  // Reset any ongoing processing state
+  if (isProcessing) {
+    isProcessing = false;
+    userInput.disabled = false;
+    setButtonsDisabled(false);
+    transformToSendButton();
+    
+    // Abort any ongoing request
+    if (currentAbortController) {
+      currentAbortController.abort();
+      currentAbortController = null;
+    }
+  }
 }
 
 // Disable/Enable all quick action buttons
@@ -378,11 +625,60 @@ function setButtonsDisabled(disabled) {
     }
   });
   
-  // Also manage send button
-  if (disabled) {
-    sendBtn.disabled = true;
-  } else if (userInput.value.trim()) {
-    sendBtn.disabled = false;
+  // Don't touch send button here - it's managed by transform functions
+}
+
+// Transform send button to stop button
+function transformToStopButton() {
+  sendBtn.innerHTML = '<span class="stop-icon">⏹</span>';
+  sendBtn.classList.add('stop-mode');
+  sendBtn.title = 'Stop generation (ESC)';
+  
+  // Remove existing click listener and add stop handler
+  const newSendBtn = sendBtn.cloneNode(true);
+  sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
+  sendBtn = newSendBtn; // Update reference
+  
+  sendBtn.addEventListener('click', handleStopGeneration);
+}
+
+// Transform stop button back to send button
+function transformToSendButton() {
+  sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  sendBtn.classList.remove('stop-mode');
+  sendBtn.title = 'Send message';
+  
+  // Remove stop handler and restore send handler
+  const newSendBtn = sendBtn.cloneNode(true);
+  sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
+  sendBtn = newSendBtn; // Update reference
+  
+  sendBtn.addEventListener('click', handleSend);
+  sendBtn.disabled = !userInput.value.trim();
+}
+
+// Handle stop generation
+function handleStopGeneration() {
+  if (currentAbortController) {
+    console.log('Stopping generation...');
+    currentAbortController.abort();
+    currentAbortController = null;
+    
+    // Also remove any loading elements
+    const loadingElements = document.querySelectorAll('[id^="loading-"]');
+    loadingElements.forEach(elem => {
+      const intervalId = elem.dataset.intervalId;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      elem.remove();
+    });
+    
+    // Re-enable inputs and transform button back
+    isProcessing = false;
+    userInput.disabled = false;
+    setButtonsDisabled(false);
+    transformToSendButton();
   }
 }
 

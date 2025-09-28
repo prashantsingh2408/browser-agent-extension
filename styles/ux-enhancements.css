@@ -1,0 +1,287 @@
+/* UX Enhancements based on Laws of UX principles */
+
+/* 1. Aesthetic-Usability Effect - Beautiful gradients and smooth animations */
+.message.bot .message-content {
+  background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
+  border: 1px solid var(--gray-200);
+  animation: messageSlideIn var(--duration-normal) var(--easing);
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 2. Fitts's Law - Larger click targets for better usability */
+.quick-action-btn {
+  min-height: 44px; /* Minimum touch target size */
+  padding: var(--spacing-sm) var(--spacing);
+  transition: all var(--duration-fast) var(--easing);
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 3. Goal-Gradient Effect - Visual progress indicators */
+.progress-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--primary-gradient);
+  transition: width var(--duration-normal) var(--easing);
+  border-radius: var(--radius-full);
+}
+
+/* 4. Miller's Law - Group items in chunks of 5-7 */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+  max-width: 100%;
+}
+
+/* 5. Serial Position Effect - Important items at start and end */
+.quick-action-btn:first-child {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.quick-action-btn:last-child {
+  background: var(--success-light);
+  border-color: var(--success);
+}
+
+/* 6. Peak-End Rule - Delightful finishing animations */
+.message.bot.complete {
+  animation: completePulse 0.5s ease;
+}
+
+@keyframes completePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* 7. Doherty Threshold - Instant feedback (< 400ms) */
+.skeleton-loader {
+  background: linear-gradient(
+    90deg,
+    var(--gray-100) 25%,
+    var(--gray-200) 50%,
+    var(--gray-100) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton var(--duration-slow) infinite;
+}
+
+@keyframes skeleton {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 8. Von Restorff Effect - Make important elements stand out */
+.primary-action {
+  background: var(--primary-gradient);
+  color: var(--white);
+  font-weight: 600;
+  box-shadow: var(--shadow-glow);
+  position: relative;
+}
+
+.primary-action::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--primary-gradient);
+  border-radius: inherit;
+  opacity: 0.3;
+  filter: blur(8px);
+  z-index: -1;
+}
+
+/* 9. Hick's Law - Simplified choices */
+.action-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.action-group > * {
+  flex: 1;
+  max-width: 150px;
+}
+
+/* 10. Flow State - Immersive experience */
+.focus-mode {
+  animation: focusIn var(--duration-normal) var(--easing);
+}
+
+@keyframes focusIn {
+  from {
+    filter: blur(2px);
+    opacity: 0.8;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+/* Enhanced Send Button with Laws of UX */
+.send-btn-enhanced {
+  /* Fitts's Law - Larger target */
+  width: 44px;
+  height: 44px;
+  
+  /* Aesthetic-Usability */
+  background: var(--primary-gradient);
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+  
+  /* Smooth transitions */
+  transition: all var(--duration-fast) var(--easing-bounce);
+  position: relative;
+  overflow: hidden;
+}
+
+.send-btn-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform var(--duration-normal) var(--easing);
+}
+
+.send-btn-enhanced:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.send-btn-enhanced:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.4);
+}
+
+/* Micro-interactions for delight */
+.micro-interaction {
+  transition: all var(--duration-instant) var(--easing);
+}
+
+.micro-interaction:hover {
+  transform: translateX(2px);
+}
+
+/* Improved Loading States */
+.loading-skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+/* Accessibility improvements */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus states for keyboard navigation */
+.focusable:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Smooth scroll behavior */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--spacing-lg);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all var(--duration-normal) var(--easing);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Tooltip enhancements */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--dark);
+  color: var(--white);
+  font-size: 12px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--easing);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}

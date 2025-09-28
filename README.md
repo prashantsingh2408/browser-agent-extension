@@ -1,280 +1,248 @@
-# 🤖 AI Assistant Chrome Extension
+# AI Browser Agent Extension
 
-A professional Chrome extension that provides an AI-powered assistant using Chrome's built-in Gemini Nano model. Features contextual web page interactions, completely private on-device processing, and a polished user interface.
+A Chrome extension that provides an AI assistant with quick action buttons for extracting page content. The extension uses Chrome's built-in Gemini Nano AI model for conversations.
 
-## ✨ Key Features
+## Features
 
-### 🎯 Core Capabilities
-- **100% Private** - All AI processing happens on-device using Chrome's Gemini Nano
-- **No API Keys Required** - Works out of the box with Chrome's built-in AI
-- **Professional UI** - Clean, modern interface with smooth animations
-- **Context-Aware** - Understands and interacts with current webpage content
+### 🤖 AI Assistant
+- **Chat Interface**: Have conversations with the built-in AI assistant
+- **Content Analysis**: Share page content with the AI using the quick action buttons
+- **Private & Local**: Uses Chrome's on-device Gemini Nano model
 
-### 🔥 Smart Actions
-- **📄 Summarize Page** - Get instant summaries of any webpage
-- **💡 Explain Selection** - Select any text and get clear explanations
-- **🎥 Explain Videos** - Find and explain videos on the current page
-- **💬 General Chat** - Ask any questions and get AI-powered answers
+### 🚀 Quick Action Buttons
+- **Attach Page Content**: One-click to attach the current page's content to your message
+- **Attach Selection**: Quickly attach any text you've selected on the page
+- **Get Links**: Extract all links from the page with a single click
+- **Get Images**: Find all images on the page instantly
 
-### 🎨 User Experience
-- **Side Panel Interface** - Non-intrusive sidebar that doesn't block content
-- **Welcome Screen** - Helpful suggestions to get started
-- **Status Indicators** - Real-time connection and processing status
-- **Keyboard Shortcut** - Quick access with `Alt+Shift+A`
-- **Clear Chat** - Reset conversations anytime
-- **Auto-resize Input** - Text area grows as you type
-- **Markdown Support** - Rich text formatting in responses
+### 📋 Available Functions
 
-## 📦 Installation
+The agent has access to these powerful functions:
 
-### Prerequisites
-- Chrome version 138 or higher
-- Chrome AI features enabled
+1. **getPageContent** - Extract main content from the current webpage
+   - Optional CSS selector for specific content
+   - Includes metadata (title, URL, description)
 
-### Step 1: Enable Chrome AI
-1. Navigate to `chrome://flags/`
-2. Search for **"Optimization Guide On Device"**
-3. Set to **Enabled**
-4. Click **Relaunch** to restart Chrome
+2. **getSelectedText** - Get currently selected text on the page
 
-### Step 2: Load the Extension
-1. Open Chrome Extensions: `chrome://extensions/`
-2. Enable **Developer Mode** (toggle in top-right)
-3. Click **Load unpacked**
-4. Select this folder: `/home/neosoft/test/browser-agent-extension`
+3. **getPageMetadata** - Extract comprehensive page metadata
+   - Title, URL, description, keywords
+   - Open Graph data
+   - Twitter Card data
+   - Schema.org structured data
 
-### Step 3: Pin the Extension
-1. Click the puzzle piece icon in Chrome toolbar
-2. Find **AI Assistant**
-3. Click the pin icon to keep it visible
+4. **findElements** - Find elements using CSS selectors
+   - Returns element details and positions
+   - Optional text extraction
 
-## 🎯 Usage Guide
+5. **getImages** - Extract all images from the page
+   - IMG tags and background images
+   - Image metadata (alt text, dimensions)
 
-### Opening the Assistant
-- **Method 1:** Click the extension icon in toolbar
-- **Method 2:** Press `Alt+Shift+A` keyboard shortcut
-- The assistant opens in a side panel
+6. **getLinks** - Extract all links
+   - Filter internal/external links
+   - Link text and attributes
 
-### Using Smart Actions
+7. **getVideos** - Find videos on the page
+   - HTML5 videos
+   - YouTube/Vimeo embeds
+   - Video metadata
 
-#### 📄 Summarize This Page
-1. Navigate to any article or webpage
-2. Open the assistant
-3. Click **"Summarize this page"**
-4. Get a structured summary with key points
+8. **getForms** - Analyze forms on the page
+   - Form fields and attributes
+   - Input types and values
 
-#### 💡 Explain Selected Text
-1. Select any text on a webpage
-2. Open the assistant
-3. Click **"Explain selected text"**
-4. Receive a clear explanation
+9. **clickElement** - Click on page elements
+   - Uses CSS selectors
+   - Simulates user clicks
 
-#### 🎥 Explain Intro Video
-1. Visit a page with video content
-2. Open the assistant
-3. Click **"Explain intro video"**
-4. Get insights about the video content
+10. **fillInput** - Fill form fields
+    - Input text into fields
+    - Trigger proper events
 
-#### 💬 General Questions
-1. Type any question in the input field
-2. Press Enter or click Send
-3. Get AI-powered responses
+11. **scrollToElement** - Scroll to specific elements
+    - Smooth scrolling option
+    - Center element in view
 
-## 🏗️ Project Structure
+12. **extractTable** - Extract table data
+    - Multiple format outputs (JSON, CSV, text)
+    - Headers and rows extraction
+
+13. **analyzePageStructure** - Comprehensive page analysis
+    - Element counts
+    - Semantic structure
+    - Accessibility metrics
+    - Performance stats
+
+14. **searchInPage** - Search text within the page
+    - Case sensitive/insensitive
+    - Whole word matching
+    - Returns matches with context
+
+## How It Works
+
+### Quick Action Buttons
+
+1. **Type Your Message**: Start typing your question or request in the chat
+2. **Click a Button**: Click any quick action button to attach page data
+3. **Content Appends**: The extracted content is added to your message
+4. **Send to AI**: Send the complete message with attachments to the AI
+
+### Example Workflow
+
+1. Type: "Can you explain this article about"
+2. Click: **Attach Page Content** button
+3. Your message becomes:
+   ```
+   Can you explain this article about
+
+   [Attached Page Content]
+   **Page:** Article Title
+   **URL:** https://example.com/article
+   **Content Preview:** The article content...
+   ```
+4. Send the message and the AI will analyze the attached content
+
+## Installation
+
+1. Open Chrome and navigate to `chrome://extensions/`
+2. Enable "Developer mode" in the top right
+3. Click "Load unpacked"
+4. Select the `browser-agent-extension` directory
+5. The extension will be installed and ready to use
+
+## Usage
+
+1. Click the extension icon or press `Alt+Shift+A` to open the side panel
+2. Use the quick action buttons at the bottom:
+   - **Attach Page Content**: Instantly get the page content ready in your message
+   - **Attach Selection**: Select text on the page, then click to attach it
+   - **Get Links**: Extract all links from the current page
+   - **Get Images**: Find all images on the page
+3. Or chat directly with the AI agent:
+   - "Can you access this page?"
+   - "What's on this website?"
+   - "Summarize the current page"
+   - "Find all forms on this page"
+   - "Extract the main content"
+   - "What images are here?"
+   - "Search for [term] on this page"
+
+## Technical Details
+
+### Architecture
 
 ```
-browser-agent-extension/
-├── manifest.json           # Extension configuration
-├── sidepanel.html         # Main UI structure
-├── README.md              # Documentation (this file)
-│
+├── manifest.json          # Extension configuration
 ├── scripts/
-│   ├── sidepanel.js       # Main application logic
-│   ├── content.js         # Page interaction & content extraction
-│   └── background.js      # Extension setup & lifecycle
-│
-├── styles/
-│   └── sidepanel.css      # Professional UI styling
-│
-└── icons/                 # Extension icons (16, 32, 48, 128px)
-    ├── icon16.png
-    ├── icon32.png
-    ├── icon48.png
-    └── icon128.png
+│   ├── background.js     # Service worker for message handling
+│   ├── content.js        # Content script with all functions
+│   ├── sidepanel.js      # Side panel UI and AI integration
+│   └── modules/
+│       └── functions.js  # Function registry and handling
+├── sidepanel.html        # Side panel interface
+└── styles/
+    └── sidepanel.css     # Styling
 ```
 
-## 🔧 Technical Architecture
+### Key Components
 
-### Core Components
+1. **Content Script** (`content.js`)
+   - Implements all page interaction functions
+   - Handles function execution requests
+   - Provides comprehensive page access
 
-#### 1. **sidepanel.js** (461 lines)
-Main application logic handling:
-- AI session management with Gemini Nano
-- Message processing and chat interface
-- Action chip handlers for smart features
-- Status management and error handling
-- Markdown formatting for responses
+2. **Background Script** (`background.js`)
+   - Manages message passing between components
+   - Handles screenshot capture
+   - Manages tab interactions
 
-Key Functions:
-- `initializeAI()` - Checks and initializes Chrome's LanguageModel API
-- `createAISession()` - Creates persistent AI session with Gemini Nano
-- `handleActionChip()` - Dispatches smart action requests
-- `summarizePage()` - Extracts and summarizes webpage content
-- `explainSelection()` - Explains user-selected text
-- `explainVideo()` - Analyzes video content on page
+3. **Side Panel** (`sidepanel.js`)
+   - AI chat interface
+   - Function call detection and execution
+   - Response formatting and display
 
-#### 2. **content.js** (78 lines)
-Page interaction layer providing:
-- Content extraction from webpages
-- Text selection detection
-- Video discovery on pages
-- Clean text processing
+4. **Function Module** (`functions.js`)
+   - Function registry with metadata
+   - Intent detection for page access
+   - Function call parsing
 
-Key Functions:
-- `getPageContent()` - Intelligent content extraction
-- `findVideosOnPage()` - Detects HTML5 and YouTube videos
-- `cleanText()` - Text sanitization and truncation
+### Permissions
 
-#### 3. **background.js** (29 lines)
-Extension lifecycle management:
-- Side panel configuration
-- Icon click handling
-- Keyboard shortcut registration
+The extension requires these permissions:
+- `sidePanel` - Display the side panel interface
+- `activeTab` - Access the current tab
+- `tabs` - Tab management
+- `scripting` - Inject and execute scripts
+- `storage` - Store preferences
+- `<all_urls>` - Access any website
 
-### AI Integration
+## Privacy & Security
 
-The extension uses Chrome's built-in **Gemini Nano** model through the `LanguageModel` API:
+- Uses Chrome's built-in Gemini Nano model (100% local, no data sent to servers)
+- All page interactions happen locally in your browser
+- No external API calls or data transmission
+- Content script only executes when you interact with the agent
 
+## Requirements
+
+- Chrome 138 or later (for Gemini Nano support)
+- Gemini Nano must be enabled in Chrome flags:
+  1. Navigate to `chrome://flags/`
+  2. Search for "optimization-guide-on-device-model"
+  3. Set to "Enabled BypassPerfRequirement"
+  4. Restart Chrome
+
+## Development
+
+### Adding New Quick Action Buttons
+
+1. Add button HTML in `sidepanel.html` in the quick-actions div
+2. Add button styles in `sidepanel.css` if needed
+3. Create handler function in `sidepanel.js`:
 ```javascript
-// AI Configuration
-const aiSession = await LanguageModel.create({
-  temperature: 0.7,      // Balanced creativity
-  topK: 3,              // Focused responses
-  language: 'en',       // English output
-  systemPrompt: 'You are a helpful, friendly, and knowledgeable AI assistant.'
-});
+async function handleNewAction() {
+  // Get data using window.functionHandler.executeFunction
+  const result = await window.functionHandler.executeFunction('functionName', {});
+  // Format and append to input
+  const attachmentText = `[Attached Data]\n${result}`;
+  userInput.value += attachmentText;
+}
 ```
+4. Add event listener in `setupEventListeners()` function
 
-### Data Flow
-1. User triggers action (click/type/select)
-2. Content script extracts page data if needed
-3. Sidepanel processes request with AI
-4. Gemini Nano generates response
-5. UI updates with formatted result
+## Troubleshooting
 
-## 🎨 UI/UX Features
+### Quick action buttons not working
+- Make sure you're not on a restricted page (chrome://, chrome-extension://)
+- Refresh the page and try again
+- Check if the content script is loaded
 
-### Design System
-- **Color Palette**: Google Material Design colors
-- **Typography**: System fonts with fallbacks
-- **Spacing**: Consistent 4px grid system
-- **Animations**: Smooth transitions (300ms ease)
-- **Icons**: Circular blue design with transparency
+### AI model not available
+- Ensure Chrome 138+ is installed
+- Enable Gemini Nano in chrome://flags/
+- Restart Chrome after enabling flags
 
-### Responsive Elements
-- Message bubbles with avatars
-- Loading animation with bouncing dots
-- Status indicator with pulse animation
-- Auto-scrolling chat container
-- Input field that grows with content
+### Buttons don't extract content
+- Open DevTools and check for errors
+- Verify you're on a regular webpage
+- Try reloading the extension
 
-## 🔒 Privacy & Security
+## License
 
-### Data Protection
-- **No External Servers** - Everything runs locally
-- **No API Calls** - No internet requests for AI
-- **No Data Collection** - Zero analytics or tracking
-- **No Storage** - Conversations aren't saved
-- **Session Only** - Data cleared on close
+MIT License - See LICENSE file for details
 
-### Permissions Used
-- `sidePanel` - Display UI in browser sidebar
-- `activeTab` - Read current page content
-- `tabs` - Access page title and URL
+## Contributing
 
-## 🐛 Troubleshooting
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
 
-### Common Issues
+## Future Enhancements
 
-#### "AI Offline" Status
-**Solution:**
-1. Ensure Chrome AI is enabled in `chrome://flags/`
-2. Restart Chrome completely
-3. Check Chrome version (138+ required)
-
-#### "Model Downloading..." Message
-**Solution:**
-- Wait 1-2 minutes for first-time download (~50MB)
-- Ensure stable internet connection
-- Model downloads automatically once
-
-#### Extension Not Loading
-**Solution:**
-1. Check all files are present (see structure above)
-2. Verify no syntax errors in console
-3. Reload extension in `chrome://extensions/`
-
-#### Content Not Extracted
-**Solution:**
-- Some dynamic sites may not work perfectly
-- Try refreshing the page
-- Ensure content script has loaded
-
-## 🚀 Advanced Features
-
-### Markdown Support
-The assistant supports markdown formatting:
-- **Bold text** with `**text**`
-- *Italic text* with `*text*`
-- `Code blocks` with backticks
-- Headers with `#`, `##`, `###`
-- Lists with `*` or `-`
-
-### Keyboard Shortcuts
-- `Alt+Shift+A` - Open assistant
-- `Enter` - Send message
-- `Shift+Enter` - New line in input
-
-## 📊 Performance
-
-- **Model Size**: ~50MB (one-time download)
-- **Response Time**: 1-3 seconds typical
-- **Memory Usage**: ~30-50MB active
-- **CPU Usage**: Minimal when idle
-
-## 🔄 Updates & Maintenance
-
-### How to Update
-1. Pull latest changes
-2. Reload extension in `chrome://extensions/`
-3. No data migration needed
-
-### Browser Compatibility
-- Chrome 138+ (required)
-- Edge 138+ (Chromium-based)
-- Other Chromium browsers (experimental)
-
-## 📄 License
-
-MIT License - Free for personal and commercial use
-
-## 🤝 Contributing
-
-Contributions welcome! The extension is designed to be:
-- Easy to extend with new actions
-- Simple to customize UI/UX
-- Modular for feature additions
-
-## 🙏 Credits
-
-Built with:
-- Chrome's Gemini Nano AI
-- Chrome Extension Manifest V3
-- Google Material Design principles
-- Pure JavaScript (no frameworks)
-
----
-
-**Made with ❤️ using Chrome's on-device AI**
-
-*For questions or issues, check the console for detailed error messages and ensure Chrome AI features are properly enabled.*
+- [ ] More quick action buttons (forms, tables, etc.)
+- [ ] Visual element selection
+- [ ] Export extracted data to files
+- [ ] Save chat history
+- [ ] Custom button configurations
+- [ ] Keyboard shortcuts for buttons
+- [ ] Preview extracted content before sending
+- [ ] Support for more content types

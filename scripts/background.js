@@ -1,4 +1,4 @@
-// Background script for AI Assistant
+// Background script for AI Assistant with enhanced functionality
 
 // Set up side panel behavior on install
 chrome.runtime.onInstalled.addListener(() => {
@@ -25,5 +25,124 @@ chrome.commands.onCommand.addListener(async (command) => {
     } catch (error) {
       console.error('Error opening side panel via shortcut:', error);
     }
+  }
+});
+
+// Handle messages from content scripts and sidepanel
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'captureScreenshot') {
+    handleScreenshot(request.selector)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ error: error.message }));
+    return true; // Keep message channel open for async response
+  }
+  
+  if (request.action === 'executeInActiveTab') {
+    executeInActiveTab(request.function, request.parameters)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ error: error.message }));
+    return true;
+  }
+  
+  if (request.action === 'getTabInfo') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      sendResponse({ tab: tabs[0] });
+    });
+    return true;
+  }
+});
+
+// Handle screenshot capture
+async function handleScreenshot(selector) {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    if (selector) {
+      // If selector is provided, need to highlight element first
+      await chrome.tabs.sendMessage(tab.id, { 
+        action: 'highlightElement', 
+        selector: selector 
+      });
+    }
+    
+    // Capture visible tab
+    const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, {
+      format: 'png',
+      quality: 90
+    });
+    
+    if (selector) {
+      // Remove highlight
+      await chrome.tabs.sendMessage(tab.id, { 
+        action: 'removeHighlight' 
+      });
+    }
+    
+    return { 
+      success: true, 
+      dataUrl: dataUrl,
+      message: 'Screenshot captured successfully'
+    };
+  } catch (error) {
+    console.error('Screenshot error:', error);
+    return { 
+      error: `Failed to capture screenshot: ${error.message}` 
+    };
+  }
+}
+
+// Execute function in active tab
+async function executeInActiveTab(functionName, parameters) {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    // Check if we can inject into this tab
+    if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
+      return { error: 'Cannot access browser internal pages' };
+    }
+    
+    // Send message to content script
+    const response = await chrome.tabs.sendMessage(tab.id, {
+      action: 'executeFunction',
+      function: functionName,
+      parameters: parameters
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('Error executing in active tab:', error);
+    
+    // Try to inject content script if it's not loaded
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['scripts/content.js']
+      });
+      
+      // Retry the function execution
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'executeFunction',
+        function: functionName,
+        parameters: parameters
+      });
+      
+      return response;
+    } catch (injectError) {
+      return { error: `Failed to access page: ${injectError.message}` };
+    }
+  }
+}
+
+// Listen for tab updates to reinject content script if needed
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && !tab.url.startsWith('chrome://')) {
+    // Optionally reinject content script on page navigation
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      files: ['scripts/content.js']
+    }).catch(() => {
+      // Silently fail if injection is not allowed
+    });
   }
 });

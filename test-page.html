@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Test page for AI Browser Agent Extension">
+    <meta name="keywords" content="AI, browser extension, test, demo">
+    <meta name="author" content="AI Agent Developer">
+    <title>AI Agent Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        h1 { margin: 0; }
+        .section {
+            background: #f5f5f5;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th { background: #4CAF50; color: white; }
+        .form-section {
+            background: white;
+            padding: 1.5rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background: #45a049; }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .image-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        img { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🤖 AI Browser Agent Test Page</h1>
+        <p>This page is designed to test the AI Agent's quick action buttons</p>
+    </header>
+
+    <main>
+        <article>
+            <section class="section">
+                <h2>📝 Test Content Section</h2>
+                <p>This is a test paragraph with some <strong>important content</strong> that the AI agent should be able to extract. The agent can use the <code>getPageContent</code> function to read this text and understand what's on the page.</p>
+                <p>Here's another paragraph with <a href="https://example.com">a link to example.com</a> and <a href="#internal">an internal link</a> that the agent can find using the <code>getLinks</code> function.</p>
+            </section>
+
+            <section class="section">
+                <h2>📊 Data Table</h2>
+                <p>The agent can extract this table using the <code>extractTable</code> function:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Function Name</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Content Extraction</td>
+                            <td>getPageContent</td>
+                            <td>Extracts main content from the page</td>
+                        </tr>
+                        <tr>
+                            <td>Link Analysis</td>
+                            <td>getLinks</td>
+                            <td>Finds all links on the page</td>
+                        </tr>
+                        <tr>
+                            <td>Form Detection</td>
+                            <td>getForms</td>
+                            <td>Identifies and analyzes forms</td>
+                        </tr>
+                        <tr>
+                            <td>Image Discovery</td>
+                            <td>getImages</td>
+                            <td>Finds all images including backgrounds</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section form-section">
+                <h2>📝 Test Form</h2>
+                <p>The agent can interact with this form using <code>fillInput</code> and <code>clickElement</code> functions:</p>
+                <form id="testForm">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your name">
+                    
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com">
+                    
+                    <label for="subject">Subject:</label>
+                    <select id="subject" name="subject">
+                        <option value="">Select a subject</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="support">Support</option>
+                        <option value="feedback">Feedback</option>
+                    </select>
+                    
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Type your message here"></textarea>
+                    
+                    <button type="submit">Submit Form</button>
+                </form>
+            </section>
+
+            <section class="section">
+                <h2>🖼️ Images Section</h2>
+                <p>The agent can find these images using the <code>getImages</code> function:</p>
+                <div class="image-gallery">
+                    <div class="image-item">
+                        <img src="data:image/svg+xml,%3Csvg width='200' height='150' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%234CAF50'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='20'%3EImage 1%3C/text%3E%3C/svg%3E" alt="Test Image 1">
+                    </div>
+                    <div class="image-item">
+                        <img src="data:image/svg+xml,%3Csvg width='200' height='150' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%232196F3'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='20'%3EImage 2%3C/text%3E%3C/svg%3E" alt="Test Image 2">
+                    </div>
+                    <div class="image-item">
+                        <img src="data:image/svg+xml,%3Csvg width='200' height='150' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='200' height='150' fill='%23FF9800'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-size='20'%3EImage 3%3C/text%3E%3C/svg%3E" alt="Test Image 3">
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🔍 Searchable Content</h2>
+                <p>The AI agent can search for specific terms in this content using the <code>searchInPage</code> function. For example, try searching for "artificial intelligence" or "machine learning".</p>
+                <p>This paragraph talks about <mark>artificial intelligence</mark> and how it's revolutionizing web browsing. Machine learning algorithms help understand user intent and provide better responses. The combination of AI and browser extensions creates powerful tools for automation.</p>
+                <p>Another mention of <mark>machine learning</mark> here, demonstrating how the search function can find multiple occurrences of terms throughout the page.</p>
+            </section>
+
+            <section class="section" id="internal">
+                <h2>🎯 Navigation Target</h2>
+                <p>This section has an ID that internal links point to. The agent can use <code>scrollToElement</code> to navigate here.</p>
+            </section>
+        </article>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; color: #666;">
+        <p>© 2024 AI Browser Agent Test Page | Test all functions of your AI agent here!</p>
+    </footer>
+
+    <script>
+        // Log form submissions for testing
+        document.getElementById('testForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            console.log('Form submitted with data:', {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            });
+            alert('Form submitted! Check console for details.');
+        });
+
+        // Add some interactivity
+        document.querySelectorAll('button').forEach(btn => {
+            if (btn.type !== 'submit') {
+                btn.addEventListener('click', () => {
+                    console.log('Button clicked:', btn.textContent);
+                });
+            }
+        });
+
+        console.log('Test page loaded. AI Agent can now interact with this page!');
+    </script>
+</body>
+</html>

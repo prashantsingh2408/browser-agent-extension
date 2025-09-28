@@ -1,5 +1,7 @@
 /* global LanguageModel */
 
+// Function handler will be available from functions.js
+
 // DOM Elements
 const messagesContainer = document.getElementById('messages');
 const userInput = document.getElementById('userInput');
@@ -11,6 +13,7 @@ const statusDot = document.querySelector('.status-dot');
 // AI Session
 let aiSession = null;
 let isProcessing = false;
+let conversationHistory = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -61,11 +64,14 @@ async function createAISession() {
       
       updateStatus('Loading model...', 'warning');
       
+      // Simple system prompt without function calling
+      const systemPrompt = `You are a helpful, friendly, and knowledgeable AI assistant. Provide clear, concise, and accurate responses. You can help analyze content that users share with you.`;
+
       aiSession = await LanguageModel.create({
         temperature: 0.7,
         topK: 3,
         language: 'en',
-        systemPrompt: 'You are a helpful, friendly, and knowledgeable AI assistant. Provide clear, concise, and accurate responses.'
+        systemPrompt: systemPrompt
       });
       
       console.log('AI session created successfully');
@@ -113,6 +119,25 @@ function setupEventListeners() {
       }
     }
   });
+  
+  // Quick Action Buttons
+  const attachPageBtn = document.getElementById('attachPageBtn');
+  const attachSelectionBtn = document.getElementById('attachSelectionBtn');
+  const attachLinksBtn = document.getElementById('attachLinksBtn');
+  const attachImagesBtn = document.getElementById('attachImagesBtn');
+  
+  if (attachPageBtn) {
+    attachPageBtn.addEventListener('click', handleAttachPage);
+  }
+  if (attachSelectionBtn) {
+    attachSelectionBtn.addEventListener('click', handleAttachSelection);
+  }
+  if (attachLinksBtn) {
+    attachLinksBtn.addEventListener('click', handleAttachLinks);
+  }
+  if (attachImagesBtn) {
+    attachImagesBtn.addEventListener('click', handleAttachImages);
+  }
 }
 
 // Handle send
@@ -153,7 +178,7 @@ async function handleSend() {
   }
 }
 
-// Process message with AI
+// Process message with AI - simplified version
 async function processMessage(message) {
   try {
     const session = await createAISession();
@@ -164,6 +189,7 @@ async function processMessage(message) {
     throw error;
   }
 }
+
 
 // Add message to chat
 function addMessage(content, type) {
@@ -456,5 +482,186 @@ Based on the page context and typical intro videos, please explain what this vid
     console.error('Explain video error:', error);
   } finally {
     isProcessing = false;
+  }
+}
+
+// Quick Action Button Handlers
+
+// Handle Attach Page Content
+async function handleAttachPage() {
+  try {
+    // Visual feedback
+    document.getElementById('attachPageBtn').classList.add('active');
+    
+    // Execute function to get page content
+    const result = await window.functionHandler.executeFunction('getPageContent', { 
+      includeMetadata: true 
+    });
+    
+    // Format the result as a message
+    const attachmentText = `
+
+[Attached Page Content]
+**Page:** ${result.metadata?.title || 'Untitled'}
+**URL:** ${result.metadata?.url || 'Unknown'}
+**Content Preview:** ${result.content?.substring(0, 500)}${result.content?.length > 500 ? '...' : ''}
+`;
+    
+    // APPEND to existing text, don't replace
+    const currentText = userInput.value;
+    const newText = currentText + (currentText && !currentText.endsWith('\n') ? '\n' : '') + attachmentText;
+    userInput.value = newText;
+    
+    // Move cursor to end
+    userInput.setSelectionRange(userInput.value.length, userInput.value.length);
+    userInput.focus();
+    
+    sendBtn.disabled = false;
+    adjustTextareaHeight();
+    
+    // Remove active state after a moment
+    setTimeout(() => {
+      document.getElementById('attachPageBtn').classList.remove('active');
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Failed to attach page content:', error);
+    showError('Failed to get page content. Make sure you\'re on a regular webpage.');
+  }
+}
+
+// Handle Attach Selection
+async function handleAttachSelection() {
+  try {
+    // Visual feedback
+    document.getElementById('attachSelectionBtn').classList.add('active');
+    
+    // Get selected text
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const response = await chrome.tabs.sendMessage(tab.id, { action: 'getSelection' });
+    
+    if (!response || !response.text || response.text.trim() === '') {
+      showError('Please select some text on the page first');
+      document.getElementById('attachSelectionBtn').classList.remove('active');
+      return;
+    }
+    
+    // Format attachment
+    const attachmentText = `
+
+[Attached Selection]
+"${response.text}"
+`;
+    
+    // APPEND to existing text
+    const currentText = userInput.value;
+    const newText = currentText + (currentText && !currentText.endsWith('\n') ? '\n' : '') + attachmentText;
+    userInput.value = newText;
+    
+    // Move cursor to end
+    userInput.setSelectionRange(userInput.value.length, userInput.value.length);
+    userInput.focus();
+    
+    sendBtn.disabled = false;
+    adjustTextareaHeight();
+    
+    // Remove active state
+    setTimeout(() => {
+      document.getElementById('attachSelectionBtn').classList.remove('active');
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Failed to get selection:', error);
+    showError('Failed to get selected text. Please try selecting text and clicking again.');
+  }
+}
+
+// Handle Get Links
+async function handleAttachLinks() {
+  try {
+    // Visual feedback
+    document.getElementById('attachLinksBtn').classList.add('active');
+    
+    // Execute function to get links
+    const result = await window.functionHandler.executeFunction('getLinks', {});
+    
+    // Format the top 10 links
+    const linksList = result.links?.slice(0, 10).map(link => 
+      `• [${link.text || 'No text'}](${link.href})`
+    ).join('\n');
+    
+    // Format attachment
+    const attachmentText = `
+
+[Attached Links - Found ${result.count} total]
+${linksList}
+`;
+    
+    // APPEND to existing text
+    const currentText = userInput.value;
+    const newText = currentText + (currentText && !currentText.endsWith('\n') ? '\n' : '') + attachmentText;
+    userInput.value = newText;
+    
+    // Move cursor to end
+    userInput.setSelectionRange(userInput.value.length, userInput.value.length);
+    userInput.focus();
+    
+    sendBtn.disabled = false;
+    adjustTextareaHeight();
+    
+    // Remove active state
+    setTimeout(() => {
+      document.getElementById('attachLinksBtn').classList.remove('active');
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Failed to get links:', error);
+    showError('Failed to get links from the page.');
+  }
+}
+
+// Handle Get Images
+async function handleAttachImages() {
+  try {
+    // Visual feedback
+    document.getElementById('attachImagesBtn').classList.add('active');
+    
+    // Execute function to get images
+    const result = await window.functionHandler.executeFunction('getImages', { 
+      includeBackgroundImages: true 
+    });
+    
+    // Format image info
+    const imageInfo = result.images?.slice(0, 10).map((img, i) => 
+      `${i + 1}. ${img.alt || 'No alt text'} - ${img.type}`
+    ).join('\n');
+    
+    // Format attachment
+    const attachmentText = `
+
+[Attached Images - Found ${result.count} total]
+${imageInfo}
+`;
+    
+    // APPEND to existing text
+    const currentText = userInput.value;
+    const newText = currentText + (currentText && !currentText.endsWith('\n') ? '\n' : '') + attachmentText;
+    userInput.value = newText;
+    
+    // Move cursor to end
+    userInput.setSelectionRange(userInput.value.length, userInput.value.length);
+    userInput.focus();
+    
+    sendBtn.disabled = false;
+    adjustTextareaHeight();
+    
+    // Remove active state
+    setTimeout(() => {
+      document.getElementById('attachImagesBtn').classList.remove('active');
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Failed to get images:', error);
+    showError('Failed to get images from the page.');
   }
 }

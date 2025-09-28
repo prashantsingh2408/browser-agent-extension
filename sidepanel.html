@@ -67,7 +67,7 @@
             <line x1="16" y1="17" x2="8" y2="17"/>
             <polyline points="10 9 9 9 8 9"/>
           </svg>
-          Attach Page Content
+          Attach Page
         </button>
         <button class="quick-action-btn" id="attachSelectionBtn" title="Attach selected text">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -76,22 +76,34 @@
             <path d="M4 17h10"/>
             <circle cx="19" cy="17" r="2"/>
           </svg>
-          Attach Selection
+          Selection
         </button>
-        <button class="quick-action-btn" id="attachLinksBtn" title="Get all links">
+        <button class="quick-action-btn" id="smartSummarizeBtn" title="Summarize selected text or page">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            <path d="M9 11H3"/>
+            <path d="M15 11h6"/>
+            <path d="M12 8v8"/>
+            <circle cx="12" cy="12" r="9"/>
           </svg>
-          Get Links
+          Summarize Page
         </button>
-        <button class="quick-action-btn" id="attachImagesBtn" title="Get all images">
+        <button class="quick-action-btn" id="translateBtn" title="Translate selected text or page to Spanish">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
+            <path d="M5 8l6 6"/>
+            <path d="M4 14l6-6 2-3"/>
+            <path d="M2 5h12"/>
+            <path d="M7 2v3"/>
+            <path d="M22 22l-5-5"/>
+            <path d="M17 22l5-5"/>
           </svg>
-          Get Images
+          Translate Page
+        </button>
+        <button class="quick-action-btn" id="improveTextBtn" title="Improve selected text">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          Improve
         </button>
       </div>
       <div class="input-wrapper">
@@ -114,6 +126,7 @@
   </div>
 
   <script src="scripts/functions.js"></script>
+  <script src="scripts/ai-apis.js"></script>
   <script src="scripts/sidepanel.js"></script>
 </body>
 </html>

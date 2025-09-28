@@ -83,10 +83,26 @@ The agent has access to these powerful functions:
 
 ### Quick Action Buttons
 
-1. **Type Your Message**: Start typing your question or request in the chat
-2. **Click a Button**: Click any quick action button to attach page data
-3. **Content Appends**: The extracted content is added to your message
-4. **Send to AI**: Send the complete message with attachments to the AI
+**Smart Button Features:**
+- **Automatic Highlighting**: When you select text on a page, all relevant buttons (Selection, Summarize, Translate, Improve) pulse with a blue highlight
+- **Context-Aware**: Buttons automatically detect if text is selected and act accordingly
+- **Graceful Fallbacks**: If Chrome's specialized AI APIs aren't available, buttons fallback to using Gemini Nano
+
+**Available Buttons:**
+
+1. **Attach Page** 📄 - Extracts full page content with metadata
+2. **Attach Selection** 🔍 - Attaches selected text (highlights when text selected)
+3. **Summarize** ⚡ - Summarizes selected text OR full page
+4. **Translate** 🌐 - Translates selected text OR page to Spanish  
+5. **Improve** ✏️ - Improves selected text clarity and quality
+
+**How They Work:**
+
+1. **Type Your Message** (optional): Start typing in the chat
+2. **Select Text** (optional): Highlight text on the page to work with specific content
+3. **Click a Button**: The button will use selected text if available, otherwise page content
+4. **Content Appends**: For attach buttons, content is added to your message
+5. **AI Processes**: For action buttons (Summarize/Translate/Improve), AI processes immediately
 
 ### Example Workflow
 

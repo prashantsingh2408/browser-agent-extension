@@ -95,7 +95,9 @@ function setupEventListeners() {
   userInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (!isProcessing) {
+        handleSend();
+      }
     }
   });
   
@@ -123,8 +125,9 @@ function setupEventListeners() {
   // Quick Action Buttons
   const attachPageBtn = document.getElementById('attachPageBtn');
   const attachSelectionBtn = document.getElementById('attachSelectionBtn');
-  const attachLinksBtn = document.getElementById('attachLinksBtn');
-  const attachImagesBtn = document.getElementById('attachImagesBtn');
+  const smartSummarizeBtn = document.getElementById('smartSummarizeBtn');
+  const translateBtn = document.getElementById('translateBtn');
+  const improveTextBtn = document.getElementById('improveTextBtn');
   
   if (attachPageBtn) {
     attachPageBtn.addEventListener('click', handleAttachPage);
@@ -132,20 +135,80 @@ function setupEventListeners() {
   if (attachSelectionBtn) {
     attachSelectionBtn.addEventListener('click', handleAttachSelection);
   }
-  if (attachLinksBtn) {
-    attachLinksBtn.addEventListener('click', handleAttachLinks);
+  if (smartSummarizeBtn) {
+    smartSummarizeBtn.addEventListener('click', handleSmartSummarize);
   }
-  if (attachImagesBtn) {
-    attachImagesBtn.addEventListener('click', handleAttachImages);
+  if (translateBtn) {
+    translateBtn.addEventListener('click', handleTranslate);
   }
+  if (improveTextBtn) {
+    improveTextBtn.addEventListener('click', handleImproveText);
+  }
+  
+  // Check for text selection periodically and highlight relevant buttons + update labels
+  setInterval(async () => {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && tab.id) {
+        chrome.tabs.sendMessage(tab.id, { action: 'getSelection' }, (response) => {
+          if (chrome.runtime.lastError) {
+            // Content script not loaded, buttons stay normal
+            attachSelectionBtn?.classList.remove('has-selection');
+            smartSummarizeBtn?.classList.remove('has-selection');
+            translateBtn?.classList.remove('has-selection');
+            improveTextBtn?.classList.remove('has-selection');
+            // Reset button labels to default
+            if (attachSelectionBtn) attachSelectionBtn.lastChild.textContent = 'Selection';
+            if (smartSummarizeBtn) smartSummarizeBtn.lastChild.textContent = 'Summarize Page';
+            if (translateBtn) translateBtn.lastChild.textContent = 'Translate Page';
+            if (improveTextBtn) improveTextBtn.lastChild.textContent = 'Improve';
+          } else if (response && response.text && response.text.trim()) {
+            // Text is selected - highlight all buttons that work with selection
+            attachSelectionBtn?.classList.add('has-selection');
+            smartSummarizeBtn?.classList.add('has-selection');
+            translateBtn?.classList.add('has-selection');
+            improveTextBtn?.classList.add('has-selection');
+            // Update button labels to show they'll use selection
+            if (attachSelectionBtn) attachSelectionBtn.lastChild.textContent = 'Attach Selected';
+            if (smartSummarizeBtn) smartSummarizeBtn.lastChild.textContent = 'Summarize Selected';
+            if (translateBtn) translateBtn.lastChild.textContent = 'Translate Selected';
+            if (improveTextBtn) improveTextBtn.lastChild.textContent = 'Improve Selected';
+          } else {
+            // No text selected - remove highlight
+            attachSelectionBtn?.classList.remove('has-selection');
+            smartSummarizeBtn?.classList.remove('has-selection');
+            translateBtn?.classList.remove('has-selection');
+            improveTextBtn?.classList.remove('has-selection');
+            // Update button labels to show they'll use page
+            if (attachSelectionBtn) attachSelectionBtn.lastChild.textContent = 'Selection';
+            if (smartSummarizeBtn) smartSummarizeBtn.lastChild.textContent = 'Summarize Page';
+            if (translateBtn) translateBtn.lastChild.textContent = 'Translate Page';
+            if (improveTextBtn) improveTextBtn.lastChild.textContent = 'Improve';
+          }
+        });
+      }
+    } catch (error) {
+      // Ignore errors (happens on chrome:// pages)
+    }
+  }, 500); // Check every 500ms
 }
 
 // Handle send
 async function handleSend() {
-  const message = userInput.value.trim();
-  if (!message || isProcessing) return;
+  // Check if already processing
+  if (isProcessing) {
+    console.log('Already processing a request. Please wait...');
+    return; // Silently ignore - don't show error
+  }
   
+  const message = userInput.value.trim();
+  if (!message) return;
+  
+  // Set processing flag and disable ALL inputs
   isProcessing = true;
+  sendBtn.disabled = true;
+  userInput.disabled = true;
+  setButtonsDisabled(true);
   
   // Hide welcome message if it exists
   const welcomeMessage = document.querySelector('.welcome-message');
@@ -158,7 +221,6 @@ async function handleSend() {
   
   // Clear input
   userInput.value = '';
-  sendBtn.disabled = true;
   adjustTextareaHeight();
   
   // Show loading
@@ -173,7 +235,10 @@ async function handleSend() {
     showError('Failed to get response. Please try again.');
     console.error('Error processing message:', error);
   } finally {
+    // Reset processing state and re-enable inputs
     isProcessing = false;
+    userInput.disabled = false;
+    setButtonsDisabled(false);
     sendBtn.disabled = !userInput.value.trim();
   }
 }
@@ -298,6 +363,26 @@ function clearChat() {
   if (welcomeMessage) {
     messagesContainer.appendChild(welcomeMessage);
     welcomeMessage.style.display = 'flex';
+  }
+}
+
+// Disable/Enable all quick action buttons
+function setButtonsDisabled(disabled) {
+  const buttons = document.querySelectorAll('.quick-action-btn');
+  buttons.forEach(btn => {
+    btn.disabled = disabled;
+    if (disabled) {
+      btn.classList.add('disabled');
+    } else {
+      btn.classList.remove('disabled');
+    }
+  });
+  
+  // Also manage send button
+  if (disabled) {
+    sendBtn.disabled = true;
+  } else if (userInput.value.trim()) {
+    sendBtn.disabled = false;
   }
 }
 
@@ -576,92 +661,302 @@ async function handleAttachSelection() {
   }
 }
 
-// Handle Get Links
-async function handleAttachLinks() {
+// Handle Smart Summarize with Chrome's Summarizer API
+async function handleSmartSummarize() {
   try {
+    // Check if already processing
+    if (isProcessing) {
+      console.log('Already processing a request. Please wait...');
+      return;
+    }
+    
+    // Set processing flag
+    isProcessing = true;
+    
+    // Disable all buttons during processing
+    setButtonsDisabled(true);
+    userInput.disabled = true;
+    
     // Visual feedback
-    document.getElementById('attachLinksBtn').classList.add('active');
+    document.getElementById('smartSummarizeBtn').classList.add('active');
     
-    // Execute function to get links
-    const result = await window.functionHandler.executeFunction('getLinks', {});
+    // First check if text is selected
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const selection = await chrome.tabs.sendMessage(tab.id, { action: 'getSelection' });
     
-    // Format the top 10 links
-    const linksList = result.links?.slice(0, 10).map(link => 
-      `• [${link.text || 'No text'}](${link.href})`
-    ).join('\n');
+    let contentToSummarize = '';
+    let contentLabel = '';
     
-    // Format attachment
-    const attachmentText = `
-
-[Attached Links - Found ${result.count} total]
-${linksList}
-`;
+    // Show loading message with spinner
+    const loadingId = showLoading();
     
-    // APPEND to existing text
-    const currentText = userInput.value;
-    const newText = currentText + (currentText && !currentText.endsWith('\n') ? '\n' : '') + attachmentText;
-    userInput.value = newText;
+    if (selection && selection.text && selection.text.trim()) {
+      // Use selected text
+      contentToSummarize = selection.text;
+      contentLabel = 'Selected Text';
+      addMessage(`⏳ Summarizing selected text...`, 'bot');
+    } else {
+      // Use page content
+      const result = await window.functionHandler.executeFunction('getPageContent', { 
+        includeMetadata: true 
+      });
+      contentToSummarize = result.content;
+      contentLabel = result.metadata?.title || 'Page Content';
+      addMessage(`⏳ Summarizing page content...`, 'bot');
+    }
     
-    // Move cursor to end
-    userInput.setSelectionRange(userInput.value.length, userInput.value.length);
-    userInput.focus();
+    // Remove the loading indicator
+    removeLoading(loadingId);
     
-    sendBtn.disabled = false;
-    adjustTextareaHeight();
+    // Try Chrome's Summarizer API if available
+    if (window.chromeAI) {
+      const summary = await window.chromeAI.smartSummarize(contentToSummarize);
+      
+      // Remove the loading message before showing result
+      const messages = document.getElementById('messages');
+      const lastMessage = messages.lastElementChild;
+      if (lastMessage && lastMessage.textContent.includes('⏳ Summarizing')) {
+        lastMessage.remove();
+      }
+      
+      if (summary && !summary.includes('Summarize this:')) {
+        // Native API worked
+        const message = `📝 **Summary of ${contentLabel}:**\n\n${summary}`;
+        addMessage(message, 'bot');
+      } else {
+        // Fallback to regular AI - auto send
+        const message = `Please provide a concise summary of this:\n\n[${contentLabel}]\n"${contentToSummarize.substring(0, 800)}..."`;
+        userInput.value = message;
+        sendBtn.disabled = false;
+        setTimeout(() => {
+          handleSend();
+        }, 100);
+      }
+    } else {
+      // Remove loading message before fallback
+      const messages = document.getElementById('messages');
+      const lastMessage = messages.lastElementChild;
+      if (lastMessage && lastMessage.textContent.includes('⏳ Summarizing')) {
+        lastMessage.remove();
+      }
+      
+      // Fallback to regular AI
+      const message = `Please summarize this:\n\n[${contentLabel}]\n"${contentToSummarize.substring(0, 800)}..."`;
+      userInput.value = message;
+      sendBtn.disabled = false;
+      adjustTextareaHeight();
+    }
     
-    // Remove active state
+    // Remove active state and re-enable buttons
     setTimeout(() => {
-      document.getElementById('attachLinksBtn').classList.remove('active');
+      document.getElementById('smartSummarizeBtn').classList.remove('active');
+      setButtonsDisabled(false);
+      userInput.disabled = false;
+      isProcessing = false;
     }, 1000);
     
   } catch (error) {
-    console.error('Failed to get links:', error);
-    showError('Failed to get links from the page.');
+    console.error('Failed to summarize:', error);
+    showError('Summarization failed. Try selecting text or using the Attach Page button.');
+    // Re-enable buttons on error
+    document.getElementById('smartSummarizeBtn').classList.remove('active');
+    setButtonsDisabled(false);
+    userInput.disabled = false;
+    isProcessing = false;
   }
 }
 
-// Handle Get Images
-async function handleAttachImages() {
+// Handle Translate with Chrome's Translator API
+async function handleTranslate() {
   try {
+    // Check if already processing
+    if (isProcessing) {
+      console.log('Already processing a request. Please wait...');
+      return;
+    }
+    
+    // Set processing flag
+    isProcessing = true;
+    
+    // Disable all buttons during processing
+    setButtonsDisabled(true);
+    userInput.disabled = true;
+    
     // Visual feedback
-    document.getElementById('attachImagesBtn').classList.add('active');
+    document.getElementById('translateBtn').classList.add('active');
     
-    // Execute function to get images
-    const result = await window.functionHandler.executeFunction('getImages', { 
-      includeBackgroundImages: true 
-    });
+    // First check if text is selected
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const selection = await chrome.tabs.sendMessage(tab.id, { action: 'getSelection' });
     
-    // Format image info
-    const imageInfo = result.images?.slice(0, 10).map((img, i) => 
-      `${i + 1}. ${img.alt || 'No alt text'} - ${img.type}`
-    ).join('\n');
+    let contentToTranslate = '';
+    let contentLabel = '';
     
-    // Format attachment
-    const attachmentText = `
-
-[Attached Images - Found ${result.count} total]
-${imageInfo}
-`;
+    if (selection && selection.text && selection.text.trim()) {
+      // Use selected text
+      contentToTranslate = selection.text;
+      contentLabel = 'Selected Text';
+      addMessage(`⏳ Translating selected text to Spanish...`, 'bot');
+    } else {
+      // Use page content
+      const result = await window.functionHandler.executeFunction('getPageContent', { 
+        includeMetadata: false 
+      });
+      contentToTranslate = result.content?.substring(0, 500) || '';
+      contentLabel = 'Page Content';
+      addMessage(`⏳ Translating page content to Spanish...`, 'bot');
+    }
     
-    // APPEND to existing text
-    const currentText = userInput.value;
-    const newText = currentText + (currentText && !currentText.endsWith('\n') ? '\n' : '') + attachmentText;
-    userInput.value = newText;
+    // Try Chrome's Translator API if available
+    if (window.chromeAI) {
+      const translated = await window.chromeAI.translateContent(contentToTranslate, 'es');
+      
+      // Remove the loading message before showing result
+      const messages = document.getElementById('messages');
+      const lastMessage = messages.lastElementChild;
+      if (lastMessage && lastMessage.textContent.includes('⏳ Translating')) {
+        lastMessage.remove();
+      }
+      
+      if (translated) {
+        // API worked! Show translation
+        addMessage(`🌐 **Translation (Spanish) of ${contentLabel}:**\n\n${translated}`, 'bot');
+      } else {
+        // API not available - use regular AI for translation
+        const message = `Please translate this text to Spanish:\n\n[${contentLabel}]\n"${contentToTranslate.substring(0, 400)}..."`;
+        
+        // Set the message in input and auto-send
+        userInput.value = message;
+        sendBtn.disabled = false;
+        
+        // Auto-send the translation request
+        setTimeout(() => {
+          handleSend();
+        }, 100);
+      }
+    } else {
+      // Remove loading message before fallback
+      const messages = document.getElementById('messages');
+      const lastMessage = messages.lastElementChild;
+      if (lastMessage && lastMessage.textContent.includes('⏳ Translating')) {
+        lastMessage.remove();
+      }
+      
+      // No Chrome AI available - fallback
+      const message = `Please translate this to Spanish:\n\n[${contentLabel}]\n"${contentToTranslate.substring(0, 400)}..."`;
+      userInput.value = message;
+      sendBtn.disabled = false;
+      adjustTextareaHeight();
+    }
     
-    // Move cursor to end
-    userInput.setSelectionRange(userInput.value.length, userInput.value.length);
-    userInput.focus();
-    
-    sendBtn.disabled = false;
-    adjustTextareaHeight();
-    
-    // Remove active state
+    // Remove active state and re-enable buttons
     setTimeout(() => {
-      document.getElementById('attachImagesBtn').classList.remove('active');
+      document.getElementById('translateBtn').classList.remove('active');
+      setButtonsDisabled(false);
+      userInput.disabled = false;
+      isProcessing = false;
     }, 1000);
     
   } catch (error) {
-    console.error('Failed to get images:', error);
-    showError('Failed to get images from the page.');
+    console.error('Failed to translate:', error);
+    showError('Translation failed. Try selecting text or copying and asking the AI.');
+    // Re-enable buttons on error
+    document.getElementById('translateBtn').classList.remove('active');
+    setButtonsDisabled(false);
+    userInput.disabled = false;
+    isProcessing = false;
   }
 }
+
+// Handle Improve Text with Chrome's Rewriter API
+async function handleImproveText() {
+  try {
+    // Check if already processing
+    if (isProcessing) {
+      console.log('Already processing a request. Please wait...');
+      return;
+    }
+    
+    // Set processing flag
+    isProcessing = true;
+    
+    // Disable all buttons during processing
+    setButtonsDisabled(true);
+    userInput.disabled = true;
+    
+    // Visual feedback
+    document.getElementById('improveTextBtn').classList.add('active');
+    
+    // Get selected text first
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const response = await chrome.tabs.sendMessage(tab.id, { action: 'getSelection' });
+    
+    if (!response || !response.text || response.text.trim() === '') {
+      showError('Please select some text first to improve');
+      document.getElementById('improveTextBtn').classList.remove('active');
+      setButtonsDisabled(false);
+      userInput.disabled = false;
+      isProcessing = false;
+      return;
+    }
+    
+    // Show loading message
+    addMessage(`⏳ Improving selected text...`, 'bot');
+    
+    // Use Chrome's Rewriter API if available
+    if (window.chromeAI) {
+      const improved = await window.chromeAI.improveText(response.text);
+      
+      // Remove the loading message before showing result
+      const messages = document.getElementById('messages');
+      const lastMessage = messages.lastElementChild;
+      if (lastMessage && lastMessage.textContent.includes('⏳ Improving')) {
+        lastMessage.remove();
+      }
+      
+      if (improved) {
+        const message = `✨ **Improved Text:**\n\n${improved}\n\n**Original:** ${response.text.substring(0, 200)}${response.text.length > 200 ? '...' : ''}`;
+        addMessage(message, 'bot');
+      } else {
+        // Fallback to regular AI
+        const message = `Please improve this text (make it clearer and more professional):\n\n"${response.text}"`;
+        userInput.value = message;
+        sendBtn.disabled = false;
+        setTimeout(() => {
+          handleSend();
+        }, 100);
+      }
+    } else {
+      // Remove loading message before fallback
+      const messages = document.getElementById('messages');
+      const lastMessage = messages.lastElementChild;
+      if (lastMessage && lastMessage.textContent.includes('⏳ Improving')) {
+        lastMessage.remove();
+      }
+      
+      // Fallback - ask AI to improve
+      const message = `Please improve this text (make it clearer and more professional):\n\n"${response.text}"`;
+      userInput.value = message;
+      sendBtn.disabled = false;
+      adjustTextareaHeight();
+    }
+    
+    // Remove active state and re-enable buttons
+    setTimeout(() => {
+      document.getElementById('improveTextBtn').classList.remove('active');
+      setButtonsDisabled(false);
+      userInput.disabled = false;
+      isProcessing = false;
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Failed to improve text:', error);
+    showError('Text improvement not available. Select text and try the regular chat.');
+    // Re-enable buttons on error
+    document.getElementById('improveTextBtn').classList.remove('active');
+    setButtonsDisabled(false);
+    userInput.disabled = false;
+    isProcessing = false;
+  }
+}
+

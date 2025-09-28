@@ -339,6 +339,43 @@ body {
   border-color: var(--primary);
 }
 
+/* Highlight when text is selected */
+.quick-action-btn.has-selection {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+  animation: pulse 1.5s infinite;
+  font-weight: 600;
+}
+
+.quick-action-btn.has-selection:hover {
+  background: var(--primary);
+  color: var(--white);
+  animation: none;
+}
+
+/* Disabled state */
+.quick-action-btn:disabled,
+.quick-action-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(66, 133, 244, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+  }
+}
+
 .quick-action-btn svg {
   width: 14px;
   height: 14px;
@@ -378,6 +415,12 @@ body {
 
 .input-field::placeholder {
   color: var(--gray-500);
+}
+
+.input-field:disabled {
+  background: var(--surface-alt);
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .send-btn {

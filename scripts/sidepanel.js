@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initializeAI();
   await initializeSessions();
   setupEventListeners();
+  setupMainNavigation();
 });
 
 // Initialize AI
@@ -2336,4 +2337,63 @@ window.debugParallelChats = function() {
   
   console.log('=== End Debug Info ===');
 };
+
+// Setup main navigation tabs (Chat and Mail Compose)
+function setupMainNavigation() {
+  const mainNavTabs = document.querySelectorAll('.main-nav-tab');
+  const chatSection = document.getElementById('chatSection');
+  const mailSection = document.getElementById('mailSection');
+  
+  if (!mainNavTabs.length || !chatSection || !mailSection) {
+    console.warn('Main navigation elements not found');
+    return;
+  }
+
+  mainNavTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetTab = tab.dataset.tab;
+      
+      // Update active tab
+      mainNavTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Show/hide sections
+      if (targetTab === 'chat') {
+        chatSection.style.display = 'flex';
+        mailSection.style.display = 'none';
+        
+        // Cleanup mail AI resources when leaving mail tab
+        if (typeof cleanupMailAI === 'function') {
+          cleanupMailAI();
+        }
+        
+        // Update header actions visibility for chat
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          headerActions.style.display = 'flex';
+        }
+      } else if (targetTab === 'mail') {
+        chatSection.style.display = 'none';
+        mailSection.style.display = 'flex';
+        
+        // Initialize mail AI when entering mail tab
+        if (typeof initializeMailAI === 'function') {
+          initializeMailAI().then(initialized => {
+            // Update AI status indicator with API info
+            if (typeof updateAIStatus === 'function') {
+              const apiName = window.lastUsedAPI || (typeof getCurrentAPIName === 'function' ? getCurrentAPIName() : null);
+              updateAIStatus(initialized, apiName);
+            }
+          });
+        }
+        
+        // Hide chat-specific header actions for mail compose
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          headerActions.style.display = 'none';
+        }
+      }
+    });
+  });
+}
 

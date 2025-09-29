@@ -1354,3 +1354,1341 @@ body {
     justify-content: center;
   }
 }
+
+/* Main Navigation Tabs */
+.main-nav-tabs {
+  display: flex;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 var(--spacing);
+}
+
+.main-nav-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--gray-700);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.main-nav-tab:hover {
+  color: var(--primary);
+  background: var(--gray-50);
+}
+
+.main-nav-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.main-nav-tab svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Main Tab Content */
+.main-tab-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Mail Compose Styles - Compact Version */
+.mail-compose-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  background: var(--gray-50);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+/* Ensure all mail elements inherit the font */
+.mail-compose-container * {
+  font-family: inherit;
+}
+
+/* Compact Mail Container */
+.mail-compose-container.compact {
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mail-header {
+  padding: var(--spacing-lg) var(--spacing-lg);
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.mail-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mail-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+}
+
+/* Progress Indicator (Goal-Gradient Effect) */
+.mail-progress {
+  flex: 1;
+  max-width: 300px;
+  margin-left: auto;
+}
+
+.progress-steps {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 6px 12px;
+  background: var(--gray-100);
+  border-radius: 20px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.progress-step.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.progress-step.completed {
+  background: var(--success-light);
+  color: var(--success);
+  opacity: 1;
+}
+
+.step-number {
+  width: 20px;
+  height: 20px;
+  background: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.mail-subtitle {
+  font-size: 14px;
+  color: var(--gray-700);
+  margin: 0;
+}
+
+.field-required {
+  color: var(--danger);
+  font-weight: normal;
+}
+
+.field-hint {
+  color: var(--gray-500);
+  font-weight: normal;
+  font-size: 11px;
+}
+
+.mail-form {
+  padding: var(--spacing-lg);
+  flex: 1;
+}
+
+.mail-field {
+  margin-bottom: var(--spacing);
+  background: var(--white);
+  padding: var(--spacing);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+}
+
+.mail-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-sm);
+}
+
+.mail-field input,
+.mail-field textarea {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--dark);
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.mail-field input:focus,
+.mail-field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.mail-field textarea {
+  resize: vertical;
+  min-height: 200px;
+}
+
+.mail-body-field textarea {
+  min-height: 300px;
+}
+
+/* Mail Generation Field */
+.mail-generation-field {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.08) 0%, rgba(66, 133, 244, 0.03) 100%);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 8px 24px rgba(66, 133, 244, 0.1);
+  position: relative;
+  animation: fadeInUp 0.5s ease;
+}
+
+/* Field Header with Helper Text */
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.field-header label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.field-helper {
+  font-size: 12px;
+  color: var(--gray-500);
+  font-weight: normal;
+  animation: pulse 2s infinite;
+}
+
+.mail-generation-field label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: var(--spacing-md);
+}
+
+.mail-generation-field textarea {
+  margin-bottom: var(--spacing);
+  background: var(--white);
+  border: 1px solid var(--primary);
+  font-size: 14px;
+}
+
+.mail-generation-field textarea:focus {
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+}
+
+/* Quick Prompts (Miller's Law - Limited Options) */
+.quick-prompts {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin: var(--spacing) 0;
+  flex-wrap: wrap;
+}
+
+.prompt-chip {
+  padding: 6px 12px;
+  background: var(--white);
+  border: 1px solid var(--gray-300);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.prompt-chip:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Primary Action Button (Fitts's Law) */
+.generate-btn.primary-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing) var(--spacing-lg);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 48px; /* Fitts's Law - Large target */
+}
+
+.generate-btn.primary-action::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.generate-btn.primary-action:hover::before {
+  left: 100%;
+}
+
+.shortcut-hint {
+  margin-left: auto;
+  padding: 2px 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.generate-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.generate-btn:active {
+  transform: translateY(0);
+}
+
+.generated-email-section {
+  margin-top: var(--spacing-lg);
+}
+
+/* AI Options Bar */
+.mail-ai-options {
+  padding: var(--spacing);
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  margin-bottom: var(--spacing);
+}
+
+.mail-ai-options > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Option Groups (Law of Proximity) */
+.option-group {
+  padding: var(--spacing-md);
+  background: var(--gray-50);
+  border-radius: var(--radius);
+  margin-bottom: var(--spacing-md);
+}
+
+.group-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-500);
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+}
+
+.option-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.ai-option-btn.primary {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.ai-option-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--white);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  color: var(--gray-700);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-option-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.ai-option-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.ai-option-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+}
+
+/* Quick Templates */
+.mail-templates {
+  padding: var(--spacing);
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  margin-bottom: var(--spacing-lg);
+}
+
+.mail-templates label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.template-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.template-btn {
+  padding: var(--spacing-sm) var(--spacing);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-300);
+  border-radius: 20px;
+  color: var(--gray-700);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.template-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Mail Actions */
+.mail-actions {
+  display: flex;
+  gap: var(--spacing);
+  padding: var(--spacing-lg);
+  background: var(--white);
+  border-top: 1px solid var(--gray-200);
+  position: sticky;
+  bottom: 0;
+}
+
+.mail-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Large CTA Button (Peak-End Rule + Fitts's Law) */
+.mail-btn-primary.large-cta {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+  flex: 1;
+  min-height: 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.large-cta .btn-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.large-cta .btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.large-cta .btn-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.large-cta .btn-hint {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.success-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: var(--success);
+  color: var(--white);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.large-cta.success .success-indicator {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.large-cta.success .btn-content {
+  opacity: 0;
+}
+
+/* Secondary Actions */
+.secondary-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.mail-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.mail-btn-ghost:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-500);
+}
+
+.mail-btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.mail-btn-secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.mail-btn-secondary:hover {
+  background: var(--gray-200);
+  border-color: var(--gray-500);
+}
+
+.mail-btn:active {
+  transform: translateY(0);
+}
+
+.mail-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mail-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Responsive adjustments for mail compose */
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ===========================
+   COMPACT MAIL DESIGN
+   =========================== */
+
+/* Compact Header */
+.mail-header.compact {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.mail-header.compact h2 {
+  font-size: 16px;
+  margin: 0;
+  font-family: inherit;
+}
+
+/* Progress Dots */
+.progress-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.progress-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-300);
+  transition: all 0.3s ease;
+}
+
+.progress-dots .dot.active {
+  background: var(--primary);
+  transform: scale(1.3);
+}
+
+.progress-dots .dot.completed {
+  background: var(--success);
+}
+
+/* Compact Form */
+.mail-form.compact {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+/* Top Section - Two Column Layout */
+.mail-top-section {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Left Column - Input Area */
+.mail-input-area {
+  flex: 0 0 45%;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border-radius: 6px;
+  padding: 8px;
+  border: 1px solid var(--gray-200);
+}
+
+.input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.input-header label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+/* Inline Quick Prompts */
+.quick-prompts.inline {
+  display: flex;
+  gap: 4px;
+}
+
+.prompt-chip.mini {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.prompt-chip.mini:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.mail-input-area textarea {
+  flex: 1;
+  min-height: 60px;
+  padding: 6px;
+  border: 1px solid var(--gray-300);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  resize: none;
+}
+
+.generate-btn.compact {
+  margin-top: 6px;
+  padding: 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.generate-btn.compact:hover {
+  background: var(--primary-dark);
+}
+
+/* Right Column - Output Area */
+.mail-output-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border-radius: 6px;
+  padding: 8px;
+  border: 1px solid var(--gray-200);
+}
+
+.subject-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.subject-row label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-700);
+  min-width: 50px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.subject-row input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.body-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.body-container textarea {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid var(--gray-300);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  resize: none;
+  min-height: 100px;
+}
+
+/* Enhancement Bar */
+.enhancement-bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.enhance-btn {
+  flex: 1;
+  padding: 6px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-300);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.enhance-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+/* Enhancement button data-action attributes are handled in JavaScript */
+
+/* Bottom Action Bar */
+.mail-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin-top: 8px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+}
+
+.action-btn.primary {
+  background: var(--primary);
+  color: white;
+  flex: 0 0 auto;
+}
+
+.action-btn.primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.action-btn.secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+  padding: 8px 10px;
+}
+
+.action-btn.secondary:hover {
+  background: var(--gray-200);
+}
+
+.action-group {
+  display: flex;
+  gap: 4px;
+}
+
+/* Success State for Copy Button */
+.action-btn.primary.success {
+  background: var(--success);
+}
+
+/* Remove old styles that add too much space */
+.mail-form.compact .mail-field {
+  margin-bottom: 0;
+  padding: 0;
+  border: none;
+}
+
+.mail-form.compact .mail-generation-field {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+/* ===========================
+   UX LAWS OPTIMIZED DESIGN
+   =========================== */
+
+/* Zeigarnik Effect: Task indicator */
+.task-indicator {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 100;
+  animation: slideIn 0.3s ease;
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+/* Simplified Progress Flow (Occam's Razor) */
+.progress-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.flow-step {
+  color: var(--gray-500);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.flow-step.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.flow-step.completed {
+  color: var(--success);
+}
+
+.flow-arrow {
+  color: var(--gray-400);
+  font-size: 14px;
+}
+
+/* Flow Optimized Form */
+.mail-form.flow-optimized {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Mail Workspace (Chunking) */
+.mail-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+/* Primary Focus Area (Selective Attention) */
+.primary-focus {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+/* Input Section (Von Restorff Effect) */
+.input-section {
+  flex: 0 0 45%;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border: 2px solid var(--primary-light);
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+}
+
+.input-section.highlighted::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  background: linear-gradient(45deg, var(--primary), var(--primary-light));
+  opacity: 0.1;
+  animation: shimmer 3s infinite;
+}
+
+/* Section Titles with Step Numbers */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 10px;
+}
+
+.step-number {
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Top Templates (Pareto Principle - 80/20 rule) */
+.top-templates {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.template-card {
+  flex: 1;
+  padding: 8px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.template-card:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.template-card.active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.template-card .icon {
+  font-size: 18px;
+}
+
+.template-card .text {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Focus Input (Flow state) */
+.focus-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.focus-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+/* Generate Button with Pulse (Call to action) */
+.generate-btn.primary.pulse {
+  width: 100%;
+  padding: 10px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn.primary.pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.shortcut {
+  padding: 2px 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* Output Section (Law of Common Region) */
+.output-section {
+  flex: 1;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* Email Preview */
+.email-preview {
+  background: var(--gray-50);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.email-field {
+  margin-bottom: 8px;
+}
+
+.email-field:last-child {
+  margin-bottom: 0;
+}
+
+.micro-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.email-field input,
+.email-field textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  font-size: 13px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.email-field input:focus,
+.email-field textarea:focus {
+  border-color: var(--primary);
+  background: white;
+}
+
+/* Polish Options (Choice Overload reduction) */
+.polish-options {
+  display: flex;
+  gap: 6px;
+}
+
+.polish-btn {
+  flex: 1;
+  padding: 8px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.polish-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+/* Action Zone (Peak-End Rule) */
+.action-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* Hero Button (Peak-End Rule + Fitts's Law) */
+.action-btn.hero {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.action-btn.hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(66, 133, 244, 0.4);
+}
+
+.action-btn.hero:active {
+  transform: translateY(0);
+}
+
+.btn-icon svg {
+  stroke-width: 2.5;
+}
+
+.btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.btn-text .main {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-text .sub {
+  font-size: 11px;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* Quick Actions (Secondary) */
+.quick-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--gray-600);
+}
+
+.icon-btn:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-300);
+  color: var(--gray-800);
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .primary-focus {
+    flex-direction: column;
+  }
+  
+  .input-section {
+    flex: 1 1 auto;
+  }
+  
+  .action-btn.hero .btn-text .sub {
+    display: none;
+  }
+}

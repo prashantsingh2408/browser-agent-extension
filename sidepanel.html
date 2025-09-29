@@ -46,8 +46,27 @@
       </div>
     </header>
 
-    <!-- Chat Tabs -->
-    <div class="chat-tabs" id="chatTabs">
+    <!-- Main Navigation Tabs -->
+    <div class="main-nav-tabs">
+      <button class="main-nav-tab active" data-tab="chat">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Chat
+      </button>
+      <button class="main-nav-tab" data-tab="mail">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Craft Mail
+      </button>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="main-tab-content" id="chatSection" style="display: flex; flex-direction: column; flex: 1;">
+      <!-- Chat Tabs -->
+      <div class="chat-tabs" id="chatTabs">
       <div class="tabs-container">
         <div class="tab active" data-session-id="default">
           <span class="tab-title">Chat 1</span>
@@ -177,10 +196,152 @@
         <span class="footer-text">Powered by Gemini Nano • 100% private</span>
       </div>
     </div>
+    </div> <!-- End of Chat Section -->
+
+    <!-- Mail Compose Section - UX Laws Optimized -->
+    <div class="main-tab-content" id="mailSection" style="display: none; flex-direction: column; flex: 1; overflow: hidden;">
+      <div class="mail-compose-container compact optimized">
+        
+        <!-- Zeigarnik Effect: Show incomplete task indicator -->
+        <div class="task-indicator" id="taskIndicator" style="display: none;">
+          <span class="pulse-dot"></span>
+          <span>Draft in progress...</span>
+        </div>
+        
+        <!-- Serial Position Effect: Most important info at start -->
+        <div class="mail-header compact">
+          <h2>✨ Craft Mail</h2>
+          <!-- Simplified progress (Occam's Razor) -->
+          <div class="progress-flow">
+            <span class="flow-step active">Write</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">Polish</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">Send</span>
+          </div>
+        </div>
+
+        <!-- Compact Mail Form with Flow optimization -->
+        <div class="mail-form compact flow-optimized">
+          
+          <!-- Chunking: Group related elements clearly -->
+          <div class="mail-workspace">
+            
+            <!-- Primary Focus Area (Selective Attention) -->
+            <div class="primary-focus">
+              
+              <!-- Input Section with Von Restorff Effect -->
+              <div class="input-section highlighted">
+                <label class="section-title">
+                  <span class="step-number">1</span>
+                  What's your message about?
+                </label>
+                
+                <!-- Pareto Principle: Show only top 3 most-used templates -->
+                <div class="top-templates">
+                  <button type="button" class="template-card active" data-prompt="Follow up after meeting">
+                    <span class="icon">📧</span>
+                    <span class="text">Follow-up</span>
+                  </button>
+                  <button type="button" class="template-card" data-prompt="Schedule meeting">
+                    <span class="icon">📅</span>
+                    <span class="text">Meeting</span>
+                  </button>
+                  <button type="button" class="template-card" data-prompt="Request information">
+                    <span class="icon">📝</span>
+                    <span class="text">Request</span>
+                  </button>
+                </div>
+                
+                <textarea id="mailDescription" 
+                          placeholder="Describe your email in a few words..." 
+                          rows="2"
+                          class="focus-input"></textarea>
+                
+                <!-- Single primary action (Hick's Law reduction) -->
+                <button class="generate-btn primary pulse" id="generateFromDescription">
+                  <span class="btn-content">
+                    Generate with AI
+                    <span class="shortcut">↵</span>
+                  </span>
+                </button>
+              </div>
+              
+              <!-- Output Section (Law of Common Region) -->
+              <div class="output-section">
+                <label class="section-title">
+                  <span class="step-number">2</span>
+                  Your Email
+                </label>
+                
+                <!-- Subject with visual hierarchy -->
+                <div class="email-preview">
+                  <div class="email-field subject-field">
+                    <label class="micro-label">Subject</label>
+                    <input type="text" id="mailSubject" placeholder="AI will generate..." />
+                  </div>
+                  
+                  <div class="email-field body-field">
+                    <label class="micro-label">Message</label>
+                    <textarea id="mailBody" 
+                              placeholder="Your email will appear here..." 
+                              rows="6"></textarea>
+                  </div>
+                </div>
+                
+                <!-- Choice Overload Fix: Simplified to 2 main options -->
+                <div class="polish-options">
+                  <button class="polish-btn" data-action="professional" title="Make Professional">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2v10m0 10v-10m0 0l4-4m-4 4l-4-4"/>
+                    </svg>
+                    Professional
+                  </button>
+                  <button class="polish-btn" data-action="grammar" title="Fix Grammar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    Fix & Polish
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Action Zone (Serial Position Effect: Important at end) -->
+            <div class="action-zone">
+              <!-- Peak-End Rule: Strong finish -->
+              <button class="action-btn hero" id="copyMailBtn">
+                <span class="btn-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                </span>
+                <span class="btn-text">
+                  <span class="main">Copy to Email</span>
+                  <span class="sub">Gmail, Outlook, etc.</span>
+                </span>
+              </button>
+              
+              <!-- Secondary actions minimized (Fitts's Law) -->
+              <div class="quick-actions">
+                <button class="icon-btn" id="clearMailBtn" title="Start Over">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 7l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M10 11v6M14 11v6"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="scripts/functions.js"></script>
   <script src="scripts/ai-apis.js"></script>
   <script src="scripts/sidepanel.js"></script>
+  <script src="scripts/mail-compose.js"></script>
 </body>
 </html>

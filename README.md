@@ -4,6 +4,12 @@ A powerful Chrome extension featuring AI-powered chat and email composition with
 
 ## 🌟 Key Features
 
+### **Customizable Tab Interface** 🔄 NEW!
+- **Drag & Drop Reordering**: Rearrange tabs in any order you prefer
+- **Scrollable Tabs**: Horizontal scrolling for narrow windows
+- **Persistent Layout**: Tab order saved and restored automatically
+- **Visual Feedback**: Drag handles appear on hover
+
 ### 1. **AI Chat Assistant**
 - Full-featured chat interface with Gemini Nano integration
 - Multiple chat sessions with tab management
@@ -17,12 +23,19 @@ A powerful Chrome extension featuring AI-powered chat and email composition with
 - Grammar fixing and tone adjustment
 - One-click copy to Gmail/Outlook
 
-### 3. **AI Agent Chat** 💬 NEW!
+### 3. **AI Agent Chat** 💬
 - Cursor-style chat interface for natural interaction
 - Four specialized agents: @research, @code, @write, @analyze
 - Real-time interruption and feedback capabilities
 - Visual progress tracking with step-by-step display
 - Chat history persistence and smart auto-detection
+
+### 4. **Settings & LLM Configuration** ⚙️ NEW!
+- **Multiple LLM Providers**: OpenAI, Anthropic, Google, Local, Custom
+- **Task-Specific Models**: Choose different models for each feature
+- **API Key Management**: Secure local storage
+- **Advanced Controls**: Temperature, max tokens, fallback options
+- **Import/Export**: Save and share your configurations
 
 ## 📚 Documentation
 

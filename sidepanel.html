@@ -46,27 +46,52 @@
       </div>
     </header>
 
-    <!-- Main Navigation Tabs -->
-    <div class="main-nav-tabs">
-      <button class="main-nav-tab active" data-tab="chat">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <!-- Main Navigation Tabs (Scrollable & Draggable) -->
+    <div class="main-nav-container">
+      <button class="nav-scroll-btn nav-scroll-left" id="navScrollLeft" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
         </svg>
-        Chat
       </button>
-      <button class="main-nav-tab" data-tab="mail">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
+      
+      <div class="main-nav-tabs" id="mainNavTabs">
+        <button class="main-nav-tab active" data-tab="chat" draggable="true">
+          <span class="drag-handle">⋮⋮</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="tab-label">Chat</span>
+        </button>
+        <button class="main-nav-tab" data-tab="mail" draggable="true">
+          <span class="drag-handle">⋮⋮</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <span class="tab-label">Craft Mail</span>
+        </button>
+        <button class="main-nav-tab" data-tab="agent" draggable="true">
+          <span class="drag-handle">⋮⋮</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          <span class="tab-label">Agent</span>
+        </button>
+        <button class="main-nav-tab" data-tab="settings" draggable="true">
+          <span class="drag-handle">⋮⋮</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M18.36 18.36l4.24 4.24M23 12h-6m-6 0H1m4.22 6.36l4.24-4.24M3.54 3.54l4.24 4.24"/>
+          </svg>
+          <span class="tab-label">Settings</span>
+        </button>
+      </div>
+      
+      <button class="nav-scroll-btn nav-scroll-right" id="navScrollRight" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
         </svg>
-        Craft Mail
-      </button>
-      <button class="main-nav-tab" data-tab="agent">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 6v6l4 2"/>
-        </svg>
-        Agent
       </button>
     </div>
 
@@ -461,6 +486,212 @@
         </div>
       </div>
     </div>
+    
+    <!-- Settings Section -->
+    <div class="main-tab-content" id="settingsSection" style="display: none; flex-direction: column; flex: 1; overflow: hidden;">
+      <div class="settings-container">
+        <!-- Settings Header -->
+        <div class="settings-header">
+          <h2>⚙️ Settings</h2>
+          <button class="save-settings-btn" id="saveSettingsBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save Settings
+          </button>
+        </div>
+        
+        <!-- Settings Content -->
+        <div class="settings-content">
+          
+          <!-- LLM Provider Section -->
+          <div class="settings-section">
+            <h3>🤖 LLM Provider Configuration</h3>
+            
+            <div class="setting-group">
+              <label class="setting-label">Primary LLM Provider</label>
+              <select id="primaryLLMProvider" class="setting-select">
+                <option value="chrome-ai">Chrome Built-in AI (Gemini Nano)</option>
+                <option value="openai">OpenAI (GPT-4)</option>
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="google">Google AI (Gemini Pro)</option>
+                <option value="local">Local LLM (Ollama)</option>
+                <option value="custom">Custom API</option>
+              </select>
+            </div>
+            
+            <div class="api-key-section" id="apiKeySection" style="display: none;">
+              <label class="setting-label">API Key</label>
+              <input type="password" id="apiKey" class="setting-input" placeholder="Enter your API key">
+              <small class="setting-hint">Your API key is stored locally and never sent to our servers</small>
+            </div>
+            
+            <div class="custom-api-section" id="customApiSection" style="display: none;">
+              <label class="setting-label">API Endpoint</label>
+              <input type="url" id="apiEndpoint" class="setting-input" placeholder="https://api.example.com/v1">
+            </div>
+          </div>
+          
+          <!-- Task-Specific LLM Selection -->
+          <div class="settings-section">
+            <h3>📋 Task-Specific Model Selection</h3>
+            
+            <div class="task-llm-grid">
+              <!-- Chat Task -->
+              <div class="task-llm-item">
+                <label class="task-label">
+                  <span class="task-icon">💬</span>
+                  <span>Chat Assistant</span>
+                </label>
+                <select id="chatLLM" class="task-select">
+                  <option value="default">Use Primary Provider</option>
+                  <option value="chrome-ai">Chrome AI</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  <option value="claude-3">Claude 3</option>
+                  <option value="gemini-pro">Gemini Pro</option>
+                </select>
+              </div>
+              
+              <!-- Email Task -->
+              <div class="task-llm-item">
+                <label class="task-label">
+                  <span class="task-icon">✉️</span>
+                  <span>Email Composition</span>
+                </label>
+                <select id="emailLLM" class="task-select">
+                  <option value="default">Use Primary Provider</option>
+                  <option value="chrome-ai">Chrome AI</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  <option value="claude-3">Claude 3</option>
+                  <option value="gemini-pro">Gemini Pro</option>
+                </select>
+              </div>
+              
+              <!-- Research Agent -->
+              <div class="task-llm-item">
+                <label class="task-label">
+                  <span class="task-icon">🔍</span>
+                  <span>Research Agent</span>
+                </label>
+                <select id="researchLLM" class="task-select">
+                  <option value="default">Use Primary Provider</option>
+                  <option value="chrome-ai">Chrome AI</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="claude-3">Claude 3</option>
+                  <option value="gemini-pro">Gemini Pro</option>
+                </select>
+              </div>
+              
+              <!-- Code Agent -->
+              <div class="task-llm-item">
+                <label class="task-label">
+                  <span class="task-icon">💻</span>
+                  <span>Code Agent</span>
+                </label>
+                <select id="codeLLM" class="task-select">
+                  <option value="default">Use Primary Provider</option>
+                  <option value="chrome-ai">Chrome AI</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="codellama">Code Llama</option>
+                  <option value="starcoder">StarCoder</option>
+                </select>
+              </div>
+              
+              <!-- Writing Agent -->
+              <div class="task-llm-item">
+                <label class="task-label">
+                  <span class="task-icon">✍️</span>
+                  <span>Writing Agent</span>
+                </label>
+                <select id="writingLLM" class="task-select">
+                  <option value="default">Use Primary Provider</option>
+                  <option value="chrome-ai">Chrome AI</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="claude-3">Claude 3</option>
+                  <option value="gemini-pro">Gemini Pro</option>
+                </select>
+              </div>
+              
+              <!-- Analysis Agent -->
+              <div class="task-llm-item">
+                <label class="task-label">
+                  <span class="task-icon">📊</span>
+                  <span>Analysis Agent</span>
+                </label>
+                <select id="analysisLLM" class="task-select">
+                  <option value="default">Use Primary Provider</option>
+                  <option value="chrome-ai">Chrome AI</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="claude-3">Claude 3</option>
+                  <option value="gemini-pro">Gemini Pro</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Advanced Settings -->
+          <div class="settings-section">
+            <h3>⚡ Advanced Settings</h3>
+            
+            <div class="setting-group">
+              <label class="setting-label">
+                <input type="checkbox" id="enableFallback" checked>
+                <span>Enable automatic fallback to Chrome AI when primary fails</span>
+              </label>
+            </div>
+            
+            <div class="setting-group">
+              <label class="setting-label">
+                <input type="checkbox" id="saveHistory" checked>
+                <span>Save conversation history</span>
+              </label>
+            </div>
+            
+            <div class="setting-group">
+              <label class="setting-label">
+                <input type="checkbox" id="showApiStatus" checked>
+                <span>Show API status in interface</span>
+              </label>
+            </div>
+            
+            <div class="setting-group">
+              <label class="setting-label">Temperature (Creativity)</label>
+              <div class="slider-container">
+                <input type="range" id="temperature" min="0" max="100" value="70" class="setting-slider">
+                <span class="slider-value" id="temperatureValue">0.7</span>
+              </div>
+              <small class="setting-hint">Lower = More focused, Higher = More creative</small>
+            </div>
+            
+            <div class="setting-group">
+              <label class="setting-label">Max Tokens (Response Length)</label>
+              <input type="number" id="maxTokens" class="setting-input" value="2048" min="100" max="4096">
+              <small class="setting-hint">Maximum length of AI responses</small>
+            </div>
+          </div>
+          
+          <!-- About Section -->
+          <div class="settings-section">
+            <h3>ℹ️ About</h3>
+            <div class="about-content">
+              <p><strong>AI Browser Agent Extension</strong></p>
+              <p>Version: 1.0.0</p>
+              <p>A powerful Chrome extension with multi-LLM support for chat, email, and intelligent agents.</p>
+              <div class="about-links">
+                <a href="#" id="resetSettings">Reset All Settings</a>
+                <a href="#" id="exportSettings">Export Settings</a>
+                <a href="#" id="importSettings">Import Settings</a>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="scripts/functions.js"></script>
@@ -468,5 +699,6 @@
   <script src="scripts/sidepanel.js"></script>
   <script src="scripts/mail-compose.js"></script>
   <script src="scripts/agent.js"></script>
+  <script src="scripts/settings.js"></script>
 </body>
 </html>

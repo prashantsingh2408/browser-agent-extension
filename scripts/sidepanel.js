@@ -2338,30 +2338,48 @@ window.debugParallelChats = function() {
   console.log('=== End Debug Info ===');
 };
 
-// Setup main navigation tabs (Chat, Mail Compose, and Agent)
+// Setup main navigation tabs (Chat, Mail Compose, and Agent) with drag and drop
 function setupMainNavigation() {
   const mainNavTabs = document.querySelectorAll('.main-nav-tab');
   const chatSection = document.getElementById('chatSection');
   const mailSection = document.getElementById('mailSection');
   const agentSection = document.getElementById('agentSection');
+  const settingsSection = document.getElementById('settingsSection');
+  const navContainer = document.getElementById('mainNavTabs');
   
-  if (!mainNavTabs.length || !chatSection || !mailSection || !agentSection) {
+  if (!mainNavTabs.length || !chatSection || !mailSection || !agentSection || !settingsSection) {
     console.warn('Main navigation elements not found');
     return;
   }
 
+  // Load saved tab order
+  loadTabOrder();
+  
+  // Setup drag and drop
+  setupTabDragAndDrop();
+  
+  // Setup scroll functionality
+  setupTabScrolling();
+  
+  // Setup tab click events
   mainNavTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', (e) => {
+      // Don't switch tabs if clicking on drag handle
+      if (e.target.classList.contains('drag-handle')) {
+        return;
+      }
+      
       const targetTab = tab.dataset.tab;
       
       // Update active tab
-      mainNavTabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.main-nav-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       
       // Hide all sections first
       chatSection.style.display = 'none';
       mailSection.style.display = 'none';
       agentSection.style.display = 'none';
+      settingsSection.style.display = 'none';
       
       // Show/hide sections based on selected tab
       if (targetTab === 'chat') {
@@ -2424,8 +2442,180 @@ function setupMainNavigation() {
         if (headerActions) {
           headerActions.style.display = 'none';
         }
+      } else if (targetTab === 'settings') {
+        settingsSection.style.display = 'flex';
+        
+        // Cleanup other resources
+        if (typeof cleanupMailAI === 'function') {
+          cleanupMailAI();
+        }
+        if (typeof cleanupAgent === 'function') {
+          cleanupAgent();
+        }
+        
+        // Initialize settings when entering settings tab
+        if (typeof initializeSettings === 'function') {
+          initializeSettings();
+        }
+        
+        // Hide chat-specific header actions for settings
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          headerActions.style.display = 'none';
+        }
+        
+        // Dispatch event for settings tab activation
+        window.dispatchEvent(new Event('settingsTabActivated'));
       }
     });
   });
+}
+
+// Setup drag and drop for tabs
+function setupTabDragAndDrop() {
+  const navContainer = document.getElementById('mainNavTabs');
+  if (!navContainer) return;
+  
+  let draggedTab = null;
+  
+  const tabs = navContainer.querySelectorAll('.main-nav-tab');
+  
+  tabs.forEach(tab => {
+    // Drag start
+    tab.addEventListener('dragstart', (e) => {
+      draggedTab = tab;
+      tab.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', tab.innerHTML);
+    });
+    
+    // Drag end
+    tab.addEventListener('dragend', (e) => {
+      tab.classList.remove('dragging');
+      draggedTab = null;
+      
+      // Save new tab order
+      saveTabOrder();
+    });
+    
+    // Drag over
+    tab.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      if (tab !== draggedTab) {
+        tab.classList.add('drag-over');
+        
+        // Determine if we should insert before or after
+        const rect = tab.getBoundingClientRect();
+        const midpoint = rect.left + rect.width / 2;
+        
+        if (e.clientX < midpoint) {
+          // Insert before
+          if (draggedTab && draggedTab.nextSibling !== tab) {
+            navContainer.insertBefore(draggedTab, tab);
+          }
+        } else {
+          // Insert after
+          if (draggedTab && draggedTab.previousSibling !== tab) {
+            navContainer.insertBefore(draggedTab, tab.nextSibling);
+          }
+        }
+      }
+    });
+    
+    // Drag leave
+    tab.addEventListener('dragleave', (e) => {
+      tab.classList.remove('drag-over');
+    });
+    
+    // Drop
+    tab.addEventListener('drop', (e) => {
+      e.preventDefault();
+      tab.classList.remove('drag-over');
+    });
+  });
+}
+
+// Setup tab scrolling
+function setupTabScrolling() {
+  const navContainer = document.getElementById('mainNavTabs');
+  const leftBtn = document.getElementById('navScrollLeft');
+  const rightBtn = document.getElementById('navScrollRight');
+  
+  if (!navContainer || !leftBtn || !rightBtn) return;
+  
+  // Check if scrolling is needed
+  const checkScrollButtons = () => {
+    const hasOverflow = navContainer.scrollWidth > navContainer.clientWidth;
+    const atStart = navContainer.scrollLeft === 0;
+    const atEnd = navContainer.scrollLeft >= navContainer.scrollWidth - navContainer.clientWidth - 1;
+    
+    leftBtn.style.display = hasOverflow && !atStart ? 'flex' : 'none';
+    rightBtn.style.display = hasOverflow && !atEnd ? 'flex' : 'none';
+  };
+  
+  // Scroll left
+  leftBtn.addEventListener('click', () => {
+    navContainer.scrollBy({ left: -150, behavior: 'smooth' });
+    setTimeout(checkScrollButtons, 300);
+  });
+  
+  // Scroll right
+  rightBtn.addEventListener('click', () => {
+    navContainer.scrollBy({ left: 150, behavior: 'smooth' });
+    setTimeout(checkScrollButtons, 300);
+  });
+  
+  // Check on scroll
+  navContainer.addEventListener('scroll', checkScrollButtons);
+  
+  // Check on resize
+  window.addEventListener('resize', checkScrollButtons);
+  
+  // Initial check
+  checkScrollButtons();
+}
+
+// Save tab order to storage
+function saveTabOrder() {
+  const navContainer = document.getElementById('mainNavTabs');
+  if (!navContainer) return;
+  
+  const tabs = navContainer.querySelectorAll('.main-nav-tab');
+  const tabOrder = Array.from(tabs).map(tab => tab.dataset.tab);
+  
+  try {
+    chrome.storage.local.set({ mainTabOrder: tabOrder });
+    console.log('Tab order saved:', tabOrder);
+  } catch (error) {
+    console.warn('Could not save tab order:', error);
+  }
+}
+
+// Load tab order from storage
+async function loadTabOrder() {
+  const navContainer = document.getElementById('mainNavTabs');
+  if (!navContainer) return;
+  
+  try {
+    const result = await chrome.storage.local.get('mainTabOrder');
+    if (result.mainTabOrder && result.mainTabOrder.length > 0) {
+      const tabOrder = result.mainTabOrder;
+      const tabs = Array.from(navContainer.querySelectorAll('.main-nav-tab'));
+      
+      // Reorder tabs based on saved order
+      tabOrder.forEach((tabName, index) => {
+        const tab = tabs.find(t => t.dataset.tab === tabName);
+        if (tab) {
+          navContainer.appendChild(tab);
+        }
+      });
+      
+      console.log('Tab order restored:', tabOrder);
+    }
+  } catch (error) {
+    console.warn('Could not load tab order:', error);
+  }
 }
 

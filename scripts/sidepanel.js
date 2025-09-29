@@ -10,15 +10,81 @@ const clearBtn = document.getElementById('clearBtn');
 const statusText = document.getElementById('statusText');
 const statusDot = document.querySelector('.status-dot');
 
-// AI Session
-let aiSession = null;
-let isProcessing = false;
+// AI Session Management - Pool approach for better isolation
+let aiSessionPool = [];
+let maxPoolSize = 3; // Limit concurrent AI sessions
 let conversationHistory = [];
-let currentAbortController = null; // For canceling ongoing requests
+
+// Session Management
+let sessions = new Map();
+let currentSessionId = 'default';
+let sessionCounter = 1;
+
+// Per-session processing states
+let sessionProcessingStates = new Map(); // sessionId -> { isProcessing, abortController, streamingData }
+
+// Global streaming state (independent of UI)
+let activeStreams = new Map(); // sessionId -> { promise, data }
+
+// Helper functions for session processing state
+function isSessionProcessing(sessionId = currentSessionId) {
+  const state = sessionProcessingStates.get(sessionId);
+  return state ? state.isProcessing : false;
+}
+
+function setSessionProcessing(sessionId = currentSessionId, processing = true, abortController = null, streamingData = null) {
+  if (processing) {
+    sessionProcessingStates.set(sessionId, { 
+      isProcessing: true, 
+      abortController: abortController,
+      streamingData: streamingData
+    });
+  } else {
+    sessionProcessingStates.delete(sessionId);
+    
+    // Remove processing indicators when processing completes
+    if (sessionId === currentSessionId) {
+      const backgroundIndicators = document.querySelectorAll('.background-indicator');
+      backgroundIndicators.forEach(indicator => indicator.remove());
+      
+      const pendingMessages = document.querySelectorAll('.pending-response');
+      pendingMessages.forEach(msg => msg.remove());
+    }
+  }
+  
+  // Update UI only for current session
+  if (sessionId === currentSessionId) {
+    updateUIForProcessingState(processing);
+  }
+  
+  // Update tabs UI to show processing indicators
+  updateTabsUI();
+}
+
+function getSessionAbortController(sessionId = currentSessionId) {
+  const state = sessionProcessingStates.get(sessionId);
+  return state ? state.abortController : null;
+}
+
+function updateUIForProcessingState(processing) {
+  userInput.disabled = processing;
+  setButtonsDisabled(processing);
+  
+  if (processing) {
+    transformToStopButton();
+    // Stop button should be enabled when processing
+    sendBtn.disabled = false;
+  } else {
+    transformToSendButton();
+    // Send button disabled if no input text
+    sendBtn.disabled = !userInput.value.trim();
+  }
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   await initializeAI();
+  await initializeSessions();
   setupEventListeners();
 });
 
@@ -53,38 +119,586 @@ async function initializeAI() {
   }
 }
 
-// Create or get AI session
-async function createAISession() {
+// Get available AI session from pool
+async function getAvailableAISession() {
   try {
-    if (!aiSession) {
-      console.log('Creating AI session...');
-      
-      if (!('LanguageModel' in self)) {
-        throw new Error('LanguageModel API not available');
+    if (!('LanguageModel' in self)) {
+      throw new Error('LanguageModel API not available');
+    }
+    
+    // Find an available session from the pool
+    for (let session of aiSessionPool) {
+      if (session && !session.busy) {
+        session.busy = true;
+        return session;
       }
+    }
+    
+    // If no available session and pool not full, create new one
+    if (aiSessionPool.length < maxPoolSize) {
+      console.log(`Creating new AI session (${aiSessionPool.length + 1}/${maxPoolSize})`);
       
       updateStatus('Loading model...', 'warning');
       
-      // Simple system prompt without function calling
       const systemPrompt = `You are a helpful, friendly, and knowledgeable AI assistant. Provide clear, concise, and accurate responses. You can help analyze content that users share with you.`;
 
-      aiSession = await LanguageModel.create({
+      const newAISession = await LanguageModel.create({
         temperature: 0.7,
         topK: 3,
         language: 'en',
         systemPrompt: systemPrompt
       });
       
-      console.log('AI session created successfully');
+      newAISession.busy = true;
+      aiSessionPool.push(newAISession);
+      
+      console.log(`AI session created successfully (Pool size: ${aiSessionPool.length})`);
       updateStatus('Online', 'success');
+      
+      return newAISession;
     }
-    return aiSession;
+    
+    // If pool is full, wait for an available session
+    return await waitForAvailableSession();
+    
   } catch (error) {
-    console.error('Failed to create AI session:', error);
-    aiSession = null;
+    console.error('Failed to get AI session:', error);
     updateStatus('Offline', 'error');
     throw error;
   }
+}
+
+// Wait for an available session (with timeout)
+async function waitForAvailableSession(timeout = 30000) {
+  const startTime = Date.now();
+  
+  return new Promise((resolve, reject) => {
+    const checkInterval = setInterval(() => {
+      // Check for available session
+      for (let session of aiSessionPool) {
+        if (session && !session.busy) {
+          session.busy = true;
+          clearInterval(checkInterval);
+          resolve(session);
+          return;
+        }
+      }
+      
+      // Check timeout
+      if (Date.now() - startTime > timeout) {
+        clearInterval(checkInterval);
+        reject(new Error('Timeout waiting for available AI session'));
+      }
+    }, 100);
+  });
+}
+
+// Release AI session back to pool
+function releaseAISession(session) {
+  if (session) {
+    session.busy = false;
+  }
+}
+
+// Start background streaming (UI-independent)
+async function startBackgroundStream(message, sessionId, abortController) {
+  let aiSession = null;
+  
+  try {
+    aiSession = await getAvailableAISession();
+    
+    let fullResponse = '';
+    
+    // Check if streaming is supported
+    if (aiSession.promptStreaming) {
+      const stream = aiSession.promptStreaming(message, { 
+        language: 'en',
+        signal: abortController.signal
+      });
+      
+      for await (const chunk of stream) {
+        if (abortController.signal?.aborted) {
+          throw new DOMException('Generation stopped by user', 'AbortError');
+        }
+        
+        fullResponse += chunk;
+        
+        // Update streaming data for this session
+        const streamData = activeStreams.get(sessionId);
+        if (streamData) {
+          streamData.data.fullResponse = fullResponse;
+        }
+        
+        // Trigger UI update if this session is currently active
+        if (currentSessionId === sessionId) {
+          updateStreamingUI(sessionId, chunk);
+        }
+      }
+    } else {
+      // Fallback to regular prompt
+      fullResponse = await aiSession.prompt(message, { 
+        language: 'en',
+        signal: abortController.signal
+      });
+      
+      // Update streaming data
+      const streamData = activeStreams.get(sessionId);
+      if (streamData) {
+        streamData.data.fullResponse = fullResponse;
+        streamData.data.isComplete = true;
+      }
+    }
+    
+    return fullResponse;
+    
+  } finally {
+    if (aiSession) {
+      releaseAISession(aiSession);
+    }
+  }
+}
+
+// Global map to track active monitoring intervals
+let activeMonitors = new Map(); // sessionId -> intervalId
+
+// Monitor stream for UI updates
+function monitorStreamForUI(sessionId, streamingMessage) {
+  // Clear any existing monitor for this session
+  if (activeMonitors.has(sessionId)) {
+    clearInterval(activeMonitors.get(sessionId));
+    activeMonitors.delete(sessionId);
+  }
+  
+  // Store sessionId on the streaming message element for tracking
+  if (streamingMessage && streamingMessage.element) {
+    streamingMessage.element.dataset.sessionId = sessionId;
+  }
+  
+  const checkInterval = setInterval(() => {
+    const streamData = activeStreams.get(sessionId);
+    if (!streamData) {
+      clearInterval(checkInterval);
+      activeMonitors.delete(sessionId);
+      return;
+    }
+    
+    // Update UI if this is still the current session
+    if (currentSessionId === sessionId && streamingMessage && streamingMessage.contentDiv) {
+      // Update streaming message with latest content
+      const currentContent = streamData.data.fullResponse;
+      if (currentContent && streamingMessage.appendChunk) {
+        // Use appendChunk to properly update the content
+        streamingMessage.appendChunk(currentContent);
+      }
+    }
+    
+    // Check if stream is complete
+    if (streamData.data.isComplete) {
+      clearInterval(checkInterval);
+      activeMonitors.delete(sessionId);
+      // Don't finalize here - let the main completion handler do it
+    }
+  }, 100);
+  
+  // Store the interval ID
+  activeMonitors.set(sessionId, checkInterval);
+}
+
+// Update streaming UI
+function updateStreamingUI(sessionId, chunk) {
+  if (currentSessionId !== sessionId) return;
+  
+  const streamingElement = document.querySelector('.message.streaming');
+  if (streamingElement) {
+    const contentDiv = streamingElement.querySelector('.streaming-content');
+    if (contentDiv) {
+      const cursor = contentDiv.querySelector('.streaming-cursor');
+      if (cursor) cursor.remove();
+      
+      const textSpan = document.createElement('span');
+      textSpan.textContent = chunk;
+      contentDiv.appendChild(textSpan);
+      
+      // Re-add cursor
+      const cursorSpan = document.createElement('span');
+      cursorSpan.className = 'streaming-cursor';
+      cursorSpan.textContent = '▊';
+      contentDiv.appendChild(cursorSpan);
+      
+      // Scroll to bottom
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  }
+}
+
+// Initialize Sessions
+async function initializeSessions() {
+  try {
+    // Load sessions from storage
+    const result = await chrome.storage.local.get(['chatSessions', 'currentSessionId']);
+    
+    if (result.chatSessions) {
+      sessions = new Map(Object.entries(result.chatSessions));
+    }
+    
+    if (result.currentSessionId) {
+      currentSessionId = result.currentSessionId;
+    }
+    
+    // Create default session if none exists
+    if (sessions.size === 0) {
+      const defaultSession = createNewSession('Chat 1', true);
+      currentSessionId = defaultSession.id;
+    }
+    
+    // Update UI
+    updateTabsUI();
+    loadCurrentSession();
+    await loadChatHistory();
+  } catch (error) {
+    console.error('Failed to initialize sessions:', error);
+    // Create default session as fallback
+    const defaultSession = createNewSession('Chat 1', true);
+    currentSessionId = defaultSession.id;
+    updateTabsUI();
+  }
+}
+
+// Create new session
+function createNewSession(title = null, isDefault = false) {
+  const sessionId = isDefault ? 'default' : `session_${Date.now()}`;
+  const sessionTitle = title || `Chat ${sessionCounter++}`;
+  
+  const session = {
+    id: sessionId,
+    title: sessionTitle,
+    messages: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  sessions.set(sessionId, session);
+  saveSessions();
+  return session;
+}
+
+// Save sessions to storage
+async function saveSessions() {
+  try {
+    const sessionsObj = Object.fromEntries(sessions);
+    await chrome.storage.local.set({
+      chatSessions: sessionsObj,
+      currentSessionId: currentSessionId
+    });
+  } catch (error) {
+    console.error('Failed to save sessions:', error);
+  }
+}
+
+// Switch to session
+function switchToSession(sessionId) {
+  if (currentSessionId === sessionId) return;
+  
+  // Stop monitoring the old session's stream UI
+  if (activeMonitors.has(currentSessionId)) {
+    clearInterval(activeMonitors.get(currentSessionId));
+    activeMonitors.delete(currentSessionId);
+  }
+  
+  // Save current session state
+  saveCurrentSessionState();
+  
+  // Switch to new session
+  currentSessionId = sessionId;
+  loadCurrentSession();
+  updateTabsUI();
+  saveSessions();
+  
+  // Update UI for new session's processing state
+  const isNewSessionProcessing = isSessionProcessing(sessionId);
+  updateUIForProcessingState(isNewSessionProcessing);
+  
+  // Force update send button state after switching
+  setTimeout(() => {
+    if (!isSessionProcessing(currentSessionId)) {
+      sendBtn.disabled = !userInput.value.trim();
+    }
+  }, 50);
+}
+
+// Save current session state
+function saveCurrentSessionState() {
+  if (!sessions.has(currentSessionId)) return;
+  
+  const session = sessions.get(currentSessionId);
+  const messages = Array.from(messagesContainer.children)
+    .filter(el => el.classList.contains('message') && !el.classList.contains('streaming'))
+    .map(el => {
+      // Use stored original content if available, otherwise extract clean text
+      let content = el.dataset.originalContent;
+      
+      if (!content) {
+        const contentDiv = el.querySelector('.message-content');
+        if (contentDiv) {
+          // Clone the content div to avoid modifying the original
+          const contentClone = contentDiv.cloneNode(true);
+          
+          // Remove action buttons from the clone before getting text
+          const actionsDiv = contentClone.querySelector('.message-actions');
+          if (actionsDiv) {
+            actionsDiv.remove();
+          }
+          
+          // Get clean text content without button text
+          content = contentClone.textContent || '';
+        }
+      }
+      
+      return {
+        type: el.classList.contains('user') ? 'user' : 'bot',
+        content: content || '',
+        timestamp: new Date().toISOString()
+      };
+    });
+  
+  session.messages = messages;
+  session.updatedAt = new Date().toISOString();
+  sessions.set(currentSessionId, session);
+}
+
+// Create welcome message element
+function createWelcomeMessage() {
+  const welcomeDiv = document.createElement('div');
+  welcomeDiv.className = 'welcome-message';
+  welcomeDiv.innerHTML = `
+    <div class="welcome-animation">
+      <div class="welcome-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="url(#gradient)" stroke-width="1.5"/>
+          <circle cx="9" cy="10" r="1.5" fill="url(#gradient)"/>
+          <circle cx="15" cy="10" r="1.5" fill="url(#gradient)"/>
+          <path d="M8 14c0 2.21 1.79 4 4 4s4-1.79 4-4" stroke="url(#gradient)" stroke-width="1.5" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#4285f4;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="pulse-ring"></div>
+    </div>
+    <h2 class="gradient-text">Hello! Ready to assist you</h2>
+    <p class="subtitle">Powered by Chrome AI • Lightning fast • Always private</p>
+    <div class="suggestions">
+      <button class="suggestion-chip action-chip" data-action="summarize">📄 Summarize this page</button>
+      <button class="suggestion-chip action-chip" data-action="explain-selection">💡 Explain selected text</button>
+      <button class="suggestion-chip action-chip" data-action="explain-video">🎥 Explain intro video</button>
+      <button class="suggestion-chip" data-suggestion="What can you help me with?">❓ What can you do?</button>
+    </div>
+  `;
+  return welcomeDiv;
+}
+
+// Load current session
+function loadCurrentSession() {
+  const session = sessions.get(currentSessionId);
+  if (!session) return;
+  
+  // Clear current messages and any background indicators
+  messagesContainer.innerHTML = '';
+  
+  // Clean up any leftover processing indicators
+  setTimeout(() => {
+    const backgroundIndicators = document.querySelectorAll('.background-indicator');
+    backgroundIndicators.forEach(indicator => indicator.remove());
+  }, 10);
+  
+  // Check if this session is currently streaming
+  const processingState = sessionProcessingStates.get(currentSessionId);
+  
+  // Restore messages or show welcome
+  if (session.messages && session.messages.length > 0) {
+    session.messages.forEach(msg => {
+      addMessage(msg.content, msg.type);
+    });
+  } else {
+    // Show welcome message for empty sessions
+    const welcomeMessage = createWelcomeMessage();
+    messagesContainer.appendChild(welcomeMessage);
+  }
+  
+  // If session is currently streaming, restore the streaming UI
+  const activeStream = activeStreams.get(currentSessionId);
+  if (activeStream && !activeStream.data.isComplete) {
+    // Check if we need to show streaming response
+    const lastMessage = session.messages && session.messages.length > 0 ? 
+      session.messages[session.messages.length - 1] : null;
+    
+    // Only show streaming if last message was from user (expecting bot response)
+    if (!lastMessage || lastMessage.type === 'user') {
+      // Check if there's already a streaming message in DOM for this session
+      let streamingMessage = null;
+      const existingStreamingMsg = document.querySelector(`.message.bot.streaming[data-session-id="${currentSessionId}"]`);
+      
+      if (existingStreamingMsg) {
+        // Reuse existing streaming message
+        const contentDiv = existingStreamingMsg.querySelector('.message-content');
+        streamingMessage = {
+          element: existingStreamingMsg,
+          messageDiv: existingStreamingMsg,
+          contentDiv: contentDiv,
+          appendChunk: function(fullText) {
+            // Remove cursor temporarily
+            const cursor = contentDiv.querySelector('.streaming-cursor');
+            if (cursor) cursor.remove();
+            
+            // Clear existing content and set the full text
+            contentDiv.innerHTML = '';
+            const textSpan = document.createElement('span');
+            textSpan.textContent = fullText;
+            contentDiv.appendChild(textSpan);
+            
+            // Re-add cursor
+            const cursorSpan = document.createElement('span');
+            cursorSpan.className = 'streaming-cursor';
+            cursorSpan.textContent = '▊';
+            contentDiv.appendChild(cursorSpan);
+          }
+        };
+      } else {
+        // Create new streaming message if none exists
+        streamingMessage = addStreamingMessage('bot');
+        if (streamingMessage && streamingMessage.element) {
+          streamingMessage.element.dataset.sessionId = currentSessionId;
+        }
+      }
+      
+      // Show accumulated content so far
+      if (activeStream.data.fullResponse && streamingMessage) {
+        streamingMessage.appendChunk(activeStream.data.fullResponse);
+      }
+      
+      // Continue monitoring this stream for updates
+      if (streamingMessage) {
+        monitorStreamForUI(currentSessionId, streamingMessage);
+      }
+    }
+  }
+}
+
+// Update tabs UI
+function updateTabsUI() {
+  const tabsContainer = document.querySelector('.tabs-container');
+  tabsContainer.innerHTML = '';
+  
+  sessions.forEach((session, sessionId) => {
+    const tab = document.createElement('div');
+    const isActive = sessionId === currentSessionId;
+    const isProcessing = isSessionProcessing(sessionId);
+    
+    tab.className = `tab ${isActive ? 'active' : ''} ${isProcessing ? 'processing' : ''}`;
+    tab.dataset.sessionId = sessionId;
+    
+    // Add processing indicator
+    const processingIndicator = isProcessing ? '<span class="processing-dot"></span>' : '';
+    
+    tab.innerHTML = `
+      <span class="tab-title">${session.title}</span>
+      ${processingIndicator}
+      <button class="tab-close" title="Close tab">×</button>
+    `;
+    
+    // Tab click handler
+    tab.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('tab-close')) {
+        switchToSession(sessionId);
+      }
+    });
+    
+    // Close button handler
+    tab.querySelector('.tab-close').addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeSession(sessionId);
+    });
+    
+    tabsContainer.appendChild(tab);
+  });
+}
+
+// Close session
+function closeSession(sessionId) {
+  if (sessions.size <= 1) {
+    // Don't close last session, just clear it
+    clearChat();
+    return;
+  }
+  
+  // Clean up processing state for the session being closed
+  if (isSessionProcessing(sessionId)) {
+    const abortController = getSessionAbortController(sessionId);
+    if (abortController) {
+      abortController.abort();
+    }
+    sessionProcessingStates.delete(sessionId);
+  }
+  
+  // Note: AI sessions are managed by the pool, no per-session cleanup needed
+  
+  sessions.delete(sessionId);
+  
+  // If closing current session, switch to another
+  if (sessionId === currentSessionId) {
+    const remainingSessions = Array.from(sessions.keys());
+    currentSessionId = remainingSessions[0];
+    loadCurrentSession();
+  }
+  
+  updateTabsUI();
+  saveSessions();
+  updateChatHistory();
+}
+
+// Load chat history
+async function loadChatHistory() {
+  const historyList = document.getElementById('historyList');
+  if (!historyList) return;
+  
+  historyList.innerHTML = '';
+  
+  // Sort sessions by update time
+  const sortedSessions = Array.from(sessions.entries())
+    .sort(([,a], [,b]) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  
+  sortedSessions.forEach(([sessionId, session]) => {
+    const historyItem = document.createElement('div');
+    historyItem.className = `history-item ${sessionId === currentSessionId ? 'active' : ''}`;
+    historyItem.dataset.sessionId = sessionId;
+    
+    const preview = session.messages.length > 0 
+      ? session.messages[0].content.substring(0, 50) + '...'
+      : 'New chat';
+    
+    const date = new Date(session.updatedAt).toLocaleDateString();
+    
+    historyItem.innerHTML = `
+      <div class="history-item-title">${session.title}</div>
+      <div class="history-item-preview">${preview}</div>
+      <div class="history-item-date">${date}</div>
+    `;
+    
+    historyItem.addEventListener('click', () => {
+      switchToSession(sessionId);
+      closeHistorySidebar();
+    });
+    
+    historyList.appendChild(historyItem);
+  });
+}
+
+// Update chat history
+function updateChatHistory() {
+  loadChatHistory();
 }
 
 // Setup event listeners
@@ -96,10 +710,10 @@ function setupEventListeners() {
   userInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (!isProcessing) {
+      if (!isSessionProcessing(currentSessionId)) {
         handleSend();
       }
-    } else if (e.key === 'Escape' && isProcessing) {
+    } else if (e.key === 'Escape' && isSessionProcessing(currentSessionId)) {
       e.preventDefault();
       handleStopGeneration();
     }
@@ -107,7 +721,7 @@ function setupEventListeners() {
   
   // Global ESC key listener for stopping generation
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isProcessing) {
+    if (e.key === 'Escape' && isSessionProcessing(currentSessionId)) {
       e.preventDefault();
       handleStopGeneration();
     }
@@ -115,12 +729,42 @@ function setupEventListeners() {
   
   // Input change
   userInput.addEventListener('input', () => {
-    sendBtn.disabled = !userInput.value.trim() || isProcessing;
+    sendBtn.disabled = !userInput.value.trim() || isSessionProcessing(currentSessionId);
     adjustTextareaHeight();
   });
   
   // Clear chat
   clearBtn.addEventListener('click', clearChat);
+  
+  // New chat button
+  const newChatBtn = document.getElementById('newChatBtn');
+  if (newChatBtn) {
+    newChatBtn.addEventListener('click', createNewChatSession);
+  }
+  
+  // New tab button
+  const newTabBtn = document.getElementById('newTabBtn');
+  if (newTabBtn) {
+    newTabBtn.addEventListener('click', createNewChatSession);
+  }
+  
+  // History button
+  const historyBtn = document.getElementById('historyBtn');
+  if (historyBtn) {
+    historyBtn.addEventListener('click', toggleHistorySidebar);
+  }
+  
+  // Close history button
+  const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+  if (closeHistoryBtn) {
+    closeHistoryBtn.addEventListener('click', closeHistorySidebar);
+  }
+  
+  // History search
+  const historySearch = document.getElementById('historySearch');
+  if (historySearch) {
+    historySearch.addEventListener('input', filterChatHistory);
+  }
   
   // Suggestion chips
   document.addEventListener('click', (e) => {
@@ -207,21 +851,27 @@ function setupEventListeners() {
 
 // Handle send
 async function handleSend() {
-  // Check if already processing
-  if (isProcessing) {
+  // Check if current session is already processing
+  if (isSessionProcessing(currentSessionId)) {
     return; // Silently ignore - don't show error
   }
   
   const message = userInput.value.trim();
   if (!message) return;
   
-  // Set processing flag and disable ALL inputs
-  isProcessing = true;
-  userInput.disabled = true;
-  setButtonsDisabled(true);
+  // Create abort controller for this request
+  const abortController = new AbortController();
   
-  // Transform send button to stop button
-  transformToStopButton();
+  // Create streaming data object for background processing
+  const streamingData = {
+    sessionId: currentSessionId,
+    message: message,
+    fullResponse: '',
+    isComplete: false
+  };
+  
+  // Set processing flag for current session only
+  setSessionProcessing(currentSessionId, true, abortController, streamingData);
   
   // Hide welcome message if it exists
   const welcomeMessage = document.querySelector('.welcome-message');
@@ -238,10 +888,6 @@ async function handleSend() {
   
   // Show loading initially
   const loadingId = showLoading();
-  const loadingStartTime = Date.now();
-  
-  // Create abort controller for this request
-  currentAbortController = new AbortController();
   
   // Create streaming message container outside try block
   let streamingMessage = null;
@@ -250,29 +896,107 @@ async function handleSend() {
   try {
     let firstChunkReceived = false;
     
-    // Process with streaming
-    const response = await processMessage(message, (chunk) => {
-      // Remove loading on first chunk (with minimum display time)
-      if (!firstChunkReceived) {
-        removeLoading(loadingId);
-        streamingMessage = addStreamingMessage('bot');
-        firstChunkReceived = true;
-      }
-      
-      // Append chunk to streaming message
-      if (streamingMessage) {
-        streamingMessage.appendChunk(chunk);
-        fullResponse += chunk;
-      }
-    }, currentAbortController.signal);
+    // Start background streaming (UI-independent)
+    const streamPromise = startBackgroundStream(message, streamingData.sessionId, abortController);
     
-    // If no streaming happened (fallback to regular response)
-    if (!firstChunkReceived) {
+    // Store the active stream
+    activeStreams.set(streamingData.sessionId, {
+      promise: streamPromise,
+      data: streamingData
+    });
+    
+    // Handle UI for current session
+    if (currentSessionId === streamingData.sessionId) {
       removeLoading(loadingId);
-      addMessage(response, 'bot');
-    } else if (streamingMessage && fullResponse) {
-      // Finalize the streaming message with formatted content
-      streamingMessage.finalize(fullResponse);
+      streamingMessage = addStreamingMessage('bot');
+      
+      // Monitor the stream for UI updates
+      monitorStreamForUI(streamingData.sessionId, streamingMessage);
+    }
+    
+    // Wait for completion
+    const response = await streamPromise;
+    fullResponse = response;
+    
+    // Mark streaming as complete
+    streamingData.isComplete = true;
+    streamingData.fullResponse = fullResponse;
+    
+    // Clean up active stream
+    activeStreams.delete(streamingData.sessionId);
+    
+    // If the completed session is currently active, finalize the streaming message
+    if (currentSessionId === streamingData.sessionId) {
+      // Find the streaming message for this session
+      const streamingMessages = document.querySelectorAll('.message.bot.streaming');
+      streamingMessages.forEach(msg => {
+        if (msg.dataset.sessionId === streamingData.sessionId) {
+          // Finalize this streaming message
+          const contentDiv = msg.querySelector('.message-content');
+          if (contentDiv) {
+            // Remove streaming class and cursor
+            msg.classList.remove('streaming');
+            const cursor = contentDiv.querySelector('.streaming-cursor');
+            if (cursor) cursor.remove();
+            
+            // Set final content with formatting
+            const formattedContent = formatMessage(fullResponse);
+            contentDiv.innerHTML = formattedContent;
+            
+            // Add message actions
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'message-actions';
+            actionsDiv.innerHTML = `
+              <button class="copy-btn" title="Copy message">📋 Copy</button>
+              <button class="continue-btn" title="Continue response">➡️ Continue</button>
+            `;
+            contentDiv.appendChild(actionsDiv);
+            
+            // Set original content for saving
+            msg.dataset.originalContent = fullResponse;
+            
+            // Add event listeners
+            const copyBtn = actionsDiv.querySelector('.copy-btn');
+            const continueBtn = actionsDiv.querySelector('.continue-btn');
+            
+            copyBtn.addEventListener('click', () => copyMessageToClipboard(fullResponse, copyBtn));
+            continueBtn.addEventListener('click', () => continueResponse(fullResponse));
+          }
+        }
+      });
+    }
+    
+    // Handle completion based on current session
+    if (currentSessionId === streamingData.sessionId) {
+      if (streamingMessage) {
+        streamingMessage.finalize(fullResponse);
+      } else {
+        removeLoading(loadingId);
+        addMessage(response, 'bot');
+      }
+    } else {
+      // Session switched - add message to correct session and update UI if we return
+      const targetSession = sessions.get(streamingData.sessionId);
+      if (targetSession) {
+        targetSession.messages.push({
+          type: 'bot',
+          content: fullResponse,
+          timestamp: new Date().toISOString()
+        });
+        targetSession.updatedAt = new Date().toISOString();
+        sessions.set(streamingData.sessionId, targetSession);
+        saveSessions();
+        
+        // If this session becomes current again, refresh to show completed message
+        if (currentSessionId === streamingData.sessionId) {
+          // Remove pending indicators
+          const pendingMessages = document.querySelectorAll('.pending-response');
+          pendingMessages.forEach(msg => msg.remove());
+          
+          // Add the completed message
+          addMessage(fullResponse, 'bot');
+        }
+      }
     }
   } catch (error) {
     removeLoading(loadingId);
@@ -296,27 +1020,23 @@ async function handleSend() {
       console.error('Error processing message:', error);
     }
   } finally {
-    // Clear abort controller
-    currentAbortController = null;
-    // Reset processing state and re-enable inputs
-    isProcessing = false;
-    userInput.disabled = false;
-    setButtonsDisabled(false);
-    // Transform button back to send
-    transformToSendButton();
+    // Clear processing state for current session
+    setSessionProcessing(currentSessionId, false);
   }
 }
 
 // Process message with AI - with streaming support and cancellation
-async function processMessage(message, onChunk, abortSignal) {
+async function processMessage(message, onChunk, abortSignal, sessionId = currentSessionId) {
+  let aiSession = null;
+  
   try {
-    const session = await createAISession();
+    aiSession = await getAvailableAISession();
     
     // Check if streaming is supported
-    if (session.promptStreaming) {
+    if (aiSession.promptStreaming) {
       // Use streaming API if available
       let fullResponse = '';
-      const stream = session.promptStreaming(message, { 
+      const stream = aiSession.promptStreaming(message, { 
         language: 'en',
         signal: abortSignal // Pass abort signal if API supports it
       });
@@ -336,7 +1056,7 @@ async function processMessage(message, onChunk, abortSignal) {
       return fullResponse;
     } else {
       // Fallback to regular prompt if streaming not available
-      const response = await session.prompt(message, { 
+      const response = await aiSession.prompt(message, { 
         language: 'en',
         signal: abortSignal // Pass abort signal if API supports it
       });
@@ -366,6 +1086,11 @@ async function processMessage(message, onChunk, abortSignal) {
       console.error('Failed to process message:', error);
     }
     throw error;
+  } finally {
+    // Release AI session back to pool
+    if (aiSession) {
+      releaseAISession(aiSession);
+    }
   }
 }
 
@@ -382,12 +1107,53 @@ function addMessage(content, type) {
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
   
-  // Format message with basic markdown support
+  // Format message with enhanced markdown support
   contentDiv.innerHTML = formatMessage(content);
+  
+  // Store original content as data attribute for proper saving
+  messageDiv.dataset.originalContent = content;
+  
+  // Add copy button for bot messages
+  if (type === 'bot') {
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'message-actions';
+    
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><span>Copy</span>';
+    copyBtn.title = 'Copy message';
+    copyBtn.onclick = () => copyMessageToClipboard(content, copyBtn);
+    
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'continue-btn';
+    continueBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg><span>Continue</span>';
+    continueBtn.title = 'Continue response';
+    continueBtn.onclick = () => continueResponse(content);
+    
+    actionsDiv.appendChild(copyBtn);
+    actionsDiv.appendChild(continueBtn);
+    contentDiv.appendChild(actionsDiv);
+  }
   
   messageDiv.appendChild(avatarDiv);
   messageDiv.appendChild(contentDiv);
   messagesContainer.appendChild(messageDiv);
+  
+  // Save message to current session (but not if it's from streaming restoration)
+  const session = sessions.get(currentSessionId);
+  if (session && !messageDiv.classList.contains('streaming')) {
+    session.messages.push({
+      type: type,
+      content: content,
+      timestamp: new Date().toISOString()
+    });
+    session.updatedAt = new Date().toISOString();
+    sessions.set(currentSessionId, session);
+    saveSessions();
+    
+    // Update history in background
+    setTimeout(() => updateChatHistory(), 100);
+  }
   
   // Scroll to bottom
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -404,6 +1170,7 @@ function addStreamingMessage(type = 'bot') {
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${type} streaming`;
   messageDiv.id = 'streaming-' + Date.now();
+  messageDiv.dataset.sessionId = currentSessionId; // Track which session this belongs to
   
   const avatarDiv = document.createElement('div');
   avatarDiv.className = 'message-avatar';
@@ -426,16 +1193,18 @@ function addStreamingMessage(type = 'bot') {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
   
   return {
+    element: messageDiv,  // Add element reference for tracking
     messageDiv,
     contentDiv,
-    appendChunk: function(chunk) {
+    appendChunk: function(fullText) {
       // Remove cursor temporarily
       const cursor = contentDiv.querySelector('.streaming-cursor');
       if (cursor) cursor.remove();
       
-      // Append the new chunk
+      // Clear existing content and set the full text
+      contentDiv.innerHTML = '';
       const textSpan = document.createElement('span');
-      textSpan.textContent = chunk;
+      textSpan.textContent = fullText;
       contentDiv.appendChild(textSpan);
       
       // Re-add cursor
@@ -452,6 +1221,13 @@ function addStreamingMessage(type = 'bot') {
       // Remove streaming class
       messageDiv.classList.remove('streaming');
       
+      // Remove any background indicators since we now have the real message
+      const backgroundIndicators = document.querySelectorAll('.background-indicator');
+      backgroundIndicators.forEach(indicator => indicator.remove());
+      
+      // Store original content for proper saving
+      messageDiv.dataset.originalContent = fullText || '';
+      
       // Apply formatting to the complete text
       if (wasStopped && fullText) {
         contentDiv.innerHTML = formatMessage(fullText) + 
@@ -462,41 +1238,115 @@ function addStreamingMessage(type = 'bot') {
         contentDiv.innerHTML = '<div class="stopped-indicator">⏸ Response stopped</div>';
       }
       
+      // Add copy and continue buttons for bot messages
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'message-actions';
+      
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"></path></svg><span>Copy</span>';
+      copyBtn.title = 'Copy message';
+      copyBtn.onclick = () => copyMessageToClipboard(fullText, copyBtn);
+      
+      const continueBtn = document.createElement('button');
+      continueBtn.className = 'continue-btn';
+      continueBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg><span>Continue</span>';
+      continueBtn.title = 'Continue response';
+      continueBtn.onclick = () => continueResponse(fullText);
+      
+      actionsDiv.appendChild(copyBtn);
+      actionsDiv.appendChild(continueBtn);
+      contentDiv.appendChild(actionsDiv);
+      
+      // Save the completed message to the correct session (not necessarily current)
+      const originalSessionId = messageDiv.dataset.sessionId || currentSessionId;
+      const session = sessions.get(originalSessionId);
+      if (session && fullText) {
+        session.messages.push({
+          type: 'bot',
+          content: fullText,
+          timestamp: new Date().toISOString()
+        });
+        session.updatedAt = new Date().toISOString();
+        sessions.set(originalSessionId, session);
+        saveSessions();
+        
+        // Update history
+        setTimeout(() => updateChatHistory(), 100);
+      }
+      
       // Scroll to bottom
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
   };
 }
 
-// Format message with basic markdown
+// Enhanced markdown formatting function
 function formatMessage(text) {
-  // Escape HTML
+  // Escape HTML first
   let formatted = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   
-  // Headers
-  formatted = formatted.replace(/^### (.+)$/gm, '<h4>$1</h4>');
-  formatted = formatted.replace(/^## (.+)$/gm, '<h3>$1</h3>');
-  formatted = formatted.replace(/^# (.+)$/gm, '<h2>$1</h2>');
-  
-  // Bold
-  formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  
-  // Italic
-  formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  
-  // Code blocks
-  formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+  // Code blocks (must be processed before inline code)
+  formatted = formatted.replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
+    const language = lang || '';
+    return `<div class="code-block"><div class="code-header"><span class="code-lang">${language}</span><button class="copy-code-btn" onclick="copyCodeToClipboard(this)">Copy</button></div><pre><code class="language-${language}">${code.trim()}</code></pre></div>`;
+  });
   
   // Inline code
-  formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
+  formatted = formatted.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
   
-  // Lists
-  formatted = formatted.replace(/^\* (.+)$/gm, '<li>$1</li>');
-  formatted = formatted.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+  // Headers (with anchor links)
+  formatted = formatted.replace(/^#### (.+)$/gm, '<h4 class="md-header">$1</h4>');
+  formatted = formatted.replace(/^### (.+)$/gm, '<h3 class="md-header">$1</h3>');
+  formatted = formatted.replace(/^## (.+)$/gm, '<h2 class="md-header">$1</h2>');
+  formatted = formatted.replace(/^# (.+)$/gm, '<h1 class="md-header">$1</h1>');
   
-  // Line breaks
-  formatted = formatted.replace(/\n\n/g, '</p><p>');
-  formatted = '<p>' + formatted + '</p>';
+  // Bold and italic (handle nested formatting)
+  formatted = formatted.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  
+  // Strikethrough
+  formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
+  
+  // Links
+  formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="md-link">$1</a>');
+  
+  // Blockquotes
+  formatted = formatted.replace(/^> (.+)$/gm, '<blockquote class="md-blockquote">$1</blockquote>');
+  
+  // Unordered lists
+  formatted = formatted.replace(/^[\*\-\+] (.+)$/gm, '<li class="md-list-item">$1</li>');
+  
+  // Ordered lists
+  formatted = formatted.replace(/^\d+\. (.+)$/gm, '<li class="md-list-item-ordered">$1</li>');
+  
+  // Wrap consecutive list items
+  formatted = formatted.replace(/(<li class="md-list-item">.*?<\/li>)/gs, '<ul class="md-list">$1</ul>');
+  formatted = formatted.replace(/(<li class="md-list-item-ordered">.*?<\/li>)/gs, '<ol class="md-list-ordered">$1</ol>');
+  
+  // Horizontal rules
+  formatted = formatted.replace(/^---$/gm, '<hr class="md-hr">');
+  
+  // Tables (basic support)
+  formatted = formatted.replace(/\|(.+)\|/g, (match, content) => {
+    const cells = content.split('|').map(cell => `<td class="md-table-cell">${cell.trim()}</td>`).join('');
+    return `<tr class="md-table-row">${cells}</tr>`;
+  });
+  
+  // Wrap table rows
+  formatted = formatted.replace(/(<tr class="md-table-row">.*?<\/tr>)/gs, '<table class="md-table">$1</table>');
+  
+  // Paragraphs (handle line breaks properly)
+  const paragraphs = formatted.split(/\n\s*\n/).filter(p => p.trim());
+  formatted = paragraphs.map(p => {
+    p = p.replace(/\n/g, '<br>');
+    // Don't wrap if already wrapped in block elements
+    if (p.match(/^<(h[1-6]|div|blockquote|ul|ol|table|pre)/)) {
+      return p;
+    }
+    return `<p class="md-paragraph">${p}</p>`;
+  }).join('');
   
   return formatted;
 }
@@ -590,27 +1440,31 @@ function showError(message) {
 
 // Clear chat
 function clearChat() {
-  // Keep welcome message if it exists
-  const welcomeMessage = document.querySelector('.welcome-message');
-  messagesContainer.innerHTML = '';
-  if (welcomeMessage) {
-    messagesContainer.appendChild(welcomeMessage);
-    welcomeMessage.style.display = 'flex';
+  // Clear current session messages
+  const session = sessions.get(currentSessionId);
+  if (session) {
+    session.messages = [];
+    session.updatedAt = new Date().toISOString();
+    sessions.set(currentSessionId, session);
+    saveSessions();
   }
   
-  // Reset any ongoing processing state
-  if (isProcessing) {
-    isProcessing = false;
-    userInput.disabled = false;
-    setButtonsDisabled(false);
-    transformToSendButton();
-    
-    // Abort any ongoing request
-    if (currentAbortController) {
-      currentAbortController.abort();
-      currentAbortController = null;
+  // Clear messages and show welcome message
+  messagesContainer.innerHTML = '';
+  const welcomeMessage = createWelcomeMessage();
+  messagesContainer.appendChild(welcomeMessage);
+  
+  // Reset any ongoing processing state for current session
+  if (isSessionProcessing(currentSessionId)) {
+    const abortController = getSessionAbortController(currentSessionId);
+    if (abortController) {
+      abortController.abort();
     }
+    setSessionProcessing(currentSessionId, false);
   }
+  
+  // Update history
+  updateChatHistory();
 }
 
 // Disable/Enable all quick action buttons
@@ -633,6 +1487,7 @@ function transformToStopButton() {
   sendBtn.innerHTML = '<span class="stop-icon">⏹</span>';
   sendBtn.classList.add('stop-mode');
   sendBtn.title = 'Stop generation (ESC)';
+  sendBtn.disabled = false; // Ensure stop button is enabled
   
   // Remove existing click listener and add stop handler
   const newSendBtn = sendBtn.cloneNode(true);
@@ -640,6 +1495,7 @@ function transformToStopButton() {
   sendBtn = newSendBtn; // Update reference
   
   sendBtn.addEventListener('click', handleStopGeneration);
+  sendBtn.disabled = false; // Ensure stop button is enabled after cloning
 }
 
 // Transform stop button back to send button
@@ -659,10 +1515,10 @@ function transformToSendButton() {
 
 // Handle stop generation
 function handleStopGeneration() {
-  if (currentAbortController) {
+  const abortController = getSessionAbortController(currentSessionId);
+  if (abortController) {
     console.log('Stopping generation...');
-    currentAbortController.abort();
-    currentAbortController = null;
+    abortController.abort();
     
     // Also remove any loading elements
     const loadingElements = document.querySelectorAll('[id^="loading-"]');
@@ -674,11 +1530,8 @@ function handleStopGeneration() {
       elem.remove();
     });
     
-    // Re-enable inputs and transform button back
-    isProcessing = false;
-    userInput.disabled = false;
-    setButtonsDisabled(false);
-    transformToSendButton();
+    // Clear processing state for current session
+    setSessionProcessing(currentSessionId, false);
   }
 }
 
@@ -775,8 +1628,13 @@ ${response.content}
 
 Provide a clear, structured summary with key points.`;
     
-    const session = await createAISession();
-    const summary = await session.prompt(prompt, { language: 'en' });
+    const aiSession = await getAvailableAISession();
+    let summary;
+    try {
+      summary = await aiSession.prompt(prompt, { language: 'en' });
+    } finally {
+      releaseAISession(aiSession);
+    }
     
     removeLoading(loadingId);
     addMessage(summary, 'bot');
@@ -814,8 +1672,13 @@ async function explainSelection() {
 
 Provide a clear explanation that's easy to understand.`;
     
-    const session = await createAISession();
-    const explanation = await session.prompt(prompt, { language: 'en' });
+    const aiSession = await getAvailableAISession();
+    let explanation;
+    try {
+      explanation = await aiSession.prompt(prompt, { language: 'en' });
+    } finally {
+      releaseAISession(aiSession);
+    }
     
     removeLoading(loadingId);
     addMessage(explanation, 'bot');
@@ -852,8 +1715,13 @@ URL: ${tab.url}
 
 Based on the page context and typical intro videos, please explain what this video likely covers and its purpose. Provide insights about what viewers can expect to learn.`;
     
-    const session = await createAISession();
-    const explanation = await session.prompt(prompt, { language: 'en' });
+    const aiSession = await getAvailableAISession();
+    let explanation;
+    try {
+      explanation = await aiSession.prompt(prompt, { language: 'en' });
+    } finally {
+      releaseAISession(aiSession);
+    }
     
     removeLoading(loadingId);
     addMessage(explanation, 'bot');
@@ -960,18 +1828,17 @@ async function handleAttachSelection() {
 // Handle Smart Summarize with Chrome's Summarizer API
 async function handleSmartSummarize() {
   try {
-    // Check if already processing
-    if (isProcessing) {
+    // Check if current session is already processing
+    if (isSessionProcessing(currentSessionId)) {
       console.log('Already processing a request. Please wait...');
       return;
     }
     
-    // Set processing flag
-    isProcessing = true;
+    // Create abort controller for this request
+    const abortController = new AbortController();
     
-    // Disable all buttons during processing
-    setButtonsDisabled(true);
-    userInput.disabled = true;
+    // Set processing flag for current session
+    setSessionProcessing(currentSessionId, true, abortController);
     
     // Visual feedback
     document.getElementById('smartSummarizeBtn').classList.add('active');
@@ -1046,9 +1913,7 @@ async function handleSmartSummarize() {
     // Remove active state and re-enable buttons
     setTimeout(() => {
       document.getElementById('smartSummarizeBtn').classList.remove('active');
-      setButtonsDisabled(false);
-      userInput.disabled = false;
-      isProcessing = false;
+      setSessionProcessing(currentSessionId, false);
     }, 1000);
     
   } catch (error) {
@@ -1056,27 +1921,24 @@ async function handleSmartSummarize() {
     showError('Summarization failed. Try selecting text or using the Attach Page button.');
     // Re-enable buttons on error
     document.getElementById('smartSummarizeBtn').classList.remove('active');
-    setButtonsDisabled(false);
-    userInput.disabled = false;
-    isProcessing = false;
+    setSessionProcessing(currentSessionId, false);
   }
 }
 
 // Handle Translate with Chrome's Translator API
 async function handleTranslate() {
   try {
-    // Check if already processing
-    if (isProcessing) {
+    // Check if current session is already processing
+    if (isSessionProcessing(currentSessionId)) {
       console.log('Already processing a request. Please wait...');
       return;
     }
     
-    // Set processing flag
-    isProcessing = true;
+    // Create abort controller for this request
+    const abortController = new AbortController();
     
-    // Disable all buttons during processing
-    setButtonsDisabled(true);
-    userInput.disabled = true;
+    // Set processing flag for current session
+    setSessionProcessing(currentSessionId, true, abortController);
     
     // Visual feedback
     document.getElementById('translateBtn').classList.add('active');
@@ -1148,9 +2010,7 @@ async function handleTranslate() {
     // Remove active state and re-enable buttons
     setTimeout(() => {
       document.getElementById('translateBtn').classList.remove('active');
-      setButtonsDisabled(false);
-      userInput.disabled = false;
-      isProcessing = false;
+      setSessionProcessing(currentSessionId, false);
     }, 1000);
     
   } catch (error) {
@@ -1158,27 +2018,24 @@ async function handleTranslate() {
     showError('Translation failed. Try selecting text or copying and asking the AI.');
     // Re-enable buttons on error
     document.getElementById('translateBtn').classList.remove('active');
-    setButtonsDisabled(false);
-    userInput.disabled = false;
-    isProcessing = false;
+    setSessionProcessing(currentSessionId, false);
   }
 }
 
 // Handle Improve Text with Chrome's Rewriter API
 async function handleImproveText() {
   try {
-    // Check if already processing
-    if (isProcessing) {
+    // Check if current session is already processing
+    if (isSessionProcessing(currentSessionId)) {
       console.log('Already processing a request. Please wait...');
       return;
     }
     
-    // Set processing flag
-    isProcessing = true;
+    // Create abort controller for this request
+    const abortController = new AbortController();
     
-    // Disable all buttons during processing
-    setButtonsDisabled(true);
-    userInput.disabled = true;
+    // Set processing flag for current session
+    setSessionProcessing(currentSessionId, true, abortController);
     
     // Visual feedback
     document.getElementById('improveTextBtn').classList.add('active');
@@ -1255,4 +2112,228 @@ async function handleImproveText() {
     isProcessing = false;
   }
 }
+
+// Copy message to clipboard
+async function copyMessageToClipboard(content, button) {
+  try {
+    await navigator.clipboard.writeText(content);
+    
+    // Visual feedback
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"></path></svg><span>Copied!</span>';
+    button.classList.add('copied');
+    
+    setTimeout(() => {
+      button.innerHTML = originalHTML;
+      button.classList.remove('copied');
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = content;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    // Show feedback
+    button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"></path></svg><span>Copied!</span>';
+    button.classList.add('copied');
+    
+    setTimeout(() => {
+      button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"></path></svg><span>Copy</span>';
+      button.classList.remove('copied');
+    }, 2000);
+  }
+}
+
+// Copy code block to clipboard
+async function copyCodeToClipboard(button) {
+  const codeBlock = button.closest('.code-block');
+  const code = codeBlock.querySelector('code').textContent;
+  
+  try {
+    await navigator.clipboard.writeText(code);
+    
+    // Visual feedback
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.classList.add('copied');
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.classList.remove('copied');
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy code:', error);
+    button.textContent = 'Failed';
+    setTimeout(() => {
+      button.textContent = 'Copy';
+    }, 2000);
+  }
+}
+
+// Continue response functionality
+async function continueResponse(previousContent) {
+  if (isSessionProcessing(currentSessionId)) {
+    return;
+  }
+  
+  // Create abort controller
+  const abortController = new AbortController();
+  
+  // Set processing flag for current session
+  setSessionProcessing(currentSessionId, true, abortController);
+  
+  // Add user message indicating continuation
+  addMessage('Continue the previous response...', 'user');
+  
+  // Show loading
+  const loadingId = showLoading();
+  
+  let streamingMessage = null;
+  let fullResponse = '';
+  
+  try {
+    let firstChunkReceived = false;
+    
+    // Create continuation prompt
+    const continuePrompt = `Please continue from where you left off in your previous response. Here's what you said so far:\n\n${previousContent}\n\nPlease continue naturally from this point.`;
+    
+    const response = await processMessage(continuePrompt, (chunk) => {
+      if (!firstChunkReceived) {
+        removeLoading(loadingId);
+        streamingMessage = addStreamingMessage('bot');
+        firstChunkReceived = true;
+      }
+      
+      if (streamingMessage) {
+        streamingMessage.appendChunk(chunk);
+        fullResponse += chunk;
+      }
+    }, abortController.signal, currentSessionId);
+    
+    if (!firstChunkReceived) {
+      removeLoading(loadingId);
+      addMessage(response, 'bot');
+    } else if (streamingMessage && fullResponse) {
+      streamingMessage.finalize(fullResponse);
+    }
+  } catch (error) {
+    removeLoading(loadingId);
+    
+    if (error.name === 'AbortError') {
+      if (streamingMessage && fullResponse) {
+        streamingMessage.finalize(fullResponse, true);
+      } else if (streamingMessage) {
+        const streamingElem = document.querySelector('.message.streaming');
+        if (streamingElem) streamingElem.remove();
+      }
+    } else {
+      const streamingElem = document.querySelector('.message.streaming');
+      if (streamingElem) streamingElem.remove();
+      showError('Failed to continue response. Please try again.');
+      console.error('Error continuing response:', error);
+    }
+  } finally {
+    // Clear processing state for current session
+    setSessionProcessing(currentSessionId, false);
+  }
+}
+
+// Create new chat session
+function createNewChatSession() {
+  // Save current session first
+  saveCurrentSessionState();
+  
+  // Create new session
+  const newSession = createNewSession();
+  currentSessionId = newSession.id;
+  
+  // Update UI
+  updateTabsUI();
+  loadCurrentSession();
+  updateChatHistory();
+  
+  // Ensure UI is properly reset for new session
+  const isNewSessionProcessing = isSessionProcessing(newSession.id);
+  updateUIForProcessingState(isNewSessionProcessing);
+  
+  // Clear input and focus
+  userInput.value = '';
+  adjustTextareaHeight();
+  userInput.focus();
+  
+  // Force update send button state for new session
+  setTimeout(() => {
+    if (!isSessionProcessing(currentSessionId)) {
+      sendBtn.disabled = !userInput.value.trim();
+    }
+  }, 50);
+}
+
+// Toggle history sidebar
+function toggleHistorySidebar() {
+  const sidebar = document.getElementById('historySidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('open');
+    if (sidebar.classList.contains('open')) {
+      updateChatHistory();
+    }
+  }
+}
+
+// Close history sidebar
+function closeHistorySidebar() {
+  const sidebar = document.getElementById('historySidebar');
+  if (sidebar) {
+    sidebar.classList.remove('open');
+  }
+}
+
+// Filter chat history
+function filterChatHistory() {
+  const searchTerm = document.getElementById('historySearch').value.toLowerCase();
+  const historyItems = document.querySelectorAll('.history-item');
+  
+  historyItems.forEach(item => {
+    const title = item.querySelector('.history-item-title').textContent.toLowerCase();
+    const preview = item.querySelector('.history-item-preview').textContent.toLowerCase();
+    
+    if (title.includes(searchTerm) || preview.includes(searchTerm)) {
+      item.style.display = 'block';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Debug function to verify parallel processing (can be called from console)
+window.debugParallelChats = function() {
+  console.log('=== Parallel Chat Debug Info ===');
+  console.log('Current Session ID:', currentSessionId);
+  console.log('Total Chat Sessions:', sessions.size);
+  console.log('AI Session Pool Size:', aiSessionPool.length);
+  console.log('Max Pool Size:', maxPoolSize);
+  console.log('Processing States:');
+  
+  sessionProcessingStates.forEach((state, sessionId) => {
+    console.log(`  Session ${sessionId}: Processing = ${state.isProcessing}`);
+  });
+  
+  console.log('Chat Sessions:');
+  sessions.forEach((session, sessionId) => {
+    const isProcessing = isSessionProcessing(sessionId);
+    const messageCount = session.messages ? session.messages.length : 0;
+    console.log(`  Session ${sessionId} (${session.title}): ${messageCount} messages, Processing: ${isProcessing}`);
+  });
+  
+  console.log('AI Session Pool:');
+  aiSessionPool.forEach((aiSession, index) => {
+    console.log(`  Pool[${index}]: ${aiSession ? (aiSession.busy ? 'Busy' : 'Available') : 'Null'}`);
+  });
+  
+  console.log('=== End Debug Info ===');
+};
 

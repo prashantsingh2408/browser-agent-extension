@@ -78,6 +78,14 @@
           </svg>
           <span class="tab-label">Agent</span>
         </button>
+        <button class="main-nav-tab" data-tab="uiux" draggable="true">
+          <span class="drag-handle">⋮⋮</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 10 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          <span class="tab-label">Web Dev</span>
+        </button>
         <button class="main-nav-tab" data-tab="settings" draggable="true">
           <span class="drag-handle">⋮⋮</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -487,6 +495,153 @@
       </div>
     </div>
     
+    <!-- Web Developer Agent Section -->
+    <div class="main-tab-content" id="uiuxSection" style="display: none; flex-direction: column; flex: 1; overflow: hidden;">
+      <div class="webdev-container">
+        <!-- Web Dev Header -->
+        <div class="webdev-header">
+          <h2>🚀 Web Developer Agent</h2>
+          <div class="webdev-actions">
+            <button class="action-btn" id="viewLiveBtn" style="display: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              View Live
+            </button>
+            <span class="status-indicator" id="webdevStatus">Ready to build</span>
+          </div>
+        </div>
+        
+        <!-- Web Dev Chat Interface -->
+        <div class="webdev-workspace">
+          <!-- Chat Messages -->
+          <div class="webdev-chat-messages" id="webdevMessages">
+            <div class="webdev-welcome">
+              <!-- Aesthetic-Usability Effect: Beautiful gradient icon -->
+              <div class="welcome-icon-gradient">
+                <span class="welcome-icon">⚡</span>
+              </div>
+              
+              <!-- Serial Position Effect: Most important info first -->
+              <h3>Start Building in Seconds</h3>
+              <p class="subtitle">Just describe your website in plain English</p>
+              
+              <!-- Fitts's Law: Large, easy-to-click cards -->
+              <!-- Miller's Law: Only 4 options (within 7±2) -->
+              <!-- Von Restorff Effect: Each card has unique color accent -->
+              <div class="examples-grid">
+                <div class="example-card" data-accent="startup">
+                  <span class="example-icon">🚀</span>
+                  <span class="example-title">Startup Landing</span>
+                  <span class="example-text">Hero, features, pricing</span>
+                </div>
+                <div class="example-card" data-accent="portfolio">
+                  <span class="example-icon">🎨</span>
+                  <span class="example-title">Portfolio</span>
+                  <span class="example-text">Projects, about, contact</span>
+                </div>
+                <div class="example-card" data-accent="business">
+                  <span class="example-icon">💼</span>
+                  <span class="example-title">Business Site</span>
+                  <span class="example-text">Services, team, testimonials</span>
+                </div>
+                <div class="example-card" data-accent="store">
+                  <span class="example-icon">🛍️</span>
+                  <span class="example-title">Online Store</span>
+                  <span class="example-text">Products, cart, checkout</span>
+                </div>
+              </div>
+              
+              <!-- Goal-Gradient Effect: Progress indicator -->
+              <div class="quick-start">
+                <div class="steps-indicator">
+                  <div class="step active">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Describe</span>
+                  </div>
+                  <div class="step-arrow">→</div>
+                  <div class="step">
+                    <span class="step-number">2</span>
+                    <span class="step-text">Generate</span>
+                  </div>
+                  <div class="step-arrow">→</div>
+                  <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-text">Preview</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Paradox of Active User: Immediate action prompt -->
+              <!-- Cognitive Load: Simple, clear instruction -->
+              <div class="instant-start">
+                <p class="start-prompt">What website do you want to build?</p>
+                <!-- Example that users can click to auto-fill -->
+                <button class="example-prompt" id="tryExample">
+                  <span class="prompt-icon">💡</span>
+                  <span>Try: "Modern landing page for a SaaS product"</span>
+                </button>
+              </div>
+              
+              <!-- Law of Common Region: Grouped help info -->
+              <div class="help-region">
+                <details class="help-details">
+                  <summary>Need help? Click here</summary>
+                  <div class="help-content">
+                    <div class="capability-group">
+                      <h5>I can create:</h5>
+                      <span class="capability-tag">Landing Pages</span>
+                      <span class="capability-tag">Portfolios</span>
+                      <span class="capability-tag">Blogs</span>
+                      <span class="capability-tag">Dashboards</span>
+                      <span class="capability-tag">E-commerce</span>
+                    </div>
+                    <div class="feature-group">
+                      <h5>Features:</h5>
+                      <span class="feature-tag">✨ Responsive Design</span>
+                      <span class="feature-tag">🎨 Modern UI</span>
+                      <span class="feature-tag">⚡ Fast Loading</span>
+                      <span class="feature-tag">♿ Accessible</span>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Live Preview Controls -->
+          <div class="live-preview-controls" id="livePreviewControls" style="display: none;">
+            <div class="preview-bar">
+              <span class="preview-label">Live Preview:</span>
+              <span class="preview-url" id="previewUrl"></span>
+              <button class="select-element-btn" id="selectForEdit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                </svg>
+                Select to Edit
+              </button>
+            </div>
+          </div>
+          
+          <!-- Chat Input -->
+          <div class="webdev-input-area">
+            <textarea id="webdevInput" 
+                      placeholder="Describe the website you want to build... (e.g., 'Create a landing page for a fitness app with hero section, features, pricing, and footer')" 
+                      rows="3"></textarea>
+            <button class="send-btn" id="sendWebdevMessage">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              Build
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- Settings Section -->
     <div class="main-tab-content" id="settingsSection" style="display: none; flex-direction: column; flex: 1; overflow: hidden;">
       <div class="settings-container">
@@ -699,6 +854,7 @@
   <script src="scripts/sidepanel.js"></script>
   <script src="scripts/mail-compose.js"></script>
   <script src="scripts/agent.js"></script>
+  <script src="scripts/webdev.js"></script>
   <script src="scripts/settings.js"></script>
 </body>
 </html>

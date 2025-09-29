@@ -30,7 +30,16 @@ A powerful Chrome extension featuring AI-powered chat and email composition with
 - Visual progress tracking with step-by-step display
 - Chat history persistence and smart auto-detection
 
-### 4. **Settings & LLM Configuration** ⚙️ NEW!
+### 4. **Web Developer Agent** 🚀 NEW!
+- **AI Website Creation**: Build complete websites from natural language descriptions
+- **Live Preview**: Open and view your created websites in new tabs
+- **Interactive Editing**: Select elements and modify them through chat
+- **Multiple Templates**: Landing pages, portfolios, dashboards, e-commerce
+- **Modern Design**: Beautiful, responsive layouts with animations
+- **Real-time Updates**: See changes instantly as you describe them
+- **Code Generation**: Full HTML, CSS, and JavaScript generation
+
+### 5. **Settings & LLM Configuration** ⚙️
 - **Multiple LLM Providers**: OpenAI, Anthropic, Google, Local, Custom
 - **Task-Specific Models**: Choose different models for each feature
 - **API Key Management**: Secure local storage
@@ -42,6 +51,8 @@ A powerful Chrome extension featuring AI-powered chat and email composition with
 ### Core Features
 - [Chat Features](CHATBOT_FEATURES.md) - Complete chatbot functionality
 - [Agent Feature](docs/AGENT-FEATURE.md) - AI Agent documentation
+- [Web Developer Agent](docs/WEBDEV-AGENT.md) - AI website builder documentation
+- [UX Laws Applied to Web Dev](docs/UX-LAWS-WEBDEV.md) - Research-based UX improvements
 - [UX Laws Implementation](docs/UX-LAWS-IMPLEMENTATION.md) - Applied UX principles
 - [AI APIs Status](docs/AI-APIS-STATUS.md) - Chrome AI integration details
 

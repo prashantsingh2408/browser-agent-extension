@@ -3601,6 +3601,718 @@ body {
   margin-top: 12px;
 }
 
+/* ===========================
+   WEB DEVELOPER AGENT STYLES
+   =========================== */
+
+.webdev-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Web Dev Header */
+.webdev-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.webdev-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.webdev-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  color: #667eea;
+  border: 1px solid #667eea;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+#webdevStatus {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Web Dev Workspace */
+.webdev-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Chat Messages */
+.webdev-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: white;
+}
+
+/* Welcome Section - UX Laws Applied */
+.webdev-welcome {
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Aesthetic-Usability Effect: Beautiful gradient animation */
+.welcome-icon-gradient {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s infinite;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.welcome-icon {
+  font-size: 40px;
+  filter: grayscale(0) brightness(10);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.webdev-welcome h3 {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+}
+
+/* Examples Grid - Fitts's Law & Von Restorff Effect */
+.examples-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+
+/* Fitts's Law: Larger click targets */
+/* Von Restorff Effect: Unique colors for each type */
+.example-card {
+  min-height: 100px;
+  padding: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  background: white;
+  border: 2px solid transparent;
+}
+
+/* Unique accent colors for Von Restorff Effect */
+.example-card[data-accent="startup"] {
+  background: linear-gradient(135deg, #667eea08, #667eea15);
+  border-color: #667eea20;
+}
+
+.example-card[data-accent="portfolio"] {
+  background: linear-gradient(135deg, #f093fb08, #f093fb15);
+  border-color: #f093fb20;
+}
+
+.example-card[data-accent="business"] {
+  background: linear-gradient(135deg, #4facfe08, #4facfe15);
+  border-color: #4facfe20;
+}
+
+.example-card[data-accent="store"] {
+  background: linear-gradient(135deg, #43e97b08, #43e97b15);
+  border-color: #43e97b20;
+}
+
+/* Hover states with unique colors */
+.example-card[data-accent="startup"]:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea15, #667eea25);
+}
+
+.example-card[data-accent="portfolio"]:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(240, 147, 251, 0.25);
+  border-color: #f093fb;
+  background: linear-gradient(135deg, #f093fb15, #f093fb25);
+}
+
+.example-card[data-accent="business"]:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(79, 172, 254, 0.25);
+  border-color: #4facfe;
+  background: linear-gradient(135deg, #4facfe15, #4facfe25);
+}
+
+.example-card[data-accent="store"]:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(67, 233, 123, 0.25);
+  border-color: #43e97b;
+  background: linear-gradient(135deg, #43e97b15, #43e97b25);
+}
+
+.example-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+.example-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.example-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Goal-Gradient Effect: Progress Steps */
+.quick-start {
+  margin: 32px 0;
+}
+
+.steps-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  animation: stepPulse 2s infinite;
+}
+
+@keyframes stepPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.step-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.step.active .step-text {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.step-arrow {
+  color: var(--gray-300);
+  font-size: 20px;
+  margin: 0 8px;
+}
+
+/* Paradox of Active User: Instant Start */
+.instant-start {
+  margin: 24px 0;
+}
+
+.start-prompt {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+/* Fitts's Law: Large clickable example button */
+.example-prompt {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea10, #764ba210);
+  border: 2px dashed #667eea40;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.example-prompt:hover {
+  background: linear-gradient(135deg, #667eea20, #764ba220);
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.prompt-icon {
+  font-size: 20px;
+}
+
+/* Law of Common Region: Help Section */
+.help-region {
+  margin-top: 24px;
+}
+
+.help-details {
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.help-details summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.help-details summary:hover {
+  background: var(--gray-100);
+  color: var(--text-primary);
+}
+
+.help-details[open] summary {
+  background: var(--gray-100);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.help-content {
+  padding: 16px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.capability-group,
+.feature-group {
+  margin-bottom: 16px;
+}
+
+.capability-group:last-child,
+.feature-group:last-child {
+  margin-bottom: 0;
+}
+
+.capability-group h5,
+.feature-group h5 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Chunking: Visual tags for capabilities */
+.capability-tag,
+.feature-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  margin: 4px;
+  background: white;
+  border: 1px solid var(--gray-300);
+  border-radius: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.capability-tag:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+
+.feature-tag {
+  background: linear-gradient(135deg, #667eea05, #764ba205);
+  border-color: #667eea20;
+}
+
+/* Chat Messages */
+.webdev-message {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  animation: slideIn 0.3s ease;
+}
+
+.webdev-message.user {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.webdev-message.user .message-avatar {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.webdev-message.agent .message-avatar {
+  background: var(--gray-200);
+}
+
+.message-content {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.webdev-message.user .message-content {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.webdev-message.agent .message-content {
+  background: var(--gray-100);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+/* Code Block in Messages */
+.message-code {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 12px;
+  overflow-x: auto;
+}
+
+/* Live Preview Controls */
+.live-preview-controls {
+  background: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  padding: 12px 20px;
+}
+
+.preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.preview-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.preview-url {
+  flex: 1;
+  font-size: 13px;
+  color: var(--primary);
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.select-element-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select-element-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Enhanced Input Area - Build Button */
+.webdev-input-area {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: white;
+  border-top: 1px solid var(--gray-200);
+  align-items: flex-end;
+}
+
+.webdev-input-area textarea {
+  flex: 1;
+  padding: 16px 20px;
+  border: 2px solid var(--gray-300);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 60px;
+  max-height: 120px;
+}
+
+.webdev-input-area textarea:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Enhanced Build Button - Fitts's Law + Aesthetic-Usability */
+.webdev-input-area .send-btn {
+  min-width: 120px;
+  height: 60px;
+  padding: 0 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Hover Effects - Enhanced */
+.webdev-input-area .send-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+/* Active State */
+.webdev-input-area .send-btn:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Focus State */
+.webdev-input-area .send-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+/* Loading State */
+.webdev-input-area .send-btn.loading {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.webdev-input-area .send-btn.loading:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+}
+
+/* Success State */
+.webdev-input-area .send-btn.success {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  animation: successPulse 0.6s ease;
+}
+
+/* Error State */
+.webdev-input-area .send-btn.error {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  cursor: not-allowed;
+}
+
+.webdev-input-area .send-btn.error:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+/* Disabled State */
+.webdev-input-area .send-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Spinning animation for loading state */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Button Icon */
+.webdev-input-area .send-btn svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.webdev-input-area .send-btn:hover svg {
+  transform: translateX(2px);
+}
+
+/* Button Text */
+.webdev-input-area .send-btn span {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .webdev-input-area {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .webdev-input-area .send-btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* Doherty Threshold: All animations < 400ms for responsiveness */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes highlightInput {
+  0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+  50% { box-shadow: 0 0 0 8px rgba(102, 126, 234, 0.2); }
+  100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+}
+
+/* Welcome section transitions for smooth exit */
+.webdev-welcome {
+  transition: all 0.3s ease;
+  transform-origin: top center;
+}
+
+/* Status Updates */
+.status-building {
+  background: #ff9800 !important;
+}
+
+.status-success {
+  background: #4caf50 !important;
+}
+
+.status-error {
+  background: #f44336 !important;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .task-llm-grid {

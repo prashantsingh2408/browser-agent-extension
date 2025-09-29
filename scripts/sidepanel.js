@@ -2344,10 +2344,11 @@ function setupMainNavigation() {
   const chatSection = document.getElementById('chatSection');
   const mailSection = document.getElementById('mailSection');
   const agentSection = document.getElementById('agentSection');
+  const uiuxSection = document.getElementById('uiuxSection');
   const settingsSection = document.getElementById('settingsSection');
   const navContainer = document.getElementById('mainNavTabs');
   
-  if (!mainNavTabs.length || !chatSection || !mailSection || !agentSection || !settingsSection) {
+  if (!mainNavTabs.length || !chatSection || !mailSection || !agentSection || !uiuxSection || !settingsSection) {
     console.warn('Main navigation elements not found');
     return;
   }
@@ -2379,6 +2380,7 @@ function setupMainNavigation() {
       chatSection.style.display = 'none';
       mailSection.style.display = 'none';
       agentSection.style.display = 'none';
+      uiuxSection.style.display = 'none';
       settingsSection.style.display = 'none';
       
       // Show/hide sections based on selected tab
@@ -2438,6 +2440,27 @@ function setupMainNavigation() {
         }
         
         // Hide chat-specific header actions for agent
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          headerActions.style.display = 'none';
+        }
+      } else if (targetTab === 'uiux') {
+        uiuxSection.style.display = 'flex';
+        
+        // Cleanup other resources
+        if (typeof cleanupMailAI === 'function') {
+          cleanupMailAI();
+        }
+        if (typeof cleanupAgent === 'function') {
+          cleanupAgent();
+        }
+        
+        // Initialize UI/UX when entering tab
+        if (typeof initializeUIUX === 'function') {
+          initializeUIUX();
+        }
+        
+        // Hide chat-specific header actions for UI/UX
         const headerActions = document.querySelector('.header-actions');
         if (headerActions) {
           headerActions.style.display = 'none';

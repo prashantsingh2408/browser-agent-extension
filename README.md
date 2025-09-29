@@ -10,17 +10,25 @@ A powerful Chrome extension featuring AI-powered chat and email composition with
 - Rich markdown support with syntax highlighting
 - Chat history persistence and search
 
-### 2. **Craft Mail** ✨ NEW!
+### 2. **Craft Mail** ✨ 
 - AI-powered email composition
 - Multi-tier API fallback system (Chrome AI → Smart Templates)
 - Professional email templates
 - Grammar fixing and tone adjustment
 - One-click copy to Gmail/Outlook
 
+### 3. **AI Agent Chat** 💬 NEW!
+- Cursor-style chat interface for natural interaction
+- Four specialized agents: @research, @code, @write, @analyze
+- Real-time interruption and feedback capabilities
+- Visual progress tracking with step-by-step display
+- Chat history persistence and smart auto-detection
+
 ## 📚 Documentation
 
 ### Core Features
 - [Chat Features](CHATBOT_FEATURES.md) - Complete chatbot functionality
+- [Agent Feature](docs/AGENT-FEATURE.md) - AI Agent documentation
 - [UX Laws Implementation](docs/UX-LAWS-IMPLEMENTATION.md) - Applied UX principles
 - [AI APIs Status](docs/AI-APIS-STATUS.md) - Chrome AI integration details
 
@@ -44,6 +52,7 @@ browser-agent-extension/
 ├── scripts/                   # JavaScript files
 │   ├── sidepanel.js          # Main sidepanel logic
 │   ├── mail-compose.js       # Email composition logic
+│   ├── agent.js              # AI Agent functionality
 │   ├── ai-apis.js            # AI API integration
 │   ├── content.js            # Content script
 │   └── functions.js          # Utility functions

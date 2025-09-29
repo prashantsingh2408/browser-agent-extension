@@ -2338,13 +2338,14 @@ window.debugParallelChats = function() {
   console.log('=== End Debug Info ===');
 };
 
-// Setup main navigation tabs (Chat and Mail Compose)
+// Setup main navigation tabs (Chat, Mail Compose, and Agent)
 function setupMainNavigation() {
   const mainNavTabs = document.querySelectorAll('.main-nav-tab');
   const chatSection = document.getElementById('chatSection');
   const mailSection = document.getElementById('mailSection');
+  const agentSection = document.getElementById('agentSection');
   
-  if (!mainNavTabs.length || !chatSection || !mailSection) {
+  if (!mainNavTabs.length || !chatSection || !mailSection || !agentSection) {
     console.warn('Main navigation elements not found');
     return;
   }
@@ -2357,14 +2358,23 @@ function setupMainNavigation() {
       mainNavTabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       
-      // Show/hide sections
+      // Hide all sections first
+      chatSection.style.display = 'none';
+      mailSection.style.display = 'none';
+      agentSection.style.display = 'none';
+      
+      // Show/hide sections based on selected tab
       if (targetTab === 'chat') {
         chatSection.style.display = 'flex';
-        mailSection.style.display = 'none';
         
         // Cleanup mail AI resources when leaving mail tab
         if (typeof cleanupMailAI === 'function') {
           cleanupMailAI();
+        }
+        
+        // Cleanup agent resources when leaving agent tab
+        if (typeof cleanupAgent === 'function') {
+          cleanupAgent();
         }
         
         // Update header actions visibility for chat
@@ -2373,8 +2383,12 @@ function setupMainNavigation() {
           headerActions.style.display = 'flex';
         }
       } else if (targetTab === 'mail') {
-        chatSection.style.display = 'none';
         mailSection.style.display = 'flex';
+        
+        // Cleanup agent resources when leaving agent tab
+        if (typeof cleanupAgent === 'function') {
+          cleanupAgent();
+        }
         
         // Initialize mail AI when entering mail tab
         if (typeof initializeMailAI === 'function') {
@@ -2388,6 +2402,24 @@ function setupMainNavigation() {
         }
         
         // Hide chat-specific header actions for mail compose
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          headerActions.style.display = 'none';
+        }
+      } else if (targetTab === 'agent') {
+        agentSection.style.display = 'flex';
+        
+        // Cleanup mail AI resources when leaving mail tab
+        if (typeof cleanupMailAI === 'function') {
+          cleanupMailAI();
+        }
+        
+        // Initialize agent when entering agent tab
+        if (typeof initializeAgent === 'function') {
+          initializeAgent();
+        }
+        
+        // Hide chat-specific header actions for agent
         const headerActions = document.querySelector('.header-actions');
         if (headerActions) {
           headerActions.style.display = 'none';

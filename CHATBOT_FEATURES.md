@@ -2,8 +2,8 @@
 
 ## 🚀 Core Features
 
-### Chat Assistant | Craft Mail
-Two powerful AI-powered tools in one extension
+### Chat Assistant | Craft Mail | AI Agent
+Three powerful AI-powered tools in one extension
 
 ### 1. **Enhanced Markdown Formatting (.md format)**
 - **Full Markdown Support**: Headers, bold, italic, strikethrough, links, blockquotes, lists, code blocks, tables, and horizontal rules
@@ -294,7 +294,7 @@ The browser agent extension now features:
 - ✅ Smooth animations (60fps)
 - ✅ Full keyboard accessibility
 
-### Craft Mail (NEW)
+### Craft Mail
 - ✅ AI-powered email generation
 - ✅ Multi-tier API fallback system
 - ✅ Smart template engine
@@ -305,5 +305,17 @@ The browser agent extension now features:
 - ✅ Transparent API status
 - ✅ 100% availability guarantee
 - ✅ One-click copy to email clients
+
+### AI Agent (NEW)
+- ✅ Four specialized agent types
+- ✅ Autonomous task completion
+- ✅ Auto Mode for hands-free operation
+- ✅ Step-by-step controlled execution
+- ✅ Real-time progress tracking
+- ✅ Action explanations
+- ✅ Chrome AI integration
+- ✅ Smart fallback templates
+- ✅ State persistence
+- ✅ Clean, intuitive interface
 
 All features are production-ready, follow modern web development best practices, and work seamlessly together!

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Chrome Official API Pattern</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #333;
+      margin: 0 0 10px 0;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 10px 10px 10px 0;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 24px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      margin-top: 20px;
+      min-height: 200px;
+      line-height: 1.6;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    .error { background: #ffebee; color: #c62828; }
+    .info { background: #e3f2fd; color: #1976d2; }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Chrome Official API Test</h1>
+    <p class="subtitle">Testing patterns from <a href="https://developer.chrome.com/docs/ai/prompt-api" target="_blank">Chrome Developer Docs</a></p>
+    
+    <div id="status" class="status-badge info">Checking API availability...</div>
+    
+    <div>
+      <button onclick="testAvailability()">1. Check Availability</button>
+      <button onclick="testParameters()">2. Get Parameters</button>
+      <button onclick="testSession()">3. Test Session</button>
+      <button onclick="testStreaming()">4. Test Streaming</button>
+      <button onclick="clearOutput()">Clear</button>
+    </div>
+    
+    <div id="output">// Click buttons above to test Chrome AI API
+// Using patterns from official Chrome documentation
+
+// Your system has: LanguageModel (Legacy API)
+// Documentation: https://developer.chrome.com/docs/ai/prompt-api</div>
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+    const statusBadge = document.getElementById('status');
+
+    function log(message) {
+      if (output.textContent.includes('Click buttons')) {
+        output.textContent = '';
+      }
+      output.textContent += message + '\n';
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function setStatus(message, type = 'info') {
+      statusBadge.textContent = message;
+      statusBadge.className = `status-badge ${type}`;
+    }
+
+    function clearOutput() {
+      output.textContent = '// Output cleared. Ready for new tests...';
+    }
+
+    // Test 1: Check Availability (from Chrome docs)
+    async function testAvailability() {
+      log('═══════════════════════════════════════');
+      log('TEST 1: Check Availability');
+      log('═══════════════════════════════════════\n');
+      
+      try {
+        if (typeof LanguageModel === 'undefined') {
+          throw new Error('LanguageModel not found');
+        }
+        
+        log('✅ LanguageModel API found!');
+        log('\n📝 Calling: await LanguageModel.availability()');
+        
+        const availability = await LanguageModel.availability();
+        log(`✅ Result: "${availability}"\n`);
+        
+        log('Possible values:');
+        log('  • "readily" - Model ready to use');
+        log('  • "after-download" - Needs download');
+        log('  • "unavailable" - Not available\n');
+        
+        if (availability === 'readily') {
+          setStatus('✅ Chrome AI is readily available!', 'success');
+          log('✅ Your Chrome AI is READY TO USE!');
+        } else if (availability === 'after-download') {
+          setStatus('⚠️ Model needs download', 'info');
+          log('⚠️ Model needs to be downloaded first');
+        } else {
+          setStatus('❌ Model unavailable', 'error');
+          log('❌ Model is not available');
+        }
+        
+      } catch (error) {
+        log(`❌ Error: ${error.message}`);
+        setStatus('❌ Test failed', 'error');
+      }
+    }
+
+    // Test 2: Get Parameters (from Chrome docs)
+    async function testParameters() {
+      log('═══════════════════════════════════════');
+      log('TEST 2: Get Model Parameters');
+      log('═══════════════════════════════════════\n');
+      
+      try {
+        log('📝 Calling: await LanguageModel.params()');
+        
+        const { defaultTemperature, maxTemperature, defaultTopK, maxTopK } = 
+          await LanguageModel.params();
+        
+        log('✅ Parameters received:\n');
+        log(`Temperature (creativity):`);
+        log(`  Default: ${defaultTemperature}`);
+        log(`  Maximum: ${maxTemperature}`);
+        log(`\nTop-K (token selection):`);
+        log(`  Default: ${defaultTopK}`);
+        log(`  Maximum: ${maxTopK}\n`);
+        
+        log('💡 Usage:');
+        log(`const session = await LanguageModel.create({`);
+        log(`  temperature: ${defaultTemperature}, // 0.0 = focused, 1.0 = creative`);
+        log(`  topK: ${defaultTopK}`);
+        log(`});`);
+        
+        setStatus('✅ Parameters retrieved successfully', 'success');
+        
+      } catch (error) {
+        log(`❌ Error: ${error.message}`);
+        setStatus('❌ Test failed', 'error');
+      }
+    }
+
+    // Test 3: Create Session and Prompt (from Chrome docs)
+    async function testSession() {
+      log('═══════════════════════════════════════');
+      log('TEST 3: Session Creation & Prompting');
+      log('═══════════════════════════════════════\n');
+      
+      try {
+        const availability = await LanguageModel.availability();
+        
+        if (availability === 'unavailable') {
+          throw new Error('Model is unavailable');
+        }
+        
+        log('✅ Model is available\n');
+        log('📝 Creating session...');
+        
+        const session = await LanguageModel.create({
+          temperature: 0.7,
+          topK: 3
+        });
+        
+        log('✅ Session created!\n');
+        log('📝 Sending prompt: "Write a haiku about coding"');
+        
+        setStatus('🤔 Generating response...', 'info');
+        
+        const result = await session.prompt('Write a haiku about coding');
+        
+        log('✅ Response received:\n');
+        log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        log(result);
+        log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+        
+        log('📊 Session stats:');
+        log(`  Input usage: ${session.inputUsage}/${session.inputQuota} tokens\n`);
+        
+        log('🗑️ Destroying session...');
+        session.destroy();
+        log('✅ Session destroyed!');
+        
+        setStatus('✅ Test completed successfully!', 'success');
+        
+      } catch (error) {
+        log(`❌ Error: ${error.message}`);
+        setStatus('❌ Test failed', 'error');
+      }
+    }
+
+    // Test 4: Streaming (from Chrome docs)
+    async function testStreaming() {
+      log('═══════════════════════════════════════');
+      log('TEST 4: Streaming Response');
+      log('═══════════════════════════════════════\n');
+      
+      try {
+        const availability = await LanguageModel.availability();
+        
+        if (availability === 'unavailable') {
+          throw new Error('Model is unavailable');
+        }
+        
+        log('✅ Model is available\n');
+        log('📝 Creating session...');
+        
+        const session = await LanguageModel.create({
+          temperature: 0.8,
+          topK: 5
+        });
+        
+        log('✅ Session created!\n');
+        log('📝 Streaming prompt: "Tell me a short story about AI"');
+        log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+        
+        setStatus('📡 Streaming response...', 'info');
+        
+        const stream = session.promptStreaming('Tell me a very short story about AI helping humans in one paragraph');
+        
+        let fullResponse = '';
+        for await (const chunk of stream) {
+          fullResponse += chunk;
+          output.textContent = output.textContent.trimEnd() + chunk;
+          output.scrollTop = output.scrollHeight;
+        }
+        
+        log('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        log('✅ Streaming complete!\n');
+        
+        log(`📊 Total response length: ${fullResponse.length} characters`);
+        log(`📊 Session usage: ${session.inputUsage}/${session.inputQuota} tokens\n`);
+        
+        session.destroy();
+        log('✅ Session destroyed!');
+        
+        setStatus('✅ Streaming test completed!', 'success');
+        
+      } catch (error) {
+        log(`\n❌ Error: ${error.message}`);
+        setStatus('❌ Test failed', 'error');
+      }
+    }
+
+    // Auto-check on load
+    window.addEventListener('load', async () => {
+      if (typeof LanguageModel !== 'undefined') {
+        try {
+          const availability = await LanguageModel.availability();
+          if (availability === 'readily') {
+            setStatus('✅ Chrome AI Ready (Legacy LanguageModel API)', 'success');
+          } else if (availability === 'after-download') {
+            setStatus('⚠️ Chrome AI needs download', 'info');
+          } else {
+            setStatus('❌ Chrome AI unavailable', 'error');
+          }
+        } catch (error) {
+          setStatus('❌ Error checking availability', 'error');
+        }
+      } else {
+        setStatus('❌ LanguageModel API not found', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
+

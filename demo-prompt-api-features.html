@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Features Demo - Chrome Prompt API</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 1.1em;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .feature-card {
+      padding: 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      border-color: #667eea;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    }
+
+    .feature-icon {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .feature-desc {
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .demo-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 12px;
+    }
+
+    .demo-section h3 {
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+    }
+
+    .output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      margin-top: 15px;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    .sample-text {
+      font-style: italic;
+      color: #666;
+      margin: 10px 0;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .status.success { background: #e8f5e9; color: #2e7d32; }
+    .status.error { background: #ffebee; color: #c62828; }
+    .status.info { background: #e3f2fd; color: #1976d2; }
+
+    .sample-image {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Smart Features Demo</h1>
+    <p class="subtitle">Powered by Chrome's Prompt API & Built-in AI</p>
+
+    <div id="statusBadge" class="status info">🔄 Checking AI availability...</div>
+
+    <h2 style="margin: 30px 0 20px 0;">✨ Available Features</h2>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🖼️</div>
+        <div class="feature-title">Image Analyzer</div>
+        <div class="feature-desc">Analyze images, generate alt text, extract text from images</div>
+        <button onclick="scrollToDemo('image-demo')">Try Demo</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">✍️</div>
+        <div class="feature-title">Text Rewriter</div>
+        <div class="feature-desc">Rewrite text in professional, casual, simple, or other styles</div>
+        <button onclick="scrollToDemo('rewriter-demo')">Try Demo</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">😊</div>
+        <div class="feature-title">Sentiment Analyzer</div>
+        <div class="feature-desc">Analyze emotions, tone, and sentiment of any text</div>
+        <button onclick="scrollToDemo('sentiment-demo')">Try Demo</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📄</div>
+        <div class="feature-title">Smart Summarizer</div>
+        <div class="feature-desc">Create brief, bullet points, or detailed summaries</div>
+        <button onclick="scrollToDemo('summary-demo')">Try Demo</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔑</div>
+        <div class="feature-title">Key Points Extractor</div>
+        <div class="feature-desc">Extract the most important points from long content</div>
+        <button onclick="scrollToDemo('keypoints-demo')">Try Demo</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💻</div>
+        <div class="feature-title">Code Explainer</div>
+        <div class="feature-desc">Understand code snippets with clear explanations</div>
+        <button onclick="scrollToDemo('code-demo')">Try Demo</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🏷️</div>
+        <div class="feature-title">Content Categorizer</div>
+        <div class="feature-desc">Automatically categorize content into topics</div>
+        <button onclick="scrollToDemo('categorize-demo')">Try Demo</button>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <div class="feature-title">Data Extractor</div>
+        <div class="feature-desc">Extract structured data (contacts, products, events)</div>
+        <button onclick="scrollToDemo('extract-demo')">Try Demo</button>
+      </div>
+    </div>
+
+    <!-- Demo: Text Rewriter -->
+    <div class="demo-section" id="rewriter-demo">
+      <h3>✍️ Text Rewriter Demo</h3>
+      <p class="sample-text">Sample: "hey can u send me that thing we talked about yesterday? its important"</p>
+      <textarea id="rewriterInput" placeholder="Enter text to rewrite...">hey can u send me that thing we talked about yesterday? its important</textarea>
+      <select id="rewriterStyle" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px;">
+        <option value="professional">Professional</option>
+        <option value="casual">Casual</option>
+        <option value="simple">Simple</option>
+        <option value="formal">Formal</option>
+        <option value="concise">Concise</option>
+      </select>
+      <button onclick="testRewriter()">✍️ Rewrite Text</button>
+      <div class="output" id="rewriterOutput">Results will appear here...</div>
+    </div>
+
+    <!-- Demo: Sentiment Analyzer -->
+    <div class="demo-section" id="sentiment-demo">
+      <h3>😊 Sentiment Analyzer Demo</h3>
+      <p class="sample-text">Sample: "This product exceeded my expectations! The quality is amazing and customer service was so helpful!"</p>
+      <textarea id="sentimentInput" placeholder="Enter text to analyze...">This product exceeded my expectations! The quality is amazing and customer service was so helpful!</textarea>
+      <button onclick="testSentiment()">😊 Analyze Sentiment</button>
+      <div class="output" id="sentimentOutput">Results will appear here...</div>
+    </div>
+
+    <!-- Demo: Summarizer -->
+    <div class="demo-section" id="summary-demo">
+      <h3>📄 Smart Summarizer Demo</h3>
+      <p class="sample-text">Try with a long article or paste content to summarize</p>
+      <textarea id="summaryInput" placeholder="Paste long content here...">Artificial intelligence (AI) is revolutionizing the way we interact with technology. From virtual assistants to autonomous vehicles, AI is making our lives easier and more efficient. Machine learning algorithms can now recognize patterns in data that would take humans years to identify. Natural language processing enables computers to understand and respond to human language. Computer vision allows machines to interpret and understand visual information. These technologies are being applied across industries including healthcare, finance, education, and entertainment. However, there are also concerns about AI ethics, privacy, and the potential impact on employment. As AI continues to advance, it's crucial that we develop responsible guidelines and regulations to ensure it benefits society as a whole.</textarea>
+      <select id="summaryStyle" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px;">
+        <option value="brief">Brief (2-3 sentences)</option>
+        <option value="bullets">Bullet Points</option>
+        <option value="tldr">TL;DR</option>
+        <option value="detailed">Detailed</option>
+      </select>
+      <button onclick="testSummary()">📄 Summarize</button>
+      <div class="output" id="summaryOutput">Results will appear here...</div>
+    </div>
+
+    <!-- Demo: Key Points Extractor -->
+    <div class="demo-section" id="keypoints-demo">
+      <h3>🔑 Key Points Extractor Demo</h3>
+      <button onclick="testKeyPoints()">🔑 Extract Key Points from Sample Article</button>
+      <div class="output" id="keypointsOutput">Results will appear here...</div>
+    </div>
+
+    <!-- Demo: Code Explainer -->
+    <div class="demo-section" id="code-demo">
+      <h3>💻 Code Explainer Demo</h3>
+      <textarea id="codeInput" placeholder="Paste code here..." style="font-family: monospace;">async function fetchData(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+  return response.json();
+}</textarea>
+      <button onclick="testCodeExplain()">💻 Explain Code</button>
+      <div class="output" id="codeOutput">Results will appear here...</div>
+    </div>
+
+    <!-- Demo: Categorizer -->
+    <div class="demo-section" id="categorize-demo">
+      <h3>🏷️ Content Categorizer Demo</h3>
+      <input type="text" id="categoryTitle" placeholder="Title..." value="Latest iPhone 15 Review" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px;">
+      <textarea id="categoryContent" placeholder="Content...">The new iPhone 15 features a powerful A17 chip, improved camera system with 48MP main sensor, and longer battery life. The design includes a new titanium frame and USB-C charging.</textarea>
+      <button onclick="testCategorize()">🏷️ Categorize</button>
+      <div class="output" id="categoryOutput">Results will appear here...</div>
+    </div>
+
+    <!-- Demo: Data Extractor -->
+    <div class="demo-section" id="extract-demo">
+      <h3>📋 Structured Data Extractor Demo</h3>
+      <textarea id="extractInput" placeholder="Paste content with contact/product info...">Contact: John Doe
+Email: john.doe@example.com
+Phone: +1 (555) 123-4567
+Address: 123 Main St, San Francisco, CA 94102
+Company: TechCorp Solutions</textarea>
+      <select id="extractType" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px;">
+        <option value="contact">Contact Information</option>
+        <option value="product">Product Details</option>
+        <option value="event">Event Information</option>
+      </select>
+      <button onclick="testExtract()">📋 Extract Data</button>
+      <div class="output" id="extractOutput">Results will appear here...</div>
+    </div>
+
+  </div>
+
+  <script src="scripts/smart-features.js"></script>
+  <script>
+    // Check AI availability on load
+    window.addEventListener('load', async () => {
+      const badge = document.getElementById('statusBadge');
+      
+      try {
+        if (typeof LanguageModel === 'undefined') {
+          badge.className = 'status error';
+          badge.textContent = '❌ Chrome AI not available';
+          return;
+        }
+
+        const availability = await LanguageModel.availability();
+        
+        if (availability === 'readily' || availability === 'available') {
+          badge.className = 'status success';
+          badge.textContent = '✅ Chrome AI Ready!';
+        } else if (availability === 'after-download') {
+          badge.className = 'status info';
+          badge.textContent = '⏳ AI Model needs download';
+        } else {
+          badge.className = 'status error';
+          badge.textContent = '❌ AI Model unavailable';
+        }
+      } catch (error) {
+        badge.className = 'status error';
+        badge.textContent = '❌ Error checking AI: ' + error.message;
+      }
+    });
+
+    function scrollToDemo(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function testRewriter() {
+      const input = document.getElementById('rewriterInput').value;
+      const style = document.getElementById('rewriterStyle').value;
+      const output = document.getElementById('rewriterOutput');
+      
+      output.textContent = '⏳ Rewriting...';
+      
+      try {
+        const result = await window.smartFeatures.rewriteText(input, style);
+        output.textContent = result;
+      } catch (error) {
+        output.textContent = '❌ Error: ' + error.message;
+      }
+    }
+
+    async function testSentiment() {
+      const input = document.getElementById('sentimentInput').value;
+      const output = document.getElementById('sentimentOutput');
+      
+      output.textContent = '⏳ Analyzing...';
+      
+      try {
+        const result = await window.smartFeatures.analyzeSentiment(input);
+        output.textContent = JSON.stringify(result, null, 2);
+      } catch (error) {
+        output.textContent = '❌ Error: ' + error.message;
+      }
+    }
+
+    async function testSummary() {
+      const input = document.getElementById('summaryInput').value;
+      const style = document.getElementById('summaryStyle').value;
+      const output = document.getElementById('summaryOutput');
+      
+      output.textContent = '⏳ Summarizing...';
+      
+      try {
+        const result = await window.smartFeatures.summarizeContent(input, style);
+        output.textContent = result;
+      } catch (error) {
+        output.textContent = '❌ Error: ' + error.message;
+      }
+    }
+
+    async function testKeyPoints() {
+      const output = document.getElementById('keypointsOutput');
+      const sampleArticle = document.getElementById('summaryInput').value;
+      
+      output.textContent = '⏳ Extracting key points...';
+      
+      try {
+        const points = await window.smartFeatures.extractKeyPoints(sampleArticle, 5);
+        output.textContent = points.map((p, i) => `${i + 1}. ${p}`).join('\n\n');
+      } catch (error) {
+        output.textContent = '❌ Error: ' + error.message;
+      }
+    }
+
+    async function testCodeExplain() {
+      const input = document.getElementById('codeInput').value;
+      const output = document.getElementById('codeOutput');
+      
+      output.textContent = '⏳ Explaining...';
+      
+      try {
+        const result = await window.smartFeatures.explainCode(input, 'javascript');
+        output.textContent = result;
+      } catch (error) {
+        output.textContent = '❌ Error: ' + error.message;
+      }
+    }
+
+    async function testCategorize() {
+      const title = document.getElementById('categoryTitle').value;
+      const content = document.getElementById('categoryContent').value;
+      const output = document.getElementById('categoryOutput');
+      
+      output.textContent = '⏳ Categorizing...';
+      
+      try {
+        const result = await window.smartFeatures.categorizeContent(title, content);
+        output.textContent = `Category: ${result}`;
+      } catch (error) {
+        output.textContent = '❌ Error: ' + error.message;
+      }
+    }
+
+    async function testExtract() {
+      const input = document.getElementById('extractInput').value;
+      const type = document.getElementById('extractType').value;
+      const output = document.getElementById('extractOutput');
+      
+      output.textContent = '⏳ Extracting...';
+      
+      try {
+        const result = await window.smartFeatures.extractStructuredData(input, type);
+        output.textContent = JSON.stringify(result, null, 2);
+      } catch (error) {
+        output.textContent = '❌ Error: ' + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
+

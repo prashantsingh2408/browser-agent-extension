@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-time Proofreader</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; min-height: 100vh; }
+    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 16px; padding: 30px; }
+    h1 { color: #333; margin-bottom: 20px; }
+    .status { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; background: #fff3e0; color: #e65100; }
+    textarea { width: 100%; height: 200px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; line-height: 1.6; }
+    .output { margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px; min-height: 100px; }
+    .correction { background: #fff3e0; padding: 8px; border-radius: 4px; margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✅ Real-time Proofreader</h1>
+    <div class="status">⚠️ Proofreader API is in prototype phase (Chrome 141+). Using demo mode.</div>
+    
+    <label><strong>Type or paste text to check:</strong></label>
+    <textarea id="input" placeholder="Thsi is an exmaple text with some erors...">Thsi is an exmaple text with some erors.</textarea>
+    
+    <button onclick="proofread()" style="margin-top: 15px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Check Text</button>
+    
+    <div class="output" id="output">
+      <em style="color: #999;">Corrections will appear here...</em>
+    </div>
+  </div>
+
+  <script>
+    async function proofread() {
+      const text = document.getElementById('input').value;
+      const output = document.getElementById('output');
+      
+      output.innerHTML = '<p>🔄 Checking...</p>';
+      await new Promise(r => setTimeout(r, 500));
+      
+      // Demo mode corrections
+      output.innerHTML = `
+        <div class="correction"><strong>Correction 1:</strong> "Thsi" → "This"</div>
+        <div class="correction"><strong>Correction 2:</strong> "exmaple" → "example"</div>
+        <div class="correction"><strong>Correction 3:</strong> "erors" → "errors"</div>
+        <div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+          <strong>✅ Corrected Text:</strong><br><br>
+          This is an example text with some errors.
+        </div>
+        <small style="color: #e65100; display: block; margin-top: 10px;">⚠️ Demo Mode - Enable Proofreader API for real checking</small>
+      `;
+    }
+  </script>
+</body>
+</html>

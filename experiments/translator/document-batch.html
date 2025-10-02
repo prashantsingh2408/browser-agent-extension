@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Batch Document Translator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 16px; padding: 30px; }
+    h1 { color: #333; margin-bottom: 20px; }
+    .status { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; }
+    .status.success { background: #e8f5e9; color: #2e7d32; }
+    textarea { width: 100%; height: 150px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 15px; font-family: inherit; }
+    button { padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .results { margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px; }
+    .mode-selector { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .mode-selector label { display: block; margin-bottom: 5px; font-weight: 600; }
+    .mode-options { display: flex; gap: 10px; }
+    .mode-btn { flex: 1; padding: 10px; border: 2px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: #333; }
+    .mode-btn strong { color: #333; display: block; margin-bottom: 4px; }
+    .mode-btn small { color: #666; }
+    .mode-btn:hover { border-color: #667eea; background: #f0f0f0; }
+    .mode-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-color: #667eea; font-weight: 600; }
+    .mode-btn.active strong { color: white; }
+    .mode-btn.active small { color: rgba(255, 255, 255, 0.9); }
+    .mode-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Batch Document Translator</h1>
+    <div class="status success" id="status">✅ Ready to translate multiple documents</div>
+    
+    <div class="mode-selector">
+      <label>🔧 Select AI Mode:</label>
+      <div class="mode-options">
+        <button class="mode-btn disabled" id="modernBtn" onclick="switchMode('modern')">
+          <strong>🚀 Modern API</strong>
+          <small style="display:block; margin-top:4px;">Translation Expert</small>
+        </button>
+        <button class="mode-btn active" id="legacyBtn" onclick="switchMode('legacy')">
+          <strong>⚡ Legacy API</strong>
+          <small style="display:block; margin-top:4px;">General LLM</small>
+        </button>
+        <button class="mode-btn" id="demoBtn" onclick="switchMode('demo')">
+          <strong>🎮 Demo</strong>
+          <small style="display:block; margin-top:4px;">Simulated</small>
+        </button>
+      </div>
+    </div>
+    
+    <label><strong>Enter documents (one per line):</strong></label>
+    <textarea id="docsInput" placeholder="Document 1 text&#10;Document 2 text&#10;Document 3 text">Welcome to our company.
+Thank you for your order.
+Please contact support if you need help.</textarea>
+    
+    <label><strong>Target Language:</strong></label>
+    <select id="targetLang" style="padding: 10px; margin: 10px 0; border-radius: 6px;">
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+    </select>
+    
+    <button onclick="translateBatch()">Translate All</button>
+    
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    let apiMode = 'none'; // 'modern', 'legacy', 'demo'
+    let legacySession = null;
+    let availableModes = [];
+
+    // Check API availability on load
+    window.addEventListener('load', async () => {
+      const status = document.getElementById('status');
+      availableModes = [];
+      
+      try {
+        // Check Modern Translation API
+        if ('translation' in self) {
+          availableModes.push('modern');
+          document.getElementById('modernBtn').classList.remove('disabled');
+        }
+        
+        // Check Legacy LanguageModel
+        if (typeof LanguageModel !== 'undefined') {
+          const availability = await LanguageModel.availability();
+          if (availability === 'readily' || availability === 'available') {
+            availableModes.push('legacy');
+            document.getElementById('legacyBtn').classList.remove('disabled');
+          }
+        }
+        
+        // Demo is always available
+        availableModes.push('demo');
+        
+        // Set default mode
+        if (availableModes.includes('modern')) {
+          switchMode('modern');
+        } else if (availableModes.includes('legacy')) {
+          switchMode('legacy');
+        } else {
+          switchMode('demo');
+        }
+        
+      } catch (error) {
+        console.error('API check failed:', error);
+        switchMode('demo');
+      }
+    });
+
+    function switchMode(mode) {
+      // Check if mode is available
+      const button = document.getElementById(mode + 'Btn');
+      if (button.classList.contains('disabled')) {
+        alert('⚠️ This mode is not available on your system.\n\n' + 
+              (mode === 'modern' ? 
+                'Modern API requires enabling Chrome flags:\n• chrome://flags/#translation-api' : 
+                'This mode is not currently available.'));
+        return;
+      }
+      
+      // Update mode
+      apiMode = mode;
+      
+      // Update button states
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      
+      // Update status
+      const status = document.getElementById('status');
+      
+      if (mode === 'modern') {
+        status.className = 'status success';
+        status.innerHTML = '✅ <strong>Modern API Active</strong> - Using Translation expert model';
+      } else if (mode === 'legacy') {
+        status.className = 'status success';
+        status.innerHTML = '✅ <strong>Legacy API Active</strong> - Using LanguageModel (General LLM)';
+      } else {
+        status.className = 'status';
+        status.style.background = '#fff3e0';
+        status.style.color = '#e65100';
+        status.innerHTML = '⚠️ <strong>Demo Mode Active</strong> - Using simulated translations';
+      }
+      
+      console.log(`Switched to ${mode} mode`);
+    }
+
+    async function translateBatch() {
+      const docs = document.getElementById('docsInput').value.split('\n').filter(d => d.trim());
+      const targetLang = document.getElementById('targetLang').value;
+      const resultsDiv = document.getElementById('results');
+      
+      if (docs.length === 0) {
+        resultsDiv.innerHTML = '<p style="color: #666;">Please enter at least one document.</p>';
+        return;
+      }
+      
+      resultsDiv.innerHTML = '<p>🔄 Translating...</p>';
+      
+      try {
+        let translatedDocs = [];
+
+        if (apiMode === 'modern') {
+          // Method 1: Use Modern Translation API
+          const canTranslate = await translation.canTranslate({
+            sourceLanguage: 'en',
+            targetLanguage: targetLang
+          });
+
+          if (canTranslate === 'no') {
+            throw new Error(`Cannot translate English to ${targetLang}`);
+          }
+
+          if (canTranslate === 'after-download') {
+            resultsDiv.innerHTML = '<p>📥 Downloading translation model... Please wait.</p>';
+          }
+
+          const translator = await translation.createTranslator({
+            sourceLanguage: 'en',
+            targetLanguage: targetLang
+          });
+          
+          for (const doc of docs) {
+            translatedDocs.push(await translator.translate(doc));
+          }
+          
+          translator.destroy();
+          
+        } else if (apiMode === 'legacy') {
+          // Method 2: Use Legacy LanguageModel for translation
+          const langNames = {
+            es: 'Spanish',
+            fr: 'French',
+            de: 'German',
+            it: 'Italian',
+            pt: 'Portuguese',
+            zh: 'Chinese',
+            ja: 'Japanese',
+            hi: 'Hindi'
+          };
+          
+          const targetLanguageName = langNames[targetLang] || targetLang;
+          
+          // Map target lang to supported LanguageModel output languages (en, es, ja)
+          const outputLangMap = {
+            'es': 'es',
+            'fr': 'en',  // French not supported, use English
+            'de': 'en',  // German not supported, use English
+            'en': 'en',
+            'ja': 'ja'
+          };
+          const outputLanguage = outputLangMap[targetLang] || 'en';
+          
+          if (!legacySession || legacySession.outputLanguage !== outputLanguage) {
+            // Recreate session if output language changed
+            if (legacySession) legacySession.destroy();
+            legacySession = await LanguageModel.create({
+              temperature: 0.3,
+              topK: 1,
+              outputLanguage: outputLanguage  // Dynamic based on target language
+            });
+            legacySession.outputLanguage = outputLanguage;  // Track it
+          }
+          
+          for (const doc of docs) {
+            const prompt = `Translate this English text to ${targetLanguageName}. Only return the translation, nothing else:\n\n"${doc}"`;
+            const translation = await legacySession.prompt(prompt);
+            translatedDocs.push(translation.trim());
+          }
+          
+        } else {
+          // Method 3: Demo mode - simulated translation
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          const langNames = {
+            es: 'Spanish',
+            fr: 'French',
+            de: 'German'
+          };
+          
+          for (const doc of docs) {
+            translatedDocs.push(`[Demo ${langNames[targetLang] || targetLang}] ${doc}`);
+          }
+        }
+        
+        // Display results
+        let html = '<div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
+        html += `<strong>✅ Translated ${docs.length} documents to ${targetLang.toUpperCase()}</strong>`;
+        
+        if (apiMode === 'legacy') {
+          html += '<br><small style="color: #2e7d32;">✅ Translated using Legacy LanguageModel API</small>';
+        } else if (apiMode === 'demo') {
+          html += '<br><small style="color: #e65100;">⚠️ Demo Mode - Enable Translation API for real translations</small>';
+        }
+        html += '</div>';
+        
+        for (let i = 0; i < translatedDocs.length; i++) {
+          html += `<div style="padding: 12px; border-left: 4px solid #667eea; background: #f5f5f5; margin-bottom: 10px; border-radius: 4px;">`;
+          html += `<strong style="color: #667eea;">Document ${i+1}:</strong><br>`;
+          html += `<div style="margin-top: 8px;">${translatedDocs[i]}</div>`;
+          html += `</div>`;
+        }
+        
+        resultsDiv.innerHTML = html;
+        
+      } catch (error) {
+        console.error('Translation failed:', error);
+        resultsDiv.innerHTML = `
+          <div style="padding: 15px; background: #ffebee; border-left: 4px solid #f44336; border-radius: 8px;">
+            <strong style="color: #c62828;">❌ Translation Failed</strong><br><br>
+            <div style="color: #666;">${error.message}</div>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
+

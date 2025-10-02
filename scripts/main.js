@@ -255,3 +255,4 @@ window.reinitializeApp = initializeApp;
 console.log('💡 Type "window.APP" in console to see app state');
 console.log('💡 Type "window.reinitializeApp()" to reinitialize');
 
+

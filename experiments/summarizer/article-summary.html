@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article Summarizer - Summarizer API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    h1 { color: #333; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 20px; }
+    .status { padding: 10px; border-radius: 6px; margin-bottom: 20px; font-weight: 600; }
+    .status.success { background: #e8f5e9; color: #2e7d32; }
+    .status.error { background: #ffebee; color: #c62828; }
+    .mode-selector { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .mode-selector label { display: block; margin-bottom: 5px; font-weight: 600; }
+    .mode-options { display: flex; gap: 10px; }
+    .mode-btn { flex: 1; padding: 10px; border: 2px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s; color: #333; }
+    .mode-btn strong { color: #333; display: block; margin-bottom: 4px; }
+    .mode-btn small { color: #666; }
+    .mode-btn:hover { border-color: #11998e; background: #f0f0f0; }
+    .mode-btn.active { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-color: #11998e; font-weight: 600; }
+    .mode-btn.active strong { color: white; }
+    .mode-btn.active small { color: rgba(255, 255, 255, 0.9); }
+    .mode-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .panel {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .panel h3 { margin-bottom: 15px; color: #333; }
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .output {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      min-height: 300px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .output.loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 2px solid #e0e0e0;
+      font-size: 14px;
+    }
+    .sample-articles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .sample-btn {
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.3s;
+    }
+    .sample-btn:hover {
+      border-color: #11998e;
+      transform: translateY(-2px);
+    }
+    .sample-btn strong { display: block; margin-bottom: 5px; color: #333; }
+    .sample-btn small { color: #666; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .metric-card {
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .metric-value { font-size: 24px; font-weight: bold; color: #11998e; }
+    .metric-label { font-size: 12px; color: #666; margin-top: 5px; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #11998e;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📄 Article Summarizer</h1>
+    <p class="subtitle">Condense long content using Chrome Summarizer API (Stable)</p>
+
+    <div id="status" class="status success">✅ Summarizer API Ready</div>
+
+    <div class="mode-selector">
+      <label>🔧 Select AI Mode:</label>
+      <div class="mode-options">
+        <button class="mode-btn disabled" id="modernBtn" onclick="switchMode('modern')">
+          <strong>🚀 Modern API</strong>
+          <small style="display:block; margin-top:4px;">Specialized Summarizer</small>
+        </button>
+        <button class="mode-btn active" id="legacyBtn" onclick="switchMode('legacy')">
+          <strong>⚡ Legacy API</strong>
+          <small style="display:block; margin-top:4px;">General LLM</small>
+        </button>
+        <button class="mode-btn" id="demoBtn" onclick="switchMode('demo')">
+          <strong>🎮 Demo Mode</strong>
+          <small style="display:block; margin-top:4px;">Simulated</small>
+        </button>
+      </div>
+    </div>
+
+    <h3>📚 Quick Sample Articles</h3>
+    <div class="sample-articles">
+      <button class="sample-btn" onclick="loadSample('ai')">
+        <strong>🤖 AI Article</strong>
+        <small>Technology news</small>
+      </button>
+      <button class="sample-btn" onclick="loadSample('health')">
+        <strong>🏥 Health Article</strong>
+        <small>Wellness tips</small>
+      </button>
+      <button class="sample-btn" onclick="loadSample('business')">
+        <strong>💼 Business Article</strong>
+        <small>Market analysis</small>
+      </button>
+      <button class="sample-btn" onclick="loadSample('tech')">
+        <strong>💻 Tech Article</strong>
+        <small>Product review</small>
+      </button>
+    </div>
+
+    <div class="grid">
+      <!-- Input Panel -->
+      <div class="panel">
+        <h3>📝 Original Article</h3>
+        <textarea id="articleInput" placeholder="Paste a long article here..."></textarea>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="panel">
+        <div class="controls">
+          <select id="summaryType">
+            <option value="key-points">Key Points</option>
+            <option value="tl;dr">TL;DR</option>
+            <option value="teaser">Teaser</option>
+            <option value="headline">Headline</option>
+          </select>
+          <select id="summaryLength">
+            <option value="short">Short</option>
+            <option value="medium">Medium</option>
+            <option value="long">Long</option>
+          </select>
+          <select id="summaryFormat">
+            <option value="plain-text">Plain Text</option>
+            <option value="markdown">Markdown</option>
+          </select>
+          <button onclick="summarize()">📊 Summarize</button>
+        </div>
+        <h3>✨ Summary</h3>
+        <div class="output" id="summaryOutput">Summary will appear here...</div>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-value" id="originalWords">0</div>
+        <div class="metric-label">Original Words</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="summaryWords">0</div>
+        <div class="metric-label">Summary Words</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="compressionRatio">0%</div>
+        <div class="metric-label">Compression</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="processingTime">0ms</div>
+        <div class="metric-label">Processing Time</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+      <strong>💡 Use Cases:</strong><br>
+      • News websites - Generate article previews<br>
+      • E-commerce - Summarize product reviews<br>
+      • Research - Condense academic papers<br>
+      • Meetings - Summarize transcripts<br>
+      • Customer support - Digest conversation history
+    </div>
+  </div>
+
+  <script>
+    let apiMode = 'none'; // 'modern', 'legacy', 'demo'
+    let legacySession = null;
+    let availableModes = [];
+
+    // Check API availability on load
+    window.addEventListener('load', async () => {
+      const status = document.getElementById('status');
+      availableModes = [];
+      
+      try {
+        // Check Modern Summarizer API
+        if ('ai' in window && 'summarizer' in window.ai) {
+          availableModes.push('modern');
+          document.getElementById('modernBtn').classList.remove('disabled');
+        }
+        
+        // Check Legacy LanguageModel
+        if (typeof LanguageModel !== 'undefined') {
+          const availability = await LanguageModel.availability();
+          if (availability === 'readily' || availability === 'available') {
+            availableModes.push('legacy');
+            document.getElementById('legacyBtn').classList.remove('disabled');
+          }
+        }
+        
+        // Demo is always available
+        availableModes.push('demo');
+        
+        // Set default mode
+        if (availableModes.includes('modern')) {
+          switchMode('modern');
+        } else if (availableModes.includes('legacy')) {
+          switchMode('legacy');
+        } else {
+          switchMode('demo');
+        }
+        
+      } catch (error) {
+        console.error('API check failed:', error);
+        switchMode('demo');
+      }
+    });
+
+    function switchMode(mode) {
+      // Check if mode is available
+      const button = document.getElementById(mode + 'Btn');
+      if (button.classList.contains('disabled')) {
+        alert('⚠️ This mode is not available on your system.\n\n' + 
+              (mode === 'modern' ? 
+                'Modern API requires enabling Chrome flags:\n• chrome://flags/#summarization-api-for-gemini-nano' : 
+                'This mode is not currently available.'));
+        return;
+      }
+      
+      // Update mode
+      apiMode = mode;
+      
+      // Update button states
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      
+      // Update status
+      const status = document.getElementById('status');
+      
+      if (mode === 'modern') {
+        status.className = 'status success';
+        status.innerHTML = '✅ <strong>Modern API Active</strong> - Using specialized Summarizer model';
+      } else if (mode === 'legacy') {
+        status.className = 'status success';
+        status.innerHTML = '✅ <strong>Legacy API Active</strong> - Using LanguageModel (General LLM)';
+      } else {
+        status.className = 'status';
+        status.style.background = '#fff3e0';
+        status.style.color = '#e65100';
+        status.innerHTML = '⚠️ <strong>Demo Mode Active</strong> - Using simulated responses';
+      }
+      
+      console.log(`Switched to ${mode} mode`);
+    }
+
+    const sampleArticles = {
+      ai: `Artificial Intelligence has revolutionized the technology landscape in ways previously unimaginable. Machine learning algorithms now power everything from recommendation systems on streaming platforms to advanced medical diagnostics. Deep learning, a subset of machine learning, has enabled computers to recognize patterns in vast amounts of data with unprecedented accuracy.
+
+The impact of AI extends across multiple industries. In healthcare, AI systems can detect diseases from medical images faster and sometimes more accurately than human doctors. In finance, algorithmic trading and fraud detection systems process millions of transactions in real-time. Transportation is being transformed by autonomous vehicles that use computer vision and sensor fusion to navigate complex environments.
+
+Natural language processing has made significant strides, enabling machines to understand and generate human language with remarkable fluency. Voice assistants, chatbots, and translation services have become ubiquitous in our daily lives. Large language models can now write coherent essays, answer complex questions, and even generate creative content.
+
+However, the rapid advancement of AI also raises important ethical concerns. Issues of privacy, bias in algorithms, job displacement, and the potential for misuse of powerful AI systems require careful consideration. Researchers and policymakers are working to develop frameworks for responsible AI development that balance innovation with safety and fairness.
+
+The future of AI promises even more transformative changes. From personalized education to climate modeling, from drug discovery to space exploration, AI is becoming an indispensable tool for solving humanity's most pressing challenges. As we continue to push the boundaries of what's possible, it's crucial that we do so with careful thought to the implications and responsibilities that come with such powerful technology.`,
+
+      health: `Maintaining good health requires a holistic approach that encompasses physical activity, nutrition, mental well-being, and preventive care. Regular exercise is fundamental to overall health, with experts recommending at least 150 minutes of moderate aerobic activity or 75 minutes of vigorous activity per week.
+
+Physical activity offers numerous benefits beyond weight management. It strengthens the cardiovascular system, improves muscle and bone strength, enhances flexibility and balance, and boosts mood through the release of endorphins. Activities like walking, swimming, cycling, and strength training can be adapted to any fitness level and incorporated into daily routines.
+
+Nutrition plays an equally critical role in health maintenance. A balanced diet rich in fruits, vegetables, whole grains, lean proteins, and healthy fats provides essential nutrients while helping to prevent chronic diseases. Limiting processed foods, added sugars, and excessive sodium intake is crucial for long-term health. Staying hydrated by drinking adequate water throughout the day supports all bodily functions.
+
+Mental health is inseparable from physical health. Stress management techniques such as meditation, deep breathing exercises, and mindfulness can significantly improve psychological well-being. Quality sleep of 7-9 hours per night is essential for cognitive function, emotional regulation, and physical recovery. Building strong social connections and maintaining meaningful relationships also contribute to mental resilience.
+
+Preventive healthcare, including regular check-ups, screenings, and vaccinations, helps detect potential health issues early when they're most treatable. Understanding your family health history and discussing risk factors with healthcare providers enables personalized prevention strategies. By adopting these comprehensive health practices, individuals can significantly improve their quality of life and longevity.`,
+
+      business: `The global business landscape is undergoing rapid transformation driven by technological innovation, shifting consumer behaviors, and evolving market dynamics. Digital transformation has become not just a competitive advantage but a necessity for survival in today's fast-paced economy.
+
+E-commerce has fundamentally altered retail, with online sales continuing to grow exponentially. Companies that successfully integrate digital and physical channels through omnichannel strategies are seeing the strongest growth. The pandemic accelerated this trend, forcing even traditional retailers to rapidly develop robust online presence and delivery capabilities.
+
+Sustainability has emerged as a critical business imperative. Consumers increasingly favor companies that demonstrate environmental responsibility and social consciousness. Investors are incorporating ESG (Environmental, Social, and Governance) criteria into their decision-making processes. Companies are responding by setting ambitious carbon neutrality goals, implementing circular economy principles, and prioritizing stakeholder value over pure shareholder returns.
+
+The nature of work itself is evolving. Remote and hybrid work models, once considered exceptions, have become mainstream. This shift has implications for organizational culture, real estate strategies, and talent acquisition. Companies are reimagining workspaces as collaboration hubs rather than daily offices, while investing in digital tools that enable seamless remote collaboration.
+
+Artificial intelligence and automation are reshaping business operations across sectors. From supply chain optimization to personalized marketing, from customer service chatbots to predictive analytics, AI is driving efficiency and enabling new capabilities. However, successful AI adoption requires not just technology investment but also workforce reskilling and change management. Looking ahead, businesses that embrace innovation while maintaining agility and human-centric values will be best positioned for long-term success.`,
+
+      tech: `The latest smartphones have reached an impressive level of technological sophistication, blurring the lines between mobile devices and professional computing equipment. Modern flagships feature powerful processors that rival laptop performance, advanced camera systems that compete with dedicated cameras, and display technologies that deliver stunning visual experiences.
+
+Camera technology has seen particularly dramatic improvements. Multi-lens systems combining wide, ultra-wide, and telephoto lenses offer versatile photography options. Computational photography uses AI to enhance images through techniques like HDR processing, night mode, and portrait effects. Video capabilities now extend to 8K recording, advanced stabilization, and professional-grade manual controls.
+
+Display innovation continues to push boundaries. High refresh rate screens (120Hz or higher) provide smooth, responsive interactions. OLED and newer display technologies deliver deep blacks and vibrant colors while improving power efficiency. Foldable displays are maturing, offering larger screen real estate in pocketable form factors, though at premium prices.
+
+Battery life and charging technology have also advanced significantly. Fast charging systems can replenish batteries to 50% or more in just 15-30 minutes. Wireless charging has become standard, with reverse wireless charging allowing phones to power other devices. Battery optimization through AI learns usage patterns to extend runtime between charges.
+
+5G connectivity is becoming mainstream, enabling faster downloads, lower latency, and new use cases like cloud gaming and augmented reality applications. However, the full potential of 5G remains to be realized as network coverage expands and applications mature. Privacy and security features have also strengthened, with enhanced biometric authentication, on-device processing of sensitive data, and more transparent privacy controls giving users greater control over their information.`
+    };
+
+    async function loadSample(type) {
+      document.getElementById('articleInput').value = sampleArticles[type];
+      updateWordCount();
+    }
+
+    function updateWordCount() {
+      const text = document.getElementById('articleInput').value;
+      const words = text.trim().split(/\s+/).length;
+      document.getElementById('originalWords').textContent = words;
+    }
+
+    async function summarize() {
+      const articleText = document.getElementById('articleInput').value.trim();
+      
+      if (!articleText) {
+        alert('Please enter or select an article to summarize');
+        return;
+      }
+
+      const summaryType = document.getElementById('summaryType').value;
+      const summaryLength = document.getElementById('summaryLength').value;
+      const summaryFormat = document.getElementById('summaryFormat').value;
+      const outputDiv = document.getElementById('summaryOutput');
+
+      // Show loading
+      outputDiv.className = 'output loading';
+      outputDiv.innerHTML = '<div class="spinner"></div>';
+
+      try {
+        const startTime = performance.now();
+        let summary;
+
+        if (apiMode === 'modern') {
+          // Method 1: Use Modern Summarizer API
+          const canSummarize = await ai.summarizer.capabilities();
+          
+          if (canSummarize.available === 'no') {
+            throw new Error('Summarizer API not available');
+          }
+
+          if (canSummarize.available === 'after-download') {
+            outputDiv.innerHTML = '<div>📥 Downloading summarization model...</div>';
+          }
+
+          const summarizer = await ai.summarizer.create({
+            type: summaryType,
+            length: summaryLength,
+            format: summaryFormat
+          });
+
+          summary = await summarizer.summarize(articleText);
+          summarizer.destroy();
+          
+        } else if (apiMode === 'legacy') {
+          // Method 2: Use Legacy LanguageModel
+          if (!legacySession) {
+            legacySession = await LanguageModel.create({
+              temperature: 0.3,
+              topK: 3,
+              outputLanguage: 'en'  // Specify output language for better quality
+            });
+          }
+          
+          const lengthMap = {
+            'short': 'very brief (2-3 sentences)',
+            'medium': 'moderate length (1 paragraph)',
+            'long': 'detailed (2-3 paragraphs)'
+          };
+          
+          const typeMap = {
+            'key-points': 'Extract and list the key points',
+            'tl;dr': 'Provide a TL;DR summary',
+            'teaser': 'Write an engaging teaser',
+            'headline': 'Create a compelling headline'
+          };
+          
+          const prompt = `${typeMap[summaryType] || 'Summarize this text'} in ${lengthMap[summaryLength]}:\n\n${articleText}`;
+          summary = await legacySession.prompt(prompt);
+          
+        } else {
+          // Method 3: Demo mode
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          summary = `[Demo Summary] This article discusses important concepts and their implications. The main points cover various aspects of the topic with detailed explanations. Enable Chrome AI APIs for real AI-powered summaries.`;
+        }
+
+        const endTime = performance.now();
+        const processingTime = Math.round(endTime - startTime);
+
+        // Display result
+        outputDiv.className = 'output';
+        outputDiv.textContent = summary;
+
+        // Update metrics
+        const summaryWords = summary.trim().split(/\s+/).length;
+        const originalWords = articleText.trim().split(/\s+/).length;
+        const compression = Math.round((1 - summaryWords / originalWords) * 100);
+
+        document.getElementById('summaryWords').textContent = summaryWords;
+        document.getElementById('compressionRatio').textContent = compression + '%';
+        document.getElementById('processingTime').textContent = processingTime + 'ms';
+
+      } catch (error) {
+        console.error('Summarization failed:', error);
+        outputDiv.className = 'output';
+        outputDiv.innerHTML = `<div style="color: #c62828;">❌ Error: ${error.message}<br><br>Make sure to enable:<br>chrome://flags/#summarization-api-for-gemini-nano</div>`;
+      }
+    }
+
+    // Update word count on input
+    document.getElementById('articleInput').addEventListener('input', updateWordCount);
+
+    // Load default sample
+    window.addEventListener('load', () => {
+      loadSample('ai');
+    });
+  </script>
+</body>
+</html>
+

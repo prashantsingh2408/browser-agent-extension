@@ -1760,6 +1760,52 @@
             </div>
           </div>
           
+          <!-- AI Testing Section -->
+          <div class="settings-section">
+            <h3>🧪 Chrome AI Testing & Diagnostics</h3>
+            <p class="setting-hint">Test Chrome's built-in AI APIs to verify which features are available on your device.</p>
+            
+            <div class="ai-test-buttons">
+              <button class="test-btn quick-test-btn" id="quickAITest">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                Quick Test (2s)
+              </button>
+              
+              <button class="test-btn full-test-btn" id="fullAITest">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                Full Test (30s)
+              </button>
+              
+              <button class="test-btn check-apis-btn" id="checkAPIsBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+                Check APIs
+              </button>
+            </div>
+            
+            <div id="aiTestResults" class="ai-test-results" style="display: none;">
+              <div class="test-status" id="testStatus">
+                <span class="status-icon">⏳</span>
+                <span class="status-text">Running tests...</span>
+              </div>
+              <div class="test-output" id="testOutput">
+                <!-- Test results will appear here -->
+              </div>
+            </div>
+            
+            <div class="ai-status-info" id="aiStatusInfo" style="margin-top: 15px;">
+              <div class="status-badge" id="chromeAIStatus">
+                <span class="badge-icon">🔄</span>
+                <span class="badge-text">Chrome AI Status: Checking...</span>
+              </div>
+            </div>
+          </div>
+          
           <!-- About Section -->
           <div class="settings-section">
             <h3>ℹ️ About</h3>

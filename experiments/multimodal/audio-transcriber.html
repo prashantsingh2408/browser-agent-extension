@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Transcriber - Multimodal API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    h1 { color: #333; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 20px; }
+    .status { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; }
+    .status.warning { background: #fff3e0; color: #e65100; }
+    .status.error { background: #ffebee; color: #c62828; }
+    .status.success { background: #e8f5e9; color: #2e7d32; }
+    
+    .record-section {
+      text-align: center;
+      padding: 40px;
+      border: 2px dashed #e0e0e0;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .record-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%);
+      color: white;
+      font-size: 48px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(250, 139, 255, 0.4);
+    }
+    
+    .record-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .record-btn.recording {
+      background: #f44336;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .output-section {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      min-height: 200px;
+      margin-bottom: 20px;
+    }
+    
+    .transcript {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #333;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .info-box {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #2196f3;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎙️ Audio Transcriber</h1>
+    <p class="subtitle">Transcribe audio using Chrome's Multimodal Prompt API (Experimental)</p>
+
+    <div id="status" class="status warning">
+      ⚠️ This feature requires Chrome 139+ with Multimodal Prompt API enabled
+    </div>
+
+    <div class="record-section">
+      <button id="recordBtn" class="record-btn" onclick="toggleRecording()">🎤</button>
+      <p style="margin-top: 15px; color: #666;">Click to start recording</p>
+      <p id="recordingTime" style="margin-top: 5px; color: #999; font-size: 14px;"></p>
+    </div>
+
+    <div class="controls">
+      <button onclick="clearTranscript()">Clear</button>
+      <button onclick="copyTranscript()">Copy Text</button>
+    </div>
+
+    <div class="output-section">
+      <h3 style="margin-bottom: 15px;">Transcript:</h3>
+      <div id="transcript" class="transcript">
+        <em style="color: #999;">Transcript will appear here...</em>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>📝 How it works:</strong><br>
+      1. Click the microphone to start recording<br>
+      2. Speak clearly into your microphone<br>
+      3. Click again to stop<br>
+      4. AI transcribes your audio locally<br>
+      5. Perfect for E2EE chat, voice notes, accessibility
+    </div>
+
+    <div class="info-box" style="background: #fff3e0; border-left-color: #ff9800; margin-top: 15px;">
+      <strong>⚠️ Important:</strong><br>
+      • Multimodal Prompt API is experimental (Chrome 139+)<br>
+      • Requires Origin Trial registration or specific Chrome flags<br>
+      • Audio input support is in early preview<br>
+      • Check <code>chrome://flags/#prompt-api-for-gemini-nano</code>
+    </div>
+  </div>
+
+  <script>
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let recordingStartTime = 0;
+    let timerInterval = null;
+
+    window.addEventListener('load', async () => {
+      const status = document.getElementById('status');
+      
+      try {
+        // Check if Prompt API with audio support is available
+        if (!('ai' in self && 'languageModel' in ai)) {
+          throw new Error('Prompt API not available');
+        }
+
+        const capabilities = await ai.languageModel.capabilities();
+        
+        if (capabilities.available === 'no') {
+          throw new Error('Language Model not available');
+        }
+
+        // Check for audio/multimodal support
+        if (!capabilities.supportsMultimodal) {
+          status.className = 'status warning';
+          status.innerHTML = `
+            ⚠️ <strong>Multimodal support not detected</strong><br>
+            <small>This feature requires Chrome 139+ with audio input support enabled.<br>
+            Currently showing demo mode with simulated transcription.</small>
+          `;
+        } else {
+          status.className = 'status success';
+          status.textContent = '✅ Audio transcription ready! Click the microphone to start.';
+        }
+
+        // Check microphone permission
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+
+      } catch (error) {
+        console.error('Setup failed:', error);
+        status.className = 'status error';
+        status.innerHTML = `
+          ❌ <strong>Setup Error:</strong> ${error.message}<br>
+          <small>Enable flags at chrome://flags/#prompt-api-for-gemini-nano</small>
+        `;
+      }
+    });
+
+    async function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await transcribeAudio(audioBlob);
+          stream.getTracks().forEach(track => track.stop());
+        };
+        
+        mediaRecorder.start();
+        isRecording = true;
+        
+        const recordBtn = document.getElementById('recordBtn');
+        recordBtn.classList.add('recording');
+        recordBtn.textContent = '⏹️';
+        
+        recordingStartTime = Date.now();
+        timerInterval = setInterval(updateTimer, 100);
+        
+      } catch (error) {
+        alert('Microphone access denied: ' + error.message);
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        
+        const recordBtn = document.getElementById('recordBtn');
+        recordBtn.classList.remove('recording');
+        recordBtn.textContent = '🎤';
+        
+        clearInterval(timerInterval);
+        document.getElementById('recordingTime').textContent = '';
+      }
+    }
+
+    function updateTimer() {
+      const elapsed = Date.now() - recordingStartTime;
+      const seconds = Math.floor(elapsed / 1000);
+      const ms = Math.floor((elapsed % 1000) / 100);
+      document.getElementById('recordingTime').textContent = 
+        `Recording: ${seconds}.${ms}s`;
+    }
+
+    async function transcribeAudio(audioBlob) {
+      const transcriptDiv = document.getElementById('transcript');
+      transcriptDiv.innerHTML = '<em style="color: #2196f3;">🔄 Transcribing...</em>';
+      
+      try {
+        // Check if multimodal API is available
+        if ('ai' in self && 'languageModel' in ai) {
+          const capabilities = await ai.languageModel.capabilities();
+          
+          if (capabilities.supportsMultimodal) {
+            // Real transcription with Prompt API
+            const session = await ai.languageModel.create();
+            
+            // Convert audio blob to format accepted by API
+            const audioBuffer = await audioBlob.arrayBuffer();
+            
+            const transcript = await session.prompt([{
+              role: 'user',
+              content: [
+                { type: 'text', value: 'Transcribe this audio accurately:' },
+                { type: 'audio', value: audioBuffer }
+              ]
+            }]);
+            
+            transcriptDiv.textContent = transcript;
+            session.destroy();
+            
+          } else {
+            // Demo mode - simulate transcription
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            transcriptDiv.innerHTML = `
+              <strong>Demo Mode:</strong><br><br>
+              "This is a simulated transcription. The actual audio transcription feature 
+              requires Chrome 139+ with multimodal Prompt API support. Once enabled, 
+              this will transcribe your audio locally using Gemini Nano without sending 
+              any data to servers."
+            `;
+          }
+        } else {
+          throw new Error('Prompt API not available');
+        }
+        
+      } catch (error) {
+        console.error('Transcription failed:', error);
+        transcriptDiv.innerHTML = `
+          <span style="color: #c62828;">❌ Transcription failed: ${error.message}</span><br><br>
+          <small>This feature requires Chrome 139+ with multimodal support.</small>
+        `;
+      }
+    }
+
+    function clearTranscript() {
+      document.getElementById('transcript').innerHTML = 
+        '<em style="color: #999;">Transcript will appear here...</em>';
+    }
+
+    function copyTranscript() {
+      const text = document.getElementById('transcript').textContent;
+      if (text && text !== 'Transcript will appear here...') {
+        navigator.clipboard.writeText(text);
+        alert('Transcript copied to clipboard!');
+      }
+    }
+  </script>
+</body>
+</html>
+

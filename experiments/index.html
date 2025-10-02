@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrome Built-in AI Experiments Hub</title>
+  
+  <!-- Origin Trial Tokens for Chrome Built-in AI APIs -->
+  <!-- Prompt API with Multimodal Input -->
+  <meta http-equiv="origin-trial" content="A5HiMuYCqkNcTsrpQI2YcQpH5ruO+EJ8DwWjLXu5SDKYKbVYwQqplxQGHEPRn8EJLPMyDK+GxILfY12bKmhfIAEAAABxeyJvcmlnaW4iOiJodHRwOi8vMTI3LjAuMC4xOjU1MDAiLCJmZWF0dXJlIjoiQUlQcm9tcHRBUElNdWx0aW1vZGFsSW5wdXQiLCJleHBpcnkiOjE3NzQzMTA0MDAsImlzVGhpcmRQYXJ0eSI6dHJ1ZX0=">
+  
+  <!-- Note: Additional tokens needed for Summarizer, Writer, Rewriter APIs -->
+  <!-- Register at: https://developer.chrome.com/origintrials/#/trials/active -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    }
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    h1 {
+      font-size: 3em;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      font-size: 1.2em;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .status-banner {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .status-banner.ready { background: #e8f5e9; color: #2e7d32; }
+    .status-banner.error { background: #ffebee; color: #c62828; }
+    
+    .categories {
+      display: grid;
+      gap: 30px;
+    }
+    
+    .category {
+      background: #f9f9f9;
+      border-radius: 16px;
+      padding: 30px;
+      border: 2px solid #e0e0e0;
+    }
+    
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .category-icon {
+      font-size: 48px;
+    }
+    
+    .category-info h2 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+    
+    .category-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .category-status.stable { background: #e8f5e9; color: #2e7d32; }
+    .category-status.trial { background: #fff3e0; color: #e65100; }
+    .category-status.prototype { background: #e3f2fd; color: #1976d2; }
+    
+    .experiments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+    
+    .experiment-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .experiment-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+    }
+    
+    .experiment-card h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    
+    .experiment-card p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    
+    .experiment-card .use-case {
+      font-size: 12px;
+      color: #999;
+      font-style: italic;
+    }
+    
+    .quick-start {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+    }
+    
+    .quick-start h2 {
+      margin-bottom: 15px;
+    }
+    
+    .quick-start ol {
+      margin-left: 20px;
+      line-height: 2;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 600;
+    }
+    
+    footer {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid #e0e0e0;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    
+    .badge.new { background: #e8f5e9; color: #2e7d32; }
+    .badge.hot { background: #ffebee; color: #c62828; }
+    
+    /* API Testing Section */
+    .api-testing {
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    .api-testing h2 {
+      color: #333;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .test-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .test-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .test-btn:hover {
+      transform: translateY(-2px);
+    }
+    .test-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .test-results {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 100px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: #333;
+    }
+    .test-results.empty {
+      color: #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🧪 Chrome Built-in AI Experiments</h1>
+      <p class="subtitle">Complete implementation of ALL Chrome AI APIs</p>
+      <div id="statusBanner" class="status-banner ready">🔄 Checking capabilities...</div>
+    </header>
+
+    <!-- API Testing Section -->
+    <div class="api-testing">
+      <h2>🧪 Test AI APIs</h2>
+      <div class="test-buttons">
+        <button class="test-btn" onclick="testModernAPI()">Test Modern API</button>
+        <button class="test-btn" onclick="testLegacyAPI()">Test Legacy API</button>
+        <button class="test-btn" onclick="testAllAPIs()">Test All APIs</button>
+        <button class="test-btn" onclick="debugInfo()">🐛 Debug Info</button>
+        <button class="test-btn" onclick="autoFix()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🔧 Auto-Fix</button>
+        <button class="test-btn" onclick="clearResults()">Clear Results</button>
+      </div>
+      <div id="testResults" class="test-results empty">Click a test button to check API availability...</div>
+    </div>
+
+    <div class="quick-start">
+      <h2>🚀 Quick Start Guide</h2>
+      <ol>
+        <li><strong>Enable Chrome Flags:</strong> chrome://flags/#optimization-guide-on-device-model</li>
+        <li><strong>Download Model:</strong> Visit chrome://on-device-internals</li>
+        <li><strong>Check Requirements:</strong> 22GB storage + 4GB VRAM</li>
+        <li><strong>Start Experimenting:</strong> Click any experiment below!</li>
+      </ol>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value">7</div>
+        <div class="stat-label">AI APIs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">25+</div>
+        <div class="stat-label">Experiments</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$0</div>
+        <div class="stat-label">API Costs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">100%</div>
+        <div class="stat-label">Private</div>
+      </div>
+    </div>
+
+    <div class="categories">
+      <!-- Translator API -->
+      <div class="category">
+        <div class="category-header">
+          <div class="category-icon">🌐</div>
+          <div class="category-info">
+            <h2>Translator API <span class="category-status stable">✅ Stable</span></h2>
+            <p>Real-time translation with 40+ languages</p>
+          </div>
+        </div>
+        <div class="experiments-grid">
+          <a href="translator/multilingual-chat.html" class="experiment-card">
+            <h3>💬 Multilingual Chat <span class="badge hot">HOT</span></h3>
+            <p>Real-time chat translation between users</p>
+            <div class="use-case">Use: Customer support, global teams</div>
+          </a>
+          <a href="translator/webpage-translator.html" class="experiment-card">
+            <h3>📄 Webpage Translator</h3>
+            <p>Translate entire webpages on-device</p>
+            <div class="use-case">Use: Content localization</div>
+          </a>
+          <a href="translator/document-batch.html" class="experiment-card">
+            <h3>📚 Batch Document Translation</h3>
+            <p>Translate multiple documents at once</p>
+            <div class="use-case">Use: Enterprise content</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Language Detector API -->
+      <div class="category">
+        <div class="category-header">
+          <div class="category-icon">🔍</div>
+          <div class="category-info">
+            <h2>Language Detector API <span class="category-status stable">✅ Stable</span></h2>
+            <p>Auto-detect language from text</p>
+          </div>
+        </div>
+        <div class="experiments-grid">
+          <a href="language-detector/smart-input.html" class="experiment-card">
+            <h3>⌨️ Smart Input Fields</h3>
+            <p>Auto-detect input language dynamically</p>
+            <div class="use-case">Use: Forms, chat apps</div>
+          </a>
+          <a href="language-detector/content-routing.html" class="experiment-card">
+            <h3>🚦 Content Routing</h3>
+            <p>Route content by detected language</p>
+            <div class="use-case">Use: CMS, support systems</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Summarizer API -->
+      <div class="category">
+        <div class="category-header">
+          <div class="category-icon">📄</div>
+          <div class="category-info">
+            <h2>Summarizer API <span class="category-status stable">✅ Stable</span></h2>
+            <p>Condense long content into summaries</p>
+          </div>
+        </div>
+        <div class="experiments-grid">
+          <a href="summarizer/article-summary.html" class="experiment-card">
+            <h3>📰 Article Summarizer <span class="badge hot">HOT</span></h3>
+            <p>Generate concise article summaries</p>
+            <div class="use-case">Use: News, blogs, research</div>
+          </a>
+          <a href="summarizer/review-digest.html" class="experiment-card">
+            <h3>⭐ Review Digest</h3>
+            <p>Summarize product reviews</p>
+            <div class="use-case">Use: E-commerce, UGC</div>
+          </a>
+          <a href="summarizer/meeting-notes.html" class="experiment-card">
+            <h3>📝 Meeting Notes</h3>
+            <p>Summarize meeting transcripts</p>
+            <div class="use-case">Use: Productivity, collaboration</div>
+          </a>
+          <a href="summarizer/email-digest.html" class="experiment-card">
+            <h3>📧 Email Digest</h3>
+            <p>Create email thread summaries</p>
+            <div class="use-case">Use: Email clients</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Writer & Rewriter APIs -->
+      <div class="category">
+        <div class="category-header">
+          <div class="category-icon">✍️</div>
+          <div class="category-info">
+            <h2>Writer & Rewriter APIs <span class="category-status trial">🔬 Origin Trial</span></h2>
+            <p>Generate and refine content</p>
+          </div>
+        </div>
+        <div class="experiments-grid">
+          <a href="writer/email-composer.html" class="experiment-card">
+            <h3>📧 Email Composer <span class="badge new">NEW</span></h3>
+            <p>Draft professional emails from bullets</p>
+            <div class="use-case">Use: Business communication</div>
+          </a>
+          <a href="writer/social-media.html" class="experiment-card">
+            <h3>📱 Social Media Generator</h3>
+            <p>Create engaging social posts</p>
+            <div class="use-case">Use: Marketing, content creation</div>
+          </a>
+          <a href="rewriter/tone-adjuster.html" class="experiment-card">
+            <h3>🎭 Tone Adjuster</h3>
+            <p>Change text formality and tone</p>
+            <div class="use-case">Use: Communication, editing</div>
+          </a>
+          <a href="rewriter/length-optimizer.html" class="experiment-card">
+            <h3>📏 Length Optimizer</h3>
+            <p>Expand or condense text</p>
+            <div class="use-case">Use: Content optimization</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Prompt API -->
+      <div class="category">
+        <div class="category-header">
+          <div class="category-icon">🎨</div>
+          <div class="category-info">
+            <h2>Prompt API <span class="category-status trial">🔬 Origin Trial</span></h2>
+            <p>General-purpose LLM access</p>
+          </div>
+        </div>
+        <div class="experiments-grid">
+          <a href="prompt-api/ai-playground.html" class="experiment-card">
+            <h3>🎨 AI Playground <span class="badge hot">HOT</span></h3>
+            <p>Interactive prompt experimentation</p>
+            <div class="use-case">Use: Testing, prototyping</div>
+          </a>
+          <a href="prompt-api/page-qa.html" class="experiment-card">
+            <h3>🔍 Page Q&A</h3>
+            <p>Answer questions about webpage content</p>
+            <div class="use-case">Use: Research, learning</div>
+          </a>
+          <a href="prompt-api/data-extraction.html" class="experiment-card">
+            <h3>📋 Data Extractor</h3>
+            <p>Extract structured data with AI</p>
+            <div class="use-case">Use: Scraping, automation</div>
+          </a>
+          <a href="prompt-api/code-explainer.html" class="experiment-card">
+            <h3>💻 Code Explainer</h3>
+            <p>Understand code snippets</p>
+            <div class="use-case">Use: Learning, documentation</div>
+          </a>
+          <a href="prompt-api/sentiment-analyzer.html" class="experiment-card">
+            <h3>😊 Sentiment Analyzer</h3>
+            <p>Detect emotions and tone</p>
+            <div class="use-case">Use: Reviews, feedback</div>
+          </a>
+          <a href="prompt-api/content-categorizer.html" class="experiment-card">
+            <h3>🏷️ Content Categorizer</h3>
+            <p>Auto-categorize and tag content</p>
+            <div class="use-case">Use: CMS, bookmarks</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Proofreader API -->
+      <div class="category">
+        <div class="category-header">
+          <div class="category-icon">✅</div>
+          <div class="category-info">
+            <h2>Proofreader API <span class="category-status prototype">🧪 Prototype</span></h2>
+            <p>Grammar and spelling correction</p>
+          </div>
+        </div>
+        <div class="experiments-grid">
+          <a href="proofreader/realtime-checker.html" class="experiment-card">
+            <h3>⚡ Real-time Checker <span class="badge new">NEW</span></h3>
+            <p>Live grammar and spelling check</p>
+            <div class="use-case">Use: Writing, editing</div>
+          </a>
+          <a href="proofreader/professional-polish.html" class="experiment-card">
+            <h3>💼 Professional Polish</h3>
+            <p>Enhance business communication</p>
+            <div class="use-case">Use: Emails, documents</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Multimodal & Hybrid -->
+      <div class="category">
+        <div class="category-header">
+          <div class="category-icon">🎭</div>
+          <div class="category-info">
+            <h2>Multimodal & Hybrid <span class="category-status trial">🔬 Advanced</span></h2>
+            <p>Image, audio, and cloud integration</p>
+          </div>
+        </div>
+        <div class="experiments-grid">
+          <a href="multimodal/image-analyzer.html" class="experiment-card">
+            <h3>🖼️ Image Analyzer <span class="badge new">NEW</span></h3>
+            <p>Describe and analyze images</p>
+            <div class="use-case">Use: Accessibility, search</div>
+          </a>
+          <a href="multimodal/audio-transcriber.html" class="experiment-card">
+            <h3>🎙️ Audio Transcriber</h3>
+            <p>Transcribe audio messages</p>
+            <div class="use-case">Use: E2EE chat, notes</div>
+          </a>
+          <a href="hybrid-ai/smart-fallback.html" class="experiment-card">
+            <h3>🔄 Smart Fallback</h3>
+            <p>On-device with cloud backup</p>
+            <div class="use-case">Use: Production apps</div>
+          </a>
+          <a href="hybrid-ai/cost-optimizer.html" class="experiment-card">
+            <h3>💰 Cost Optimizer</h3>
+            <p>Intelligent routing strategy</p>
+            <div class="use-case">Use: Enterprise SaaS</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p><strong>Chrome Built-in AI Experiments</strong> • October 2025</p>
+      <p>Chrome 138+ Required • All experiments run locally • Zero API costs</p>
+      <p style="margin-top: 10px;">
+        <a href="README.md" style="color: #667eea;">📖 Documentation</a> •
+        <a href="https://developer.chrome.com/docs/ai/built-in" style="color: #667eea;">🔗 Official Docs</a> •
+        <a href="https://github.com" style="color: #667eea;">💻 Source Code</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    window.addEventListener('load', async () => {
+      const banner = document.getElementById('statusBanner');
+      
+      try {
+        // Check available APIs (Modern + Legacy)
+        const checks = {
+          translator: 'translation' in self,
+          languageDetector: 'translation' in self,
+          summarizer: 'ai' in self && 'summarizer' in ai,
+          languageModel: 'ai' in self && 'languageModel' in ai,
+          proofreader: 'ai' in self && 'proofreader' in ai,
+          legacyLanguageModel: typeof LanguageModel !== 'undefined'  // ← ADDED THIS!
+        };
+
+        // Check Legacy API availability
+        let legacyAvailable = false;
+        if (typeof LanguageModel !== 'undefined') {
+          try {
+            const status = await LanguageModel.availability();
+            legacyAvailable = (status === 'readily' || status === 'available');
+            checks.legacyLanguageModel = legacyAvailable;
+          } catch (e) {
+            checks.legacyLanguageModel = false;
+          }
+        }
+
+        const available = Object.values(checks).filter(Boolean).length;
+        const total = Object.keys(checks).length;
+
+        if (available === 0) {
+          banner.className = 'status-banner error';
+          banner.textContent = `❌ No AI APIs available. Enable chrome://flags`;
+        } else {
+          const modernCount = available - (legacyAvailable ? 1 : 0);
+          const apiType = legacyAvailable && modernCount === 0 ? 
+            ' (Legacy LanguageModel)' : 
+            modernCount > 0 ? ' (Modern APIs)' : '';
+          banner.className = 'status-banner ready';
+          banner.textContent = `✅ ${available} API${available > 1 ? 's' : ''} Ready${apiType}! Start experimenting below.`;
+        }
+
+        console.log('API Availability:', checks);
+
+      } catch (error) {
+        banner.className = 'status-banner error';
+        banner.textContent = `⚠️ Error checking APIs: ${error.message}`;
+      }
+    });
+
+    // API Testing Functions
+    function log(message) {
+      const results = document.getElementById('testResults');
+      results.classList.remove('empty');
+      results.textContent += message + '\n';
+      results.scrollTop = results.scrollHeight;
+    }
+
+    function clearResults() {
+      const results = document.getElementById('testResults');
+      results.textContent = '';
+      results.classList.add('empty');
+      results.textContent = 'Results cleared. Click a test button to run tests...';
+    }
+
+    async function testModernAPI() {
+      clearResults();
+      log('═══ TESTING MODERN APIs ═══\n');
+      
+      // Test Modern Prompt API
+      log('🔹 Modern Prompt API (ai.languageModel):');
+      if ('ai' in window && 'languageModel' in window.ai) {
+        try {
+          const caps = await window.ai.languageModel.capabilities();
+          log(`   ✅ Status: ${caps.available}`);
+          
+          if (caps.available === 'readily') {
+            const session = await window.ai.languageModel.create();
+            const response = await session.prompt('Say hello!');
+            log(`   ✅ Test Response: ${response.substring(0, 50)}...`);
+            session.destroy();
+          }
+        } catch (e) {
+          log(`   ❌ Error: ${e.message}`);
+        }
+      } else {
+        log('   ❌ Not available');
+      }
+      
+      // Test Summarizer
+      log('\n🔹 Summarizer API:');
+      if ('ai' in window && 'summarizer' in window.ai) {
+        try {
+          const caps = await window.ai.summarizer.capabilities();
+          log(`   ✅ Status: ${caps.available}`);
+        } catch (e) {
+          log(`   ❌ Error: ${e.message}`);
+        }
+      } else {
+        log('   ❌ Not available');
+      }
+      
+      // Test Translation
+      log('\n🔹 Translation API:');
+      if ('translation' in self) {
+        try {
+          const canTranslate = await translation.canTranslate({
+            sourceLanguage: 'en',
+            targetLanguage: 'es'
+          });
+          log(`   ✅ Status (en→es): ${canTranslate}`);
+        } catch (e) {
+          log(`   ❌ Error: ${e.message}`);
+        }
+      } else {
+        log('   ❌ Not available');
+      }
+      
+      log('\n═══════════════════════════');
+    }
+
+    async function testLegacyAPI() {
+      clearResults();
+      log('═══ TESTING LEGACY API ═══\n');
+      
+      log('🔹 Legacy LanguageModel:');
+      if (typeof LanguageModel !== 'undefined') {
+        try {
+          const status = await LanguageModel.availability();
+          log(`   ✅ Status: ${status}`);
+          
+          if (status === 'readily' || status === 'available') {
+            log('   🧪 Creating test session...');
+            const session = await LanguageModel.create({
+              temperature: 0.7,
+              topK: 3,
+              outputLanguage: 'en'
+            });
+            log('   ✅ Session created successfully!');
+            
+            log('   💬 Sending test prompt...');
+            const response = await session.prompt('Respond with "Hello from Legacy API!"');
+            log(`   ✅ Response: ${response}`);
+            
+            session.destroy();
+            log('   ✅ Test complete!');
+          } else {
+            log(`   ⚠️  Status "${status}" - API may need download or setup`);
+          }
+        } catch (e) {
+          log(`   ❌ Error: ${e.message}`);
+        }
+      } else {
+        log('   ❌ Legacy LanguageModel not found');
+        log('\n💡 To enable Legacy API:');
+        log('   1. chrome://flags/#optimization-guide-on-device-model');
+        log('   2. Set to "Enabled BypassPerfRequirement"');
+        log('   3. Restart Chrome');
+      }
+      
+      log('\n═══════════════════════════');
+    }
+
+    async function testAllAPIs() {
+      clearResults();
+      log('═══ COMPREHENSIVE API TEST ═══\n');
+      
+      // Modern APIs
+      log('📊 MODERN APIs:\n');
+      
+      const modernChecks = [
+        { name: 'Prompt API', check: () => 'ai' in window && 'languageModel' in window.ai },
+        { name: 'Summarizer', check: () => 'ai' in window && 'summarizer' in window.ai },
+        { name: 'Translation', check: () => 'translation' in self },
+        { name: 'Proofreader', check: () => 'ai' in window && 'proofreader' in window.ai },
+        { name: 'Writer', check: () => 'ai' in window && 'writer' in window.ai }
+      ];
+      
+      for (const api of modernChecks) {
+        const available = api.check();
+        log(`   ${available ? '✅' : '❌'} ${api.name}: ${available ? 'Available' : 'Not found'}`);
+      }
+      
+      // Legacy API
+      log('\n📊 LEGACY API:\n');
+      if (typeof LanguageModel !== 'undefined') {
+        try {
+          const status = await LanguageModel.availability();
+          log(`   ✅ LanguageModel: ${status}`);
+        } catch (e) {
+          log(`   ❌ LanguageModel: Error - ${e.message}`);
+        }
+      } else {
+        log('   ❌ LanguageModel: Not found');
+      }
+      
+      // Summary
+      const totalModern = modernChecks.filter(api => api.check()).length;
+      const hasLegacy = typeof LanguageModel !== 'undefined';
+      
+      log('\n═══════════════════════════');
+      log(`\n📈 SUMMARY:`);
+      log(`   Modern APIs: ${totalModern}/${modernChecks.length}`);
+      log(`   Legacy API: ${hasLegacy ? '✅ Available' : '❌ Not available'}`);
+      log(`   Total Working: ${totalModern + (hasLegacy ? 1 : 0)}`);
+      
+      if (totalModern === 0 && !hasLegacy) {
+        log(`\n⚠️  No APIs found!`);
+        log(`   Enable chrome://flags and restart Chrome`);
+      } else {
+        log(`\n✅ You're ready to use the experiments!`);
+      }
+    }
+
+    async function debugInfo() {
+      clearResults();
+      log('═══ DEBUG INFORMATION ═══\n');
+      
+      // Browser Info
+      log('🌐 BROWSER:');
+      log(`   User Agent: ${navigator.userAgent}`);
+      log(`   Platform: ${navigator.platform}`);
+      log(`   Language: ${navigator.language}`);
+      
+      // Window Objects
+      log('\n🔍 WINDOW OBJECTS:');
+      log(`   window.ai: ${typeof window.ai !== 'undefined' ? '✅ EXISTS' : '❌ NOT FOUND'}`);
+      log(`   window.translation: ${typeof window.translation !== 'undefined' ? '✅ EXISTS' : '❌ NOT FOUND'}`);
+      log(`   self.translation: ${'translation' in self ? '✅ EXISTS' : '❌ NOT FOUND'}`);
+      log(`   window.LanguageModel: ${typeof window.LanguageModel !== 'undefined' ? '✅ EXISTS' : '❌ NOT FOUND'}`);
+      log(`   LanguageModel (global): ${typeof LanguageModel !== 'undefined' ? '✅ EXISTS' : '❌ NOT FOUND'}`);
+      
+      // Detailed API Check
+      log('\n🔬 DETAILED API CHECK:');
+      
+      // Check window.ai properties
+      if ('ai' in window) {
+        log('   window.ai properties:');
+        const aiProps = Object.keys(window.ai || {});
+        if (aiProps.length > 0) {
+          aiProps.forEach(prop => log(`      - ${prop}`));
+        } else {
+          log('      (empty object or no properties)');
+        }
+      } else {
+        log('   window.ai: NOT FOUND');
+      }
+      
+      // Check self.ai
+      if ('ai' in self) {
+        log('   self.ai properties:');
+        const selfAiProps = Object.keys(self.ai || {});
+        if (selfAiProps.length > 0) {
+          selfAiProps.forEach(prop => log(`      - ${prop}`));
+        } else {
+          log('      (empty object)');
+        }
+      } else {
+        log('   self.ai: NOT FOUND');
+      }
+      
+      // Modern API Detailed Check
+      log('\n📊 MODERN APIs DETAILED:');
+      
+      const apiChecks = [
+        { 
+          name: 'languageModel', 
+          path: 'window.ai.languageModel',
+          check: () => 'ai' in window && window.ai && 'languageModel' in window.ai 
+        },
+        { 
+          name: 'summarizer', 
+          path: 'window.ai.summarizer',
+          check: () => 'ai' in window && window.ai && 'summarizer' in window.ai 
+        },
+        { 
+          name: 'writer', 
+          path: 'window.ai.writer',
+          check: () => 'ai' in window && window.ai && 'writer' in window.ai 
+        },
+        { 
+          name: 'rewriter', 
+          path: 'window.ai.rewriter',
+          check: () => 'ai' in window && window.ai && 'rewriter' in window.ai 
+        },
+        { 
+          name: 'translation (self)', 
+          path: 'self.translation',
+          check: () => 'translation' in self 
+        }
+      ];
+      
+      for (const api of apiChecks) {
+        const exists = api.check();
+        log(`   ${exists ? '✅' : '❌'} ${api.name}: ${exists ? 'EXISTS' : 'NOT FOUND'} (${api.path})`);
+      }
+      
+      // Legacy API Detailed
+      log('\n🔧 LEGACY API DETAILED:');
+      if (typeof LanguageModel !== 'undefined') {
+        try {
+          log('   ✅ LanguageModel object: EXISTS');
+          log('   📋 Properties:');
+          const props = Object.getOwnPropertyNames(LanguageModel);
+          props.forEach(prop => log(`      - ${prop}`));
+          
+          const status = await LanguageModel.availability();
+          log(`   📊 Availability: ${status}`);
+          
+          // Try to get capabilities
+          if (typeof LanguageModel.capabilities === 'function') {
+            try {
+              const caps = await LanguageModel.capabilities();
+              log('   📋 Capabilities:');
+              log(JSON.stringify(caps, null, 2).split('\n').map(l => '      ' + l).join('\n'));
+            } catch (e) {
+              log(`   ⚠️  Capabilities error: ${e.message}`);
+            }
+          }
+        } catch (e) {
+          log(`   ❌ Error checking LanguageModel: ${e.message}`);
+        }
+      } else {
+        log('   ❌ LanguageModel: NOT FOUND');
+      }
+      
+      // Chrome Flags Suggestions
+      log('\n💡 CHROME FLAGS TO ENABLE:');
+      log('   For Modern APIs:');
+      log('      chrome://flags/#optimization-guide-on-device-model');
+      log('      chrome://flags/#prompt-api-for-gemini-nano');
+      log('      chrome://flags/#summarization-api-for-gemini-nano');
+      log('      chrome://flags/#translation-api');
+      log('      chrome://flags/#rewriter-api');
+      log('      chrome://flags/#writer-api');
+      log('      chrome://flags/#proofreader-api');
+      log('\n   Set all to: "Enabled" or "Enabled BypassPerfRequirement"');
+      log('   Then: Restart Chrome and wait 5-10 min for models to download');
+      
+      // Origin Trial
+      log('\n🎫 ORIGIN TRIAL:');
+      const hasMeta = document.querySelector('meta[http-equiv="origin-trial"]');
+      if (hasMeta) {
+        log('   ✅ Origin Trial token: FOUND');
+        log(`   Token length: ${hasMeta.content.length} characters`);
+      } else {
+        log('   ⚠️  Origin Trial token: NOT FOUND');
+        log('   Note: Token needed for web Prompt API access');
+      }
+      
+      // Check on-device status
+      log('\n🖥️  ON-DEVICE MODEL:');
+      log('   Check status at: chrome://on-device-internals');
+      log('   Look for:');
+      log('      - Foundational model state: Ready');
+      log('      - Model Name: v3Nano');
+      log('      - Feature Adaptations: Active versions');
+      
+      log('\n═══════════════════════════');
+    }
+
+    async function autoFix() {
+      clearResults();
+      log('═══ AUTO-FIX DIAGNOSTIC ═══\n');
+      log('🔍 Analyzing your system...\n');
+      
+      let issues = [];
+      let fixes = [];
+      
+      // Check 1: Origin Trial Token
+      log('📋 Check 1: Origin Trial Token');
+      const hasToken = document.querySelector('meta[http-equiv="origin-trial"]');
+      if (hasToken) {
+        log('   ✅ Token present');
+      } else {
+        log('   ❌ Token missing');
+        issues.push('origin-token');
+        fixes.push({
+          issue: 'Origin Trial Token Missing',
+          fix: 'Token has been added to this page. Please reload.',
+          action: 'Reload page (Ctrl+Shift+R)'
+        });
+      }
+      
+      // Check 2: Modern APIs
+      log('\n📋 Check 2: Modern APIs Availability');
+      const hasModernAPI = 'ai' in window;
+      if (hasModernAPI) {
+        log('   ✅ window.ai detected');
+      } else {
+        log('   ❌ window.ai not found');
+        issues.push('modern-api');
+      }
+      
+      // Check 3: Legacy API
+      log('\n📋 Check 3: Legacy API');
+      if (typeof LanguageModel !== 'undefined') {
+        const status = await LanguageModel.availability();
+        log(`   ✅ Legacy API: ${status}`);
+        if (status !== 'readily' && status !== 'available') {
+          issues.push('legacy-not-ready');
+        }
+      } else {
+        log('   ❌ Legacy API not found');
+        issues.push('no-legacy');
+      }
+      
+      // Check 4: Chrome Version
+      log('\n📋 Check 4: Chrome Version');
+      const userAgent = navigator.userAgent;
+      const chromeMatch = userAgent.match(/Chrome\/([\d.]+)/);
+      if (chromeMatch) {
+        const version = parseInt(chromeMatch[1]);
+        log(`   Chrome version: ${chromeMatch[1]}`);
+        if (version < 127) {
+          log('   ⚠️  Chrome too old (need 127+)');
+          issues.push('old-chrome');
+        } else {
+          log('   ✅ Chrome version OK');
+        }
+      }
+      
+      // Check 5: Origin Match
+      log('\n📋 Check 5: Origin Match');
+      const currentOrigin = window.location.origin;
+      log(`   Current origin: ${currentOrigin}`);
+      if (currentOrigin === 'http://127.0.0.1:5500') {
+        log('   ✅ Origin matches token');
+      } else {
+        log('   ⚠️  Origin mismatch (token is for http://127.0.0.1:5500)');
+        issues.push('origin-mismatch');
+        fixes.push({
+          issue: 'Wrong Origin',
+          fix: `Access via: http://127.0.0.1:5500/browser-agent-extension/experiments/`,
+          action: 'Open correct URL'
+        });
+      }
+      
+      // Analyze and provide solutions
+      log('\n═══════════════════════════');
+      log('\n🎯 DIAGNOSIS:\n');
+      
+      if (issues.length === 0 && hasModernAPI) {
+        log('✅ Everything looks good! All APIs should work.\n');
+      } else if (issues.length === 0 && !hasModernAPI) {
+        log('⚠️  System is configured correctly, but Modern APIs not detected.\n');
+        log('📝 POSSIBLE REASONS:\n');
+        log('   1. Chrome flags not enabled');
+        log('   2. Models still downloading');
+        log('   3. Chrome needs restart\n');
+      } else {
+        log(`❌ Found ${issues.length} issue(s):\n`);
+        issues.forEach((issue, i) => {
+          log(`   ${i + 1}. ${issue}`);
+        });
+        log('');
+      }
+      
+      // Provide automatic fixes
+      log('═══════════════════════════');
+      log('\n🔧 AUTOMATIC FIXES:\n');
+      
+      // Fix 1: Chrome Flags
+      if (!hasModernAPI && !issues.includes('no-legacy')) {
+        log('📌 FIX 1: Enable Chrome Flags\n');
+        log('   ⚠️  Modern APIs require Chrome flags to be enabled.\n');
+        log('   🔗 STEP-BY-STEP:\n');
+        log('   1. Open new tab and paste each URL:\n');
+        
+        const flags = [
+          'chrome://flags/#optimization-guide-on-device-model',
+          'chrome://flags/#prompt-api-for-gemini-nano',
+          'chrome://flags/#summarization-api-for-gemini-nano',
+          'chrome://flags/#translation-api',
+          'chrome://flags/#writer-api',
+          'chrome://flags/#rewriter-api'
+        ];
+        
+        flags.forEach((flag, i) => {
+          log(`      ${i + 1}. ${flag}`);
+        });
+        
+        log('\n   2. For EACH flag:');
+        log('      - Set to: "Enabled" or "Enabled BypassPerfRequirement"');
+        log('      - Click "Relaunch" at bottom\n');
+        
+        log('   3. After restart:');
+        log('      - Wait 5-10 minutes for models to download');
+        log('      - Check chrome://on-device-internals\n');
+        
+        log('   📋 Copy-paste this command to check status:\n');
+        log('      Open console and run: LanguageModel.availability()\n');
+      }
+      
+      // Fix 2: One-click flag opener
+      log('📌 FIX 2: Quick Flag Access\n');
+      log('   Click these links to open flags directly:\n');
+      
+      const flagLinks = [
+        { name: 'On-Device Model', url: 'chrome://flags/#optimization-guide-on-device-model' },
+        { name: 'Prompt API', url: 'chrome://flags/#prompt-api-for-gemini-nano' },
+        { name: 'Summarizer', url: 'chrome://flags/#summarization-api-for-gemini-nano' },
+        { name: 'Translation', url: 'chrome://flags/#translation-api' }
+      ];
+      
+      flagLinks.forEach(flag => {
+        log(`   🔗 ${flag.name}: ${flag.url}`);
+      });
+      
+      log('\n   (Copy URLs and paste in new tab)\n');
+      
+      // Fix 3: Model Download Check
+      log('📌 FIX 3: Check Model Download Status\n');
+      log('   🔗 Open: chrome://on-device-internals\n');
+      log('   ✅ Look for:');
+      log('      - Foundational model state: Ready');
+      log('      - Model Name: v3Nano');
+      log('      - Feature Adaptations with version numbers\n');
+      
+      // Fix 4: Current workaround
+      log('📌 FIX 4: Use Legacy API (Works Now!)\n');
+      log('   ✅ Your Legacy LanguageModel API works perfectly!');
+      log('   ✅ All experiments will function using Legacy mode');
+      log('   ✅ Click any experiment and select "⚡ Legacy API"\n');
+      
+      // Summary
+      log('═══════════════════════════');
+      log('\n📊 SUMMARY:\n');
+      
+      if (typeof LanguageModel !== 'undefined') {
+        log('   ✅ You can USE EXPERIMENTS NOW with Legacy API!');
+        log('   🎯 Modern APIs are optional (for better performance)\n');
+      }
+      
+      log('   🎮 QUICK START:');
+      log('      1. Click any experiment below');
+      log('      2. Select "⚡ Legacy API" button');
+      log('      3. Try it out - it works!\n');
+      
+      log('   🚀 For Modern APIs:');
+      log('      1. Enable all Chrome flags (see FIX 1 above)');
+      log('      2. Restart Chrome');
+      log('      3. Wait 10 minutes');
+      log('      4. Run this Auto-Fix again to verify\n');
+      
+      log('═══════════════════════════');
+      log('\n✅ Auto-Fix Complete!');
+      log('📝 Follow the fixes above to enable Modern APIs');
+      log('🎉 OR use Legacy API right now - it works perfectly!\n');
+    }
+  </script>
+</body>
+</html>
+

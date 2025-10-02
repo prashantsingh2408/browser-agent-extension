@@ -59,11 +59,18 @@ These APIs are implemented in our extension but may not work yet depending on yo
 - **What it does**: Detects language of text
 - **Our Fallback**: Not implemented
 
-### 🔴 Not Yet Available
-- **Prompt API** (`ai.prompt`) - Enhanced Gemini access (uses LanguageModel instead)
+### 🟢 Improved Multi-Tier Prompt API
+- **Prompt API** - Now with intelligent fallback system
+  - **Tier 1**: `window.ai.languageModel` (Chrome 127+) - **Recommended**
+  - **Tier 2**: `self.ai.prompt` (Experimental)
+  - **Tier 3**: `window.ai.createTextSession` (Legacy)
+  - **Tier 4**: Global `LanguageModel` (Fallback)
+  
+The `createPromptSession()` function now automatically detects and uses the best available API!
 
 ## How to Check What's Available
 
+### Quick Check (Console)
 Open Chrome DevTools Console and run:
 ```javascript
 // Check for AI APIs
@@ -73,6 +80,94 @@ console.log('Translation:', 'translation' in self);
 console.log('Writer:', 'ai' in self && 'writer' in self.ai);
 console.log('Rewriter:', 'ai' in self && 'rewriter' in self.ai);
 console.log('LanguageModel:', 'LanguageModel' in self);
+```
+
+### Comprehensive Check (New!)
+Use our improved API checker for detailed status:
+
+```javascript
+// Check all APIs with capabilities
+const status = await window.chromeAI.checkAIAPIs();
+// Returns detailed info with availability and capabilities
+
+// Check Prompt API options
+const promptStatus = await window.chromeAI.checkPromptAPIAvailability();
+console.log('Recommended API:', promptStatus.recommended);
+console.log('Available APIs:', promptStatus);
+```
+
+### Using the Improved Prompt API
+
+```javascript
+// Automatically uses the best available API
+const session = await window.chromeAI.createPromptSession({
+  systemPrompt: 'You are a helpful assistant.',
+  temperature: 0.7,
+  topK: 3
+});
+
+if (session) {
+  const response = await session.prompt('Hello! How are you?');
+  console.log(response);
+  session.destroy();
+} else {
+  console.log('No AI API available - check chrome://flags');
+}
+```
+
+### 🧪 NEW: Test Mode - Check All APIs
+
+We've added comprehensive testing functions to verify which AI APIs are working:
+
+#### Quick Test (Fast)
+```javascript
+// Quick check of all APIs (5 seconds)
+const status = await window.chromeAI.quickTestAIAPIs();
+// Shows a clean table of what's available
+```
+
+#### Comprehensive Test (Detailed)
+```javascript
+// Full test with actual API calls (20-30 seconds)
+const results = await window.chromeAI.testAllAIAPIs();
+
+// Or run silently and get results object
+const results = await window.chromeAI.testAllAIAPIs(false);
+console.log(results);
+```
+
+**Test Output Example:**
+```
+═══════════════════════════════════════════════════
+🧪 CHROME AI APIs - COMPREHENSIVE TEST MODE
+═══════════════════════════════════════════════════
+
+Chrome Version: 127
+Test Time: 10/2/2025, 2:30:45 PM
+
+🔍 Testing Language Model API (window.ai.languageModel)...
+   ✅ API exists
+   ✅ API available (readily)
+   ✅ Session created successfully
+   ✅ Prompt test passed: "Test successful..."
+   ✅ Session destroyed successfully
+
+🔍 Testing Prompt API (self.ai.prompt)...
+   ⏭️  API not found (experimental feature)
+
+🔍 Testing Summarizer API (self.ai.summarizer)...
+   ⏭️  API not found
+
+═══════════════════════════════════════════════════
+📊 TEST SUMMARY
+═══════════════════════════════════════════════════
+✅ Passed:  7
+❌ Failed:  0
+⏭️  Skipped: 8
+📝 Total:   15
+═══════════════════════════════════════════════════
+
+✅ Chrome AI is ready!
 ```
 
 ## Enable Experimental Features

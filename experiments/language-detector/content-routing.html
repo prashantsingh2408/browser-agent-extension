@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Content Routing by Language</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 16px; padding: 30px; }
+    h1 { color: #333; margin-bottom: 20px; }
+    textarea { width: 100%; height: 100px; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin: 10px 0; }
+    button { padding: 12px 24px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .route { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: 600; }
+    .route.en { background: #e3f2fd; color: #1976d2; }
+    .route.es { background: #fff3e0; color: #e65100; }
+    .route.fr { background: #f3e5f5; color: #7b1fa2; }
+    .route.other { background: #f5f5f5; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚦 Content Routing by Language</h1>
+    <p style="color: #666;">Automatically route content based on detected language</p>
+
+    <textarea id="contentInput" placeholder="Enter content to route...">This is a customer support message that needs routing.</textarea>
+    <button onclick="routeContent()">Detect & Route</button>
+
+    <div id="routingResult"></div>
+
+    <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+      <strong>Example routing rules:</strong><br>
+      • English → US Support Team<br>
+      • Spanish → LATAM Support Team<br>
+      • French → EU Support Team<br>
+      • Other → International Team
+    </div>
+  </div>
+
+  <script>
+    async function routeContent() {
+      const text = document.getElementById('contentInput').value;
+      const resultDiv = document.getElementById('routingResult');
+
+      try {
+        const detector = await translation.createDetector();
+        const results = await detector.detect(text);
+        const lang = results[0].detectedLanguage;
+
+        const routes = {
+          en: '🇺🇸 Routed to: US Support Team',
+          es: '🇪🇸 Routed to: LATAM Support Team',
+          fr: '🇫🇷 Routed to: EU Support Team'
+        };
+
+        const message = routes[lang] || '🌍 Routed to: International Team';
+        resultDiv.innerHTML = `<div class="route ${lang}">${message} (Detected: ${lang.toUpperCase()})</div>`;
+
+        detector.destroy();
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="route other">Error: ${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Playground - Prompt API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    h1 { color: #333; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 20px; }
+    .status { padding: 10px; border-radius: 6px; margin-bottom: 20px; font-weight: 600; }
+    .status.success { background: #e8f5e9; color: #2e7d32; }
+    .status.error { background: #ffebee; color: #c62828; }
+    .status.warning { background: #fff3e0; color: #e65100; }
+    
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
+    
+    .sidebar {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      height: fit-content;
+    }
+    
+    .sidebar h3 { margin-bottom: 15px; color: #333; font-size: 18px; }
+    
+    .template-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .template-btn {
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.3s;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .template-btn:hover {
+      border-color: #667eea;
+      transform: translateX(5px);
+      background: #f5f7ff;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    }
+    
+    .template-btn.active {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .main-panel {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .chat-area {
+      height: 500px;
+      overflow-y: auto;
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .message {
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      animation: fadeIn 0.3s;
+    }
+    
+    .message.user {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin-left: 20%;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .message.assistant {
+      background: white;
+      border: 2px solid #e0e0e0;
+      margin-right: 20%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .input-area {
+      display: flex;
+      gap: 10px;
+    }
+    
+    textarea {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+      height: 80px;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    button:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    .settings {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    
+    .setting-group label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    
+    .setting-group input,
+    .setting-group select {
+      width: 100%;
+      padding: 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .metric-card {
+      padding: 12px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .metric-value { font-size: 20px; font-weight: bold; color: #f5576c; }
+    .metric-label { font-size: 11px; color: #666; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 AI Playground</h1>
+    <p class="subtitle">Experiment with Chrome Prompt API (Origin Trial)</p>
+
+    <div id="status" class="status warning">⚠️ Checking API availability...</div>
+
+    <div class="layout">
+      <!-- Sidebar with Templates -->
+      <div class="sidebar">
+        <h3>📋 Prompt Templates</h3>
+        <div class="template-list">
+          <button class="template-btn" onclick="loadTemplate('chat')">
+            💬 General Chat
+          </button>
+          <button class="template-btn" onclick="loadTemplate('codeExplain')">
+            💻 Code Explainer
+          </button>
+          <button class="template-btn" onclick="loadTemplate('sentiment')">
+            😊 Sentiment Analysis
+          </button>
+          <button class="template-btn" onclick="loadTemplate('extraction')">
+            📋 Data Extraction
+          </button>
+          <button class="template-btn" onclick="loadTemplate('categorize')">
+            🏷️ Content Categorizer
+          </button>
+          <button class="template-btn" onclick="loadTemplate('translate')">
+            🌐 Smart Translator
+          </button>
+          <button class="template-btn" onclick="loadTemplate('qa')">
+            🔍 Q&A System
+          </button>
+          <button class="template-btn" onclick="loadTemplate('creative')">
+            ✍️ Creative Writing
+          </button>
+        </div>
+
+        <div style="margin-top: 20px; padding: 12px; background: #f5f5f5; border-radius: 8px; font-size: 12px;">
+          <strong>💡 Tips:</strong><br>
+          • Select a template<br>
+          • Adjust settings<br>
+          • Start chatting!<br>
+          • All on-device 🔒
+        </div>
+      </div>
+
+      <!-- Main Chat Area -->
+      <div class="main-panel">
+        <div class="settings">
+          <div class="setting-group">
+            <label>Temperature (Creativity)</label>
+            <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7" oninput="document.getElementById('tempValue').textContent = this.value">
+            <small id="tempValue">0.7</small>
+          </div>
+          <div class="setting-group">
+            <label>Top-K (Variety)</label>
+            <input type="range" id="topK" min="1" max="5" step="1" value="3" oninput="document.getElementById('topKValue').textContent = this.value">
+            <small id="topKValue">3</small>
+          </div>
+          <div class="setting-group">
+            <label>Mode</label>
+            <select id="mode">
+              <option value="conversational">Conversational</option>
+              <option value="analytical">Analytical</option>
+              <option value="creative">Creative</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chat-area" id="chatArea"></div>
+
+        <div class="input-area">
+          <textarea id="userInput" placeholder="Type your message..."></textarea>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="clearChat()" style="background: linear-gradient(135deg, #888 0%, #666 100%);">Clear</button>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-value" id="messageCount">0</div>
+            <div class="metric-label">Messages</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="avgLatency">0ms</div>
+            <div class="metric-label">Avg Latency</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="totalTokens">0</div>
+            <div class="metric-label">Tokens Used</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="sessionStatus">🟢</div>
+            <div class="metric-label">Session</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let session = null;
+    let messageCount = 0;
+    let totalLatency = 0;
+    let currentTemplate = 'chat';
+
+    const templates = {
+      chat: {
+        systemPrompt: 'You are a helpful AI assistant. Provide clear, concise, and accurate responses.',
+        placeholder: 'Ask me anything...'
+      },
+      codeExplain: {
+        systemPrompt: 'You are a code explanation expert. Explain code clearly with: 1) What it does, 2) How it works, 3) Key concepts.',
+        placeholder: 'Paste code here...'
+      },
+      sentiment: {
+        systemPrompt: 'Analyze the sentiment and emotions in the text. Return: sentiment (positive/negative/neutral/mixed), confidence (0-1), emotions detected, and a brief explanation.',
+        placeholder: 'Enter text to analyze...'
+      },
+      extraction: {
+        systemPrompt: 'Extract structured data from text. Identify contacts, events, products, or other structured information and return as JSON.',
+        placeholder: 'Paste content with structured data...'
+      },
+      categorize: {
+        systemPrompt: 'Categorize content into ONE of these: Technology, Business, Science, Health, Entertainment, Sports, Politics, Education, Travel, Food, Finance, Fashion, Gaming, News, Other.',
+        placeholder: 'Enter content to categorize...'
+      },
+      translate: {
+        systemPrompt: 'Translate text with context awareness. Consider cultural nuances, idioms, and provide natural translations.',
+        placeholder: 'Enter text to translate (specify target language)...'
+      },
+      qa: {
+        systemPrompt: 'Answer questions based on provided context. If the answer is not in the context, say "I cannot find that information."',
+        placeholder: 'Provide context, then ask questions...'
+      },
+      creative: {
+        systemPrompt: 'You are a creative writing assistant. Help with stories, poems, and creative content. Be imaginative and engaging.',
+        placeholder: 'Give me a creative writing prompt...'
+      }
+    };
+
+    let apiMode = 'none'; // 'modern', 'legacy', 'cloud', 'none'
+
+    window.addEventListener('load', async () => {
+      await checkAPIAvailability();
+      loadTemplate('chat');
+    });
+
+    async function checkAPIAvailability() {
+      const status = document.getElementById('status');
+      
+      try {
+        // Method 1: Try Modern API (ai.languageModel)
+        if ('ai' in self && 'languageModel' in ai) {
+          const capabilities = await ai.languageModel.capabilities();
+          
+          if (capabilities.available === 'readily') {
+            status.className = 'status success';
+            status.textContent = '✅ Modern Prompt API Ready! (On-device, Private, Fast)';
+            apiMode = 'modern';
+            console.log('✅ Using Modern API');
+            return;
+          } else if (capabilities.available === 'after-download') {
+            status.className = 'status warning';
+            status.textContent = '📥 Model downloading... Will be ready soon.';
+            apiMode = 'modern';
+            return;
+          }
+        }
+
+        // Method 2: Try Legacy LanguageModel API
+        if (typeof LanguageModel !== 'undefined') {
+          const availability = await LanguageModel.availability();
+          if (availability === 'readily' || availability === 'available') {
+            status.className = 'status success';
+            status.innerHTML = '✅ <strong>Legacy API Ready!</strong> (Using LanguageModel fallback)';
+            apiMode = 'legacy';
+            console.log('✅ Using Legacy LanguageModel API');
+            return;
+          }
+        }
+
+        // Method 3: Cloud Fallback Available
+        status.className = 'status warning';
+        status.innerHTML = `
+          ⚠️ <strong>On-device AI not available</strong><br>
+          <small>Using demo mode. To enable:<br>
+          1. chrome://flags/#optimization-guide-on-device-model → Enable<br>
+          2. chrome://flags/#prompt-api-for-gemini-nano → Enable<br>
+          3. Restart Chrome</small>
+        `;
+        apiMode = 'demo';
+        
+      } catch (error) {
+        status.className = 'status error';
+        status.innerHTML = `
+          ❌ <strong>API Check Failed:</strong> ${error.message}<br>
+          <small>Running in demo mode</small>
+        `;
+        apiMode = 'demo';
+      }
+    }
+
+    function loadTemplate(templateName) {
+      currentTemplate = templateName;
+      const template = templates[templateName];
+      document.getElementById('userInput').placeholder = template.placeholder;
+      
+      // Update active button
+      document.querySelectorAll('.template-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // Clear chat and show template info
+      clearChat();
+      addMessage('system', `Template loaded: ${templateName}\n\nSystem Prompt: ${template.systemPrompt}`);
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      
+      if (!message) return;
+
+      // Add user message
+      addMessage('user', message);
+      input.value = '';
+
+      const startTime = performance.now();
+
+      try {
+        let response;
+
+        // Route based on available API
+        if (apiMode === 'modern') {
+          response = await getResponseModern(message);
+        } else if (apiMode === 'legacy') {
+          response = await getResponseLegacy(message);
+        } else {
+          response = await getResponseDemo(message);
+        }
+
+        const endTime = performance.now();
+        const latency = Math.round(endTime - startTime);
+
+        // Update metrics
+        messageCount++;
+        totalLatency += latency;
+        document.getElementById('messageCount').textContent = messageCount;
+        document.getElementById('avgLatency').textContent = Math.round(totalLatency / messageCount) + 'ms';
+        document.getElementById('totalTokens').textContent = estimateTokens(message + response);
+
+        // Add assistant response
+        addMessage('assistant', response);
+
+      } catch (error) {
+        addMessage('error', `Error: ${error.message}`);
+        document.getElementById('sessionStatus').textContent = '🔴';
+      }
+    }
+
+    // Modern API (ai.languageModel)
+    async function getResponseModern(message) {
+      if (!session) {
+        const temperature = parseFloat(document.getElementById('temperature').value);
+        const topK = parseInt(document.getElementById('topK').value);
+
+        session = await ai.languageModel.create({
+          temperature,
+          topK,
+          systemPrompt: templates[currentTemplate].systemPrompt
+        });
+        document.getElementById('sessionStatus').textContent = '🟢';
+      }
+
+      return await session.prompt(message);
+    }
+
+    // Legacy API (LanguageModel)
+    async function getResponseLegacy(message) {
+      if (!session) {
+        const temperature = parseFloat(document.getElementById('temperature').value);
+        const topK = parseInt(document.getElementById('topK').value);
+
+        session = await LanguageModel.create({
+          temperature,
+          topK,
+          systemPrompt: templates[currentTemplate].systemPrompt,
+          outputLanguage: 'en'  // Specify output language for better quality
+        });
+        document.getElementById('sessionStatus').textContent = '🟢';
+      }
+
+      return await session.prompt(message);
+    }
+
+    // Demo Mode (Simulated responses)
+    async function getResponseDemo(message) {
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+
+      const responses = {
+        chat: `I'm a demo response! The actual Chrome AI APIs aren't available yet. To enable them:\n\n1. Open chrome://flags/#optimization-guide-on-device-model\n2. Set to "Enabled BypassPerfRequirement"\n3. Restart Chrome\n\nYour question was: "${message}"`,
+        
+        codeExplain: `**Demo Mode Response**\n\nThis would explain your code in detail:\n1. What it does\n2. How it works\n3. Key concepts\n\nEnable Chrome AI flags to get real code explanations!`,
+        
+        sentiment: `**Demo Sentiment Analysis**\n\nSentiment: Positive\nConfidence: 85%\nEmotions: Curious, Interested\n\nNote: This is simulated. Enable Chrome AI for real analysis.`,
+        
+        extraction: `**Demo Data Extraction**\n\n{\n  "note": "This is demo mode",\n  "message": "${message.substring(0, 50)}..."\n}\n\nEnable Chrome AI APIs for real extraction!`,
+        
+        categorize: `**Demo Categorization**\n\nCategory: Technology\nConfidence: High\n\nNote: Real categorization requires Chrome AI APIs enabled.`,
+        
+        translate: `**Demo Translation**\n\nThis would translate your text using context-aware AI translation.\n\nEnable Chrome AI APIs for real multilingual translation!`,
+        
+        qa: `**Demo Q&A**\n\nAnswer: This would provide an accurate answer based on the provided context.\n\nEnable Chrome AI APIs for real context-aware Q&A!`,
+        
+        creative: `**Demo Creative Response**\n\nOnce upon a time, in a browser far, far away, there lived a helpful AI...\n\nEnable Chrome AI APIs for real creative writing assistance!`
+      };
+
+      return responses[currentTemplate] || responses.chat;
+    }
+
+    function addMessage(role, text) {
+      const chatArea = document.getElementById('chatArea');
+      const messageDiv = document.createElement('div');
+      
+      if (role === 'system') {
+        messageDiv.style.cssText = 'padding: 15px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #2e7d32; line-height: 1.6;';
+      } else if (role === 'error') {
+        messageDiv.style.cssText = 'padding: 15px; background: #ffebee; border-left: 4px solid #f44336; border-radius: 8px; margin-bottom: 15px; color: #c62828; font-weight: 500; line-height: 1.6;';
+      } else {
+        messageDiv.className = `message ${role}`;
+      }
+      
+      messageDiv.innerHTML = `
+        <div style="font-size: 11px; opacity: 0.7; margin-bottom: 5px;">
+          ${role === 'user' ? '👤 You' : role === 'assistant' ? '🤖 AI' : '📢 System'}
+        </div>
+        <div style="white-space: pre-wrap;">${text}</div>
+      `;
+      
+      chatArea.appendChild(messageDiv);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function clearChat() {
+      document.getElementById('chatArea').innerHTML = '';
+      if (session) {
+        session.destroy();
+        session = null;
+      }
+      messageCount = 0;
+      totalLatency = 0;
+      document.getElementById('messageCount').textContent = '0';
+      document.getElementById('avgLatency').textContent = '0ms';
+      document.getElementById('totalTokens').textContent = '0';
+      document.getElementById('sessionStatus').textContent = '🟡';
+    }
+
+    function estimateTokens(text) {
+      // Rough estimate: ~4 characters per token
+      return Math.round(text.length / 4);
+    }
+
+    // Enter to send
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
+

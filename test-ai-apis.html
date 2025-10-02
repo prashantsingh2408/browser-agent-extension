@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrome AI APIs Test Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    #output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      min-height: 300px;
+      max-height: 600px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.5;
+    }
+
+    .status {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .status.info {
+      background: #e3f2fd;
+      color: #1976d2;
+      border-left: 4px solid #1976d2;
+    }
+
+    .status.success {
+      background: #e8f5e9;
+      color: #388e3c;
+      border-left: 4px solid #388e3c;
+    }
+
+    .status.warning {
+      background: #fff3e0;
+      color: #f57c00;
+      border-left: 4px solid #f57c00;
+    }
+
+    .status.error {
+      background: #ffebee;
+      color: #d32f2f;
+      border-left: 4px solid #d32f2f;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .feature-card {
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .feature-card h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+
+    .feature-card p {
+      color: #666;
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Chrome AI APIs Test Suite</h1>
+    <p class="subtitle">Comprehensive testing for Chrome's Built-in AI APIs</p>
+
+    <div id="status" class="status info">
+      <strong>ℹ️ Ready to test!</strong> Click any button below to start testing Chrome AI APIs.
+    </div>
+
+    <div class="btn-group">
+      <button class="btn-primary" onclick="runQuickTest()">
+        <span>🚀 Quick Test</span>
+      </button>
+      <button class="btn-secondary" onclick="runFullTest()">
+        <span>🧪 Full Test</span>
+        <span class="spinner hidden" id="spinner1"></span>
+      </button>
+      <button class="btn-success" onclick="checkAPIs()">
+        <span>📊 Check APIs</span>
+      </button>
+      <button class="btn-success" onclick="testPromptSession()">
+        <span>💬 Test Prompt</span>
+      </button>
+      <button class="btn-primary" onclick="clearOutput()">
+        <span>🗑️ Clear</span>
+      </button>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <h3>🚀 Quick Test</h3>
+        <p>Fast check of all available APIs without running actual tests. Results in ~2 seconds.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🧪 Full Test</h3>
+        <p>Comprehensive test with actual API calls. Tests all features including prompt generation.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📊 Check APIs</h3>
+        <p>Detailed capability check for each API with version and configuration info.</p>
+      </div>
+    </div>
+
+    <div id="output">// Test results will appear here...
+// Open DevTools Console (F12) to see detailed logs
+
+// To enable Chrome AI:
+// 1. Go to chrome://flags
+// 2. Search for "Optimization Guide On Device Model"
+// 3. Set to "Enabled BypassPerfRequirement"
+// 4. Restart Chrome</div>
+  </div>
+
+  <script src="scripts/ai-apis.js"></script>
+  <script>
+    const output = document.getElementById('output');
+    const status = document.getElementById('status');
+
+    function updateStatus(message, type = 'info') {
+      status.className = `status ${type}`;
+      status.innerHTML = `<strong>${getIcon(type)}</strong> ${message}`;
+    }
+
+    function getIcon(type) {
+      const icons = {
+        info: 'ℹ️',
+        success: '✅',
+        warning: '⚠️',
+        error: '❌'
+      };
+      return icons[type] || 'ℹ️';
+    }
+
+    function clearOutput() {
+      output.textContent = '// Output cleared. Ready for new tests...';
+      updateStatus('Ready to test!', 'info');
+    }
+
+    function appendOutput(text) {
+      if (output.textContent.includes('Test results will appear here')) {
+        output.textContent = '';
+      }
+      output.textContent += text + '\n';
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // Override console.log for output window
+    const originalLog = console.log;
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      const text = args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+      ).join(' ');
+      appendOutput(text);
+    };
+
+    async function runQuickTest() {
+      updateStatus('Running quick test...', 'info');
+      clearOutput();
+      
+      try {
+        const results = await window.chromeAI.quickTestAIAPIs();
+        updateStatus('Quick test completed!', 'success');
+      } catch (error) {
+        updateStatus(`Test failed: ${error.message}`, 'error');
+        appendOutput(`\n❌ Error: ${error.message}`);
+      }
+    }
+
+    async function runFullTest() {
+      updateStatus('Running comprehensive test... This may take 20-30 seconds.', 'info');
+      clearOutput();
+      
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      try {
+        const results = await window.chromeAI.testAllAIAPIs();
+        
+        if (results.summary.failed === 0 && results.summary.passed > 0) {
+          updateStatus('All tests passed! Chrome AI is working perfectly. ✨', 'success');
+        } else if (results.summary.passed > 0) {
+          updateStatus(`Tests completed with ${results.summary.passed} passed and ${results.summary.failed} failed.`, 'warning');
+        } else {
+          updateStatus('Chrome AI not available. Please enable it in chrome://flags', 'warning');
+        }
+      } catch (error) {
+        updateStatus(`Test failed: ${error.message}`, 'error');
+        appendOutput(`\n❌ Error: ${error.message}`);
+      } finally {
+        buttons.forEach(btn => btn.disabled = false);
+      }
+    }
+
+    async function checkAPIs() {
+      updateStatus('Checking API capabilities...', 'info');
+      clearOutput();
+      
+      try {
+        const results = await window.chromeAI.checkAIAPIs();
+        updateStatus('API check completed!', 'success');
+      } catch (error) {
+        updateStatus(`Check failed: ${error.message}`, 'error');
+        appendOutput(`\n❌ Error: ${error.message}`);
+      }
+    }
+
+    async function testPromptSession() {
+      updateStatus('Testing prompt session...', 'info');
+      clearOutput();
+      
+      try {
+        appendOutput('🔍 Creating prompt session...');
+        const session = await window.chromeAI.createPromptSession({
+          systemPrompt: 'You are a helpful test assistant.',
+          temperature: 0.7
+        });
+        
+        if (!session) {
+          throw new Error('Failed to create session - Chrome AI not available');
+        }
+        
+        appendOutput('✅ Session created successfully!');
+        appendOutput('\n💬 Sending test prompt: "Say hello in a creative way"');
+        
+        const response = await session.prompt('Say hello in a creative way in under 15 words.');
+        
+        appendOutput(`\n✅ Response received:\n"${response}"`);
+        
+        session.destroy();
+        appendOutput('\n✅ Session destroyed successfully!');
+        
+        updateStatus('Prompt test completed successfully!', 'success');
+      } catch (error) {
+        updateStatus(`Prompt test failed: ${error.message}`, 'error');
+        appendOutput(`\n❌ Error: ${error.message}`);
+        appendOutput('\n💡 Make sure Chrome AI is enabled in chrome://flags');
+      }
+    }
+
+    // Check if APIs are loaded
+    window.addEventListener('load', () => {
+      if (window.chromeAI) {
+        updateStatus('✅ Test suite loaded! Chrome AI APIs script is ready.', 'success');
+      } else {
+        updateStatus('⚠️ Warning: Chrome AI script not loaded. Make sure ai-apis.js is in scripts/ folder.', 'warning');
+      }
+    });
+  </script>
+</body>
+</html>
+

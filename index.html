@@ -50,11 +50,42 @@
       opacity: 1;
       transform: translateX(0);
     }
+    
+    /* Experiments Link Button */
+    .experiments-link {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 700;
+      z-index: 99999;
+      box-shadow: 0 4px 16px rgba(17, 153, 142, 0.4);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .experiments-link:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(17, 153, 142, 0.6);
+    }
   </style>
 </head>
 <body>
   <!-- Web App Mode Badge -->
   <div class="webapp-badge" id="webappBadge">🌐 Web App Mode</div>
+  
+  <!-- Experiments Link -->
+  <a href="experiments/index.html" class="experiments-link" target="_blank" title="Try Chrome AI Experiments">
+    <span>🧪</span>
+    <span>AI Experiments</span>
+  </a>
   
   <!-- Content will be loaded from sidepanel.html -->
   <div id="app-root"></div>

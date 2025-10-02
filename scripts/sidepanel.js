@@ -1711,6 +1711,58 @@ setTimeout(() => {
     startAIRetryCheck();
   }
 }, 5000);
+// Setup agent mode selector functionality
+function setupAgentModeSelector() {
+  const agentSelectors = document.querySelectorAll('.agent-quick-select');
+  const agentSection = document.getElementById('agentSection');
+  const uiuxSection = document.getElementById('uiuxSection');
+  
+  if (!agentSelectors.length) {
+    console.warn('Agent selectors not found');
+    return;
+  }
+  
+  agentSelectors.forEach(selector => {
+    selector.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Remove active class from all selectors
+      agentSelectors.forEach(s => s.classList.remove('active'));
+      
+      // Add active class to clicked selector
+      selector.classList.add('active');
+      
+      // Get the agent type
+      const agentType = selector.dataset.agent;
+      
+      // Handle Web Dev mode specially
+      if (agentType === 'webdev') {
+        // Hide agent section, show uiux section
+        if (agentSection) agentSection.style.display = 'none';
+        if (uiuxSection) {
+          uiuxSection.style.display = 'flex';
+          
+          // Initialize Web Dev functionality
+          if (typeof initializeUIUX === 'function') {
+            initializeUIUX();
+          }
+        }
+      } else {
+        // Show agent section, hide uiux section
+        if (agentSection) agentSection.style.display = 'flex';
+        if (uiuxSection) uiuxSection.style.display = 'none';
+        
+        // Cleanup Web Dev resources
+        if (typeof cleanupUIUX === 'function') {
+          cleanupUIUX();
+        }
+      }
+      
+      console.log(`Agent mode switched to: ${agentType}`);
+    });
+  });
+}
+
 // Initialize Tools functionality
 function initializeTools() {
   console.log('Initializing Tools tab...');
@@ -2616,6 +2668,12 @@ function setupMainNavigation() {
       toolsSection.style.display = 'none';
       settingsSection.style.display = 'none';
       
+      // Reset agent mode selector to default when switching tabs
+      const agentSelectors = document.querySelectorAll('.agent-quick-select');
+      agentSelectors.forEach(s => s.classList.remove('active'));
+      const autoSelector = document.querySelector('.agent-quick-select[data-agent="auto"]');
+      if (autoSelector) autoSelector.classList.add('active');
+      
       // Show/hide sections based on selected tab
       if (targetTab === 'chat') {
         chatSection.style.display = 'flex';
@@ -2636,6 +2694,7 @@ function setupMainNavigation() {
           headerActions.style.display = 'flex';
         }
       } else if (targetTab === 'agent') {
+        // Show agent section by default
         agentSection.style.display = 'flex';
         
         // Cleanup other resources when entering agent tab
@@ -2648,28 +2707,10 @@ function setupMainNavigation() {
           initializeAgent();
         }
         
+        // Setup agent mode selector
+        setupAgentModeSelector();
+        
         // Hide chat-specific header actions for agent
-        const headerActions = document.querySelector('.header-actions');
-        if (headerActions) {
-          headerActions.style.display = 'none';
-        }
-      } else if (targetTab === 'uiux') {
-        uiuxSection.style.display = 'flex';
-        
-        // Cleanup other resources
-        if (typeof cleanupMailAI === 'function') {
-          cleanupMailAI();
-        }
-        if (typeof cleanupAgent === 'function') {
-          cleanupAgent();
-        }
-        
-        // Initialize UI/UX when entering tab
-        if (typeof initializeUIUX === 'function') {
-          initializeUIUX();
-        }
-        
-        // Hide chat-specific header actions for UI/UX
         const headerActions = document.querySelector('.header-actions');
         if (headerActions) {
           headerActions.style.display = 'none';

@@ -30,9 +30,17 @@ function setupWebDevEventListeners() {
   const input = document.getElementById('webdevInput');
   
   if (sendBtn && input) {
-    sendBtn.addEventListener('click', handleSendMessage);
+    // Remove existing listeners by cloning
+    const newSendBtn = sendBtn.cloneNode(true);
+    sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
     
-    input.addEventListener('keydown', (e) => {
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+    
+    // Add fresh event listeners
+    newSendBtn.addEventListener('click', handleSendMessage);
+    
+    newInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleSendMessage();

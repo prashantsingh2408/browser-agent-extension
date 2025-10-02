@@ -45,6 +45,9 @@ async function initializeMemory() {
     // Setup keyboard shortcuts (UX Law: Paradox of Active User)
     setupMemoryKeyboardShortcuts();
     
+    // Initialize default sub-tab
+    switchMemorySubtab('capture');
+    
     // Render memories
     renderMemories();
     
@@ -153,6 +156,14 @@ function setupMemoryKeyboardShortcuts() {
           e.preventDefault();
           connectGoogleDrive();
           break;
+        case 'b':
+          e.preventDefault();
+          scanBarcode();
+          break;
+        case 'm':
+          e.preventDefault();
+          connectMobile();
+          break;
       }
     }
   });
@@ -162,20 +173,23 @@ function setupMemoryKeyboardShortcuts() {
 function setupMemoryEventListeners() {
   // Sub-tab navigation
   const subtabBtns = document.querySelectorAll('.memory-subtab');
+  console.log(`Found ${subtabBtns.length} sub-tab buttons`);
   subtabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const targetSubtab = btn.dataset.subtab;
+      console.log('Sub-tab clicked:', targetSubtab);
       switchMemorySubtab(targetSubtab);
     });
   });
   
-  // Add memory button (if exists - removed from header)
+  // Add memory button
   const addMemoryBtn = document.getElementById('addMemoryBtn');
   if (addMemoryBtn) {
     addMemoryBtn.addEventListener('click', showAddMemoryModal);
   }
   
-  // Import memory button (if exists)
+  // Import memory button
   const importMemoryBtn = document.getElementById('importMemoryBtn');
   if (importMemoryBtn) {
     importMemoryBtn.addEventListener('click', importMemories);
@@ -243,6 +257,27 @@ function setupMemoryEventListeners() {
         e.stopPropagation();
         console.log('Images button clicked via event listener!');
         connectGoogleDrive();
+      });
+    }
+    
+    const barcodeBtn = document.querySelector('.control-btn.barcode-btn');
+    const mobileBtn = document.querySelector('.control-btn.mobile-btn');
+    
+    if (barcodeBtn) {
+      console.log('✅ Barcode button found, attaching listener');
+      barcodeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Barcode button clicked via event listener!');
+        scanBarcode();
+      });
+    }
+    
+    if (mobileBtn) {
+      console.log('✅ Mobile button found, attaching listener');
+      mobileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Mobile button clicked via event listener!');
+        connectMobile();
       });
     }
   }, 500);
@@ -714,6 +749,26 @@ function editMemory(memoryId) {
   const modal = createEditMemoryModal(memory);
   document.body.appendChild(modal);
   
+  // Setup close button listeners
+  setTimeout(() => {
+    const closeBtn = modal.querySelector('.modal-close');
+    const overlay = modal.querySelector('.modal-overlay');
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeEditMemoryModal();
+      });
+    }
+    
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeEditMemoryModal();
+      });
+    }
+  }, 100);
+  
   // Focus on title input
   const titleInput = modal.querySelector('#editMemoryTitleInput');
   if (titleInput) {
@@ -837,6 +892,29 @@ function expandMemory(memoryId) {
   
   const modal = createExpandMemoryModal(memory);
   document.body.appendChild(modal);
+  
+  // Setup close button listeners
+  setTimeout(() => {
+    const closeBtn = modal.querySelector('.modal-close');
+    const overlay = modal.querySelector('.modal-overlay');
+    
+    if (closeBtn) {
+      console.log('Setting up close button for expand modal');
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Expand modal close button clicked');
+        closeExpandMemoryModal();
+      });
+    }
+    
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Expand modal overlay clicked');
+        closeExpandMemoryModal();
+      });
+    }
+  }, 100);
 }
 
 // Create expand memory modal
@@ -1408,6 +1486,327 @@ function showRecordingControls(mediaRecorder, stream) {
 }
 
 // ============================================
+// BARCODE/QR CODE SCANNING
+// ============================================
+
+// Scan barcode or QR code
+async function scanBarcode() {
+  console.log('📷 Barcode scanner activated!');
+  try {
+    showActionFeedback('📷', 'Starting barcode scanner...', 'progress');
+    
+    const modal = createBarcodeScannerModal();
+    document.body.appendChild(modal);
+    
+    // Setup modal listeners
+    setTimeout(() => {
+      const closeBtn = modal.querySelector('.modal-close');
+      const overlay = modal.querySelector('.modal-overlay');
+      
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeBarcodeScanner();
+        });
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeBarcodeScanner();
+        });
+      }
+      
+      // Start camera
+      startBarcodeScanner();
+    }, 100);
+    
+    hideActionFeedback();
+    
+  } catch (error) {
+    console.error('Failed to start barcode scanner:', error);
+    showActionFeedback('❌', 'Camera access denied', 100, 'error');
+    setTimeout(hideActionFeedback, 2000);
+  }
+}
+
+// Create barcode scanner modal
+function createBarcodeScannerModal() {
+  const modal = document.createElement('div');
+  modal.className = 'memory-modal barcode-scanner-modal';
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="closeBarcodeScanner()"></div>
+    <div class="modal-content scanner-content">
+      <div class="modal-header">
+        <div class="scanner-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+            <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+            <rect x="9" y="9" width="6" height="6"/>
+          </svg>
+          <h3>Scan Barcode or QR Code</h3>
+        </div>
+        <button class="modal-close" onclick="closeBarcodeScanner()">×</button>
+      </div>
+      <div class="modal-body scanner-body">
+        <div class="scanner-info">
+          <p>Point your camera at a barcode or QR code</p>
+        </div>
+        <div class="scanner-view">
+          <video id="barcodeVideo" autoplay playsinline></video>
+          <canvas id="barcodeCanvas" style="display:none;"></canvas>
+          <div class="scanner-overlay">
+            <div class="scanner-frame"></div>
+          </div>
+          <div class="scanner-status" id="scannerStatus">Looking for code...</div>
+        </div>
+        <div class="scanner-result" id="scannerResult" style="display:none;">
+          <div class="result-icon">✅</div>
+          <div class="result-text" id="resultText"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeBarcodeScanner()">Cancel</button>
+        <button class="btn-primary" id="saveScanResultBtn" style="display:none;" onclick="saveScanResult()">
+          Save to Memories
+        </button>
+      </div>
+    </div>
+  `;
+  
+  return modal;
+}
+
+let barcodeStream = null;
+let scanResult = null;
+
+// Start barcode scanner
+async function startBarcodeScanner() {
+  try {
+    const video = document.getElementById('barcodeVideo');
+    if (!video) return;
+    
+    // Request camera access
+    barcodeStream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'environment' } 
+    });
+    
+    video.srcObject = barcodeStream;
+    
+    // Note: Real barcode scanning would require a library like jsQR or ZXing
+    // For now, show a "coming soon" message after a delay
+    setTimeout(() => {
+      const status = document.getElementById('scannerStatus');
+      if (status) {
+        status.innerHTML = '📱 <strong>Barcode scanning coming soon!</strong><br>Will support QR codes, UPC, EAN, and more';
+        status.style.background = 'rgba(102, 126, 234, 0.9)';
+        status.style.color = 'white';
+      }
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Camera access failed:', error);
+    const status = document.getElementById('scannerStatus');
+    if (status) {
+      status.textContent = 'Camera access denied. Please allow camera permission.';
+      status.style.background = 'rgba(234, 67, 53, 0.9)';
+      status.style.color = 'white';
+    }
+  }
+}
+
+// Close barcode scanner
+function closeBarcodeScanner() {
+  const modal = document.querySelector('.barcode-scanner-modal');
+  if (modal) {
+    modal.remove();
+  }
+  
+  // Stop camera stream
+  if (barcodeStream) {
+    barcodeStream.getTracks().forEach(track => track.stop());
+    barcodeStream = null;
+  }
+}
+
+// Save scan result
+function saveScanResult() {
+  if (!scanResult) return;
+  
+  const memory = createMemory(
+    `Scanned Code - ${new Date().toLocaleString()}`,
+    scanResult,
+    'personal',
+    ['barcode', 'scanned'],
+    'text',
+    null,
+    { scannedAt: new Date().toISOString() }
+  );
+  
+  showMemoryToast('Scan result saved to memories!', 'success');
+  closeBarcodeScanner();
+  renderMemories();
+}
+
+// ============================================
+// MOBILE UPLOAD CONNECTION
+// ============================================
+
+// Connect mobile device for upload
+async function connectMobile() {
+  console.log('📱 Mobile upload activated!');
+  try {
+    showActionFeedback('📱', 'Generating QR code...', 'progress');
+    
+    const modal = createMobileUploadModal();
+    document.body.appendChild(modal);
+    
+    // Setup modal listeners
+    setTimeout(() => {
+      const closeBtn = modal.querySelector('.modal-close');
+      const overlay = modal.querySelector('.modal-overlay');
+      
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeMobileUpload();
+        });
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeMobileUpload();
+        });
+      }
+      
+      // Generate QR code
+      generateUploadQRCode();
+    }, 100);
+    
+    hideActionFeedback();
+    
+  } catch (error) {
+    console.error('Failed to create mobile upload:', error);
+    showActionFeedback('❌', 'Failed to create upload link', 100, 'error');
+    setTimeout(hideActionFeedback, 2000);
+  }
+}
+
+// Create mobile upload modal
+function createMobileUploadModal() {
+  const modal = document.createElement('div');
+  modal.className = 'memory-modal mobile-upload-modal';
+  modal.innerHTML = `
+    <div class="modal-overlay"></div>
+    <div class="modal-content mobile-upload-content">
+      <div class="modal-header">
+        <div class="mobile-header-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          <h3>Upload from Mobile</h3>
+        </div>
+        <button class="modal-close">×</button>
+      </div>
+      <div class="modal-body mobile-upload-body">
+        <div class="mobile-info">
+          <div class="mobile-info-icon">📱</div>
+          <h4>Scan QR Code with Your Phone</h4>
+          <p>Scan this code to upload memories directly from your mobile device</p>
+        </div>
+        
+        <div class="qr-code-container" id="qrCodeContainer">
+          <div class="qr-code-placeholder">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <rect x="10" y="10" width="180" height="180" fill="white" stroke="#ccc" stroke-width="2"/>
+              <rect x="20" y="20" width="50" height="50" fill="#667eea"/>
+              <rect x="130" y="20" width="50" height="50" fill="#667eea"/>
+              <rect x="20" y="130" width="50" height="50" fill="#667eea"/>
+              <circle cx="100" cy="100" r="20" fill="#764ba2"/>
+              <text x="100" y="105" text-anchor="middle" fill="white" font-size="12" font-weight="bold">QR</text>
+            </svg>
+          </div>
+          <div class="qr-code-loading">
+            <div class="loading-spinner"></div>
+            <p>Generating secure upload link...</p>
+          </div>
+        </div>
+        
+        <div class="mobile-instructions">
+          <h4>How it works:</h4>
+          <ol>
+            <li>Open camera app on your phone</li>
+            <li>Scan the QR code above</li>
+            <li>Upload photos/videos from your phone</li>
+            <li>They'll appear here instantly!</li>
+          </ol>
+        </div>
+        
+        <div class="mobile-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Secure end-to-end connection. All data stays on your local network.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeMobileUpload()">Close</button>
+      </div>
+    </div>
+  `;
+  
+  return modal;
+}
+
+// Generate QR code for upload
+function generateUploadQRCode() {
+  // In a real implementation, you would:
+  // 1. Start a local WebSocket server
+  // 2. Generate a unique upload URL
+  // 3. Create QR code with that URL
+  // 4. Phone scans → Opens upload page
+  // 5. Phone uploads → Extension receives files
+  
+  setTimeout(() => {
+    const qrLoading = document.querySelector('.qr-code-loading');
+    const placeholder = document.querySelector('.qr-code-placeholder');
+    
+    if (qrLoading) qrLoading.style.display = 'none';
+    if (placeholder) {
+      placeholder.style.display = 'block';
+      
+      // Show "coming soon" message
+      const container = document.getElementById('qrCodeContainer');
+      if (container) {
+        container.innerHTML += `
+          <div class="qr-coming-soon">
+            <p><strong>🚀 Coming Soon!</strong></p>
+            <p>Mobile upload feature is in development. For now, you can:</p>
+            <ul>
+              <li>✅ Use browser's mobile view</li>
+              <li>✅ Upload from device storage</li>
+              <li>✅ Email files to yourself</li>
+            </ul>
+          </div>
+        `;
+      }
+    }
+  }, 1500);
+}
+
+// Close mobile upload
+function closeMobileUpload() {
+  const modal = document.querySelector('.mobile-upload-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// ============================================
 // GOOGLE DOCS INTEGRATION
 // ============================================
 
@@ -1812,122 +2211,6 @@ function hideActionFeedback() {
 }
 
 // ============================================
-// SUB-TAB NAVIGATION
-// ============================================
-
-// Switch memory sub-tab
-function switchMemorySubtab(subtabName) {
-  console.log('Switching to subtab:', subtabName);
-  
-  // Update sub-tab buttons
-  const subtabBtns = document.querySelectorAll('.memory-subtab');
-  subtabBtns.forEach(btn => {
-    if (btn.dataset.subtab === subtabName) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
-  });
-  
-  // Hide all subtab contents
-  const captureSubtab = document.getElementById('captureSubtab');
-  const searchSubtab = document.getElementById('searchSubtab');
-  const chatSubtab = document.getElementById('chatSubtab');
-  const gallerySubtab = document.getElementById('gallerySubtab');
-  
-  if (captureSubtab) captureSubtab.style.display = 'none';
-  if (searchSubtab) searchSubtab.style.display = 'none';
-  if (chatSubtab) chatSubtab.style.display = 'none';
-  if (gallerySubtab) gallerySubtab.style.display = 'none';
-  
-  // Show selected subtab
-  switch(subtabName) {
-    case 'capture':
-      if (captureSubtab) captureSubtab.style.display = 'flex';
-      break;
-    case 'search':
-      if (searchSubtab) searchSubtab.style.display = 'flex';
-      renderMemories();
-      break;
-    case 'chat':
-      if (chatSubtab) chatSubtab.style.display = 'flex';
-      break;
-    case 'gallery':
-      if (gallerySubtab) gallerySubtab.style.display = 'flex';
-      renderGallery();
-      break;
-  }
-}
-
-// Render gallery view
-function renderGallery() {
-  const galleryGrid = document.getElementById('galleryGrid');
-  const galleryEmptyState = document.getElementById('galleryEmptyState');
-  
-  if (!galleryGrid) return;
-  
-  // Get visual memories (images, screenshots, videos)
-  const visualMemories = Array.from(memories.values()).filter(m => 
-    m.type === 'image' || m.type === 'screenshot' || m.type === 'video'
-  );
-  
-  if (visualMemories.length === 0) {
-    if (galleryEmptyState) {
-      galleryEmptyState.style.display = 'flex';
-    }
-    // Clear other items
-    const items = galleryGrid.querySelectorAll('.gallery-item');
-    items.forEach(item => item.remove());
-    return;
-  }
-  
-  // Hide empty state
-  if (galleryEmptyState) {
-    galleryEmptyState.style.display = 'none';
-  }
-  
-  // Clear existing items
-  const items = galleryGrid.querySelectorAll('.gallery-item');
-  items.forEach(item => item.remove());
-  
-  // Render gallery items
-  visualMemories.forEach(memory => {
-    const galleryItem = createGalleryItem(memory);
-    galleryGrid.appendChild(galleryItem);
-  });
-}
-
-// Create gallery item
-function createGalleryItem(memory) {
-  const item = document.createElement('div');
-  item.className = 'gallery-item';
-  item.onclick = () => {
-    accessMemory(memory.id);
-    expandMemory(memory.id);
-  };
-  
-  const typeInfo = MEMORY_TYPES[memory.type] || MEMORY_TYPES.text;
-  
-  if (memory.type === 'video') {
-    item.innerHTML = `
-      <video src="${memory.mediaData}" muted></video>
-      <div class="gallery-item-overlay">
-        ${typeInfo.icon} ${escapeHtml(memory.title)}
-      </div>
-    `;
-  } else {
-    item.innerHTML = `
-      <img src="${memory.mediaData}" alt="${escapeHtml(memory.title)}" loading="lazy">
-      <div class="gallery-item-overlay">
-        ${typeInfo.icon} ${escapeHtml(memory.title)}
-      </div>
-    `;
-  }
-  
-  return item;
-}
-
-// ============================================
 // CHAT WITH MEMORIES FEATURE
 // ============================================
 
@@ -2103,7 +2386,55 @@ function simpleMemoryAnswer(question) {
 }
 
 // ============================================
-// INLINE CHAT INTERFACE (IN CHAT SUBTAB)
+// SUB-TAB NAVIGATION
+// ============================================
+
+// Switch memory sub-tab
+function switchMemorySubtab(subtabName) {
+  console.log('Switching to subtab:', subtabName);
+  
+  // Update sub-tab buttons
+  const subtabBtns = document.querySelectorAll('.memory-subtab');
+  subtabBtns.forEach(btn => {
+    if (btn.dataset.subtab === subtabName) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  // Hide all subtab contents
+  const captureSubtab = document.getElementById('captureSubtab');
+  const searchSubtab = document.getElementById('searchSubtab');
+  const chatSubtab = document.getElementById('chatSubtab');
+  const gallerySubtab = document.getElementById('gallerySubtab');
+  
+  if (captureSubtab) captureSubtab.style.display = 'none';
+  if (searchSubtab) searchSubtab.style.display = 'none';
+  if (chatSubtab) chatSubtab.style.display = 'none';
+  if (gallerySubtab) gallerySubtab.style.display = 'none';
+  
+  // Show selected subtab
+  switch(subtabName) {
+    case 'capture':
+      if (captureSubtab) captureSubtab.style.display = 'flex';
+      break;
+    case 'search':
+      if (searchSubtab) searchSubtab.style.display = 'flex';
+      renderMemories();
+      break;
+    case 'chat':
+      if (chatSubtab) chatSubtab.style.display = 'flex';
+      break;
+    case 'gallery':
+      if (gallerySubtab) gallerySubtab.style.display = 'flex';
+      renderGallery();
+      break;
+  }
+}
+
+// ============================================
+// INLINE CHAT (IN CHAT SUBTAB)
 // ============================================
 
 // Ask question in inline chat
@@ -2179,6 +2510,80 @@ async function sendChatInterfaceMessage() {
   }
 }
 
+// ============================================
+// GALLERY VIEW
+// ============================================
+
+// Render gallery view
+function renderGallery() {
+  const galleryGrid = document.getElementById('galleryGrid');
+  const galleryEmptyState = document.getElementById('galleryEmptyState');
+  
+  if (!galleryGrid) return;
+  
+  // Get visual memories (images, screenshots, videos)
+  const visualMemories = Array.from(memories.values()).filter(m => 
+    m.type === 'image' || m.type === 'screenshot' || m.type === 'video'
+  );
+  
+  if (visualMemories.length === 0) {
+    if (galleryEmptyState) {
+      galleryEmptyState.style.display = 'flex';
+    }
+    // Clear gallery items
+    const items = galleryGrid.querySelectorAll('.gallery-item');
+    items.forEach(item => item.remove());
+    return;
+  }
+  
+  // Hide empty state
+  if (galleryEmptyState) {
+    galleryEmptyState.style.display = 'none';
+  }
+  
+  // Clear existing items
+  const items = galleryGrid.querySelectorAll('.gallery-item');
+  items.forEach(item => item.remove());
+  
+  // Render gallery items
+  visualMemories.forEach(memory => {
+    const galleryItem = createGalleryItem(memory);
+    galleryGrid.appendChild(galleryItem);
+  });
+}
+
+// Create gallery item
+function createGalleryItem(memory) {
+  const item = document.createElement('div');
+  item.className = 'gallery-item';
+  item.onclick = () => {
+    accessMemory(memory.id);
+    expandMemory(memory.id);
+  };
+  
+  const typeInfo = MEMORY_TYPES[memory.type] || MEMORY_TYPES.text;
+  
+  if (memory.type === 'video') {
+    item.innerHTML = `
+      <video src="${memory.mediaData}" muted></video>
+      <div class="gallery-item-overlay">
+        <div class="gallery-type-badge">${typeInfo.icon}</div>
+        <div class="gallery-item-title">${escapeHtml(memory.title)}</div>
+      </div>
+    `;
+  } else {
+    item.innerHTML = `
+      <img src="${memory.mediaData}" alt="${escapeHtml(memory.title)}" loading="lazy">
+      <div class="gallery-item-overlay">
+        <div class="gallery-type-badge">${typeInfo.icon}</div>
+        <div class="gallery-item-title">${escapeHtml(memory.title)}</div>
+      </div>
+    `;
+  }
+  
+  return item;
+}
+
 // Global functions for HTML onclick handlers
 window.showAddMemoryModal = showAddMemoryModal;
 window.closeAddMemoryModal = closeAddMemoryModal;
@@ -2213,6 +2618,11 @@ window.switchMemorySubtab = switchMemorySubtab;
 window.askMemoryQuestionInline = askMemoryQuestionInline;
 window.sendChatInterfaceMessage = sendChatInterfaceMessage;
 window.renderGallery = renderGallery;
+window.scanBarcode = scanBarcode;
+window.closeBarcodeScanner = closeBarcodeScanner;
+window.saveScanResult = saveScanResult;
+window.connectMobile = connectMobile;
+window.closeMobileUpload = closeMobileUpload;
 
 // Verify all functions are available
 console.log('✅ Memory Agent functions loaded:');

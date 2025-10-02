@@ -50,6 +50,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+  
+  if (request.action === 'saveWebMemory') {
+    handleWebMemorySave(request.memory)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ error: error.message }));
+    return true;
+  }
 });
 
 // Handle screenshot capture
@@ -134,13 +141,34 @@ async function executeInActiveTab(functionName, parameters) {
   }
 }
 
+// Handle web memory save
+async function handleWebMemorySave(memory) {
+  try {
+    // Get existing memories
+    const result = await chrome.storage.local.get(['memories']);
+    const memories = result.memories || {};
+    
+    // Add new web memory
+    memories[memory.id] = memory;
+    
+    // Save back to storage
+    await chrome.storage.local.set({ memories: memories });
+    
+    console.log('Web memory saved:', memory.title);
+    return { success: true, id: memory.id };
+  } catch (error) {
+    console.error('Error saving web memory:', error);
+    throw error;
+  }
+}
+
 // Listen for tab updates to reinject content script if needed
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && !tab.url.startsWith('chrome://')) {
     // Optionally reinject content script on page navigation
     chrome.scripting.executeScript({
       target: { tabId: tabId },
-      files: ['scripts/content.js']
+      files: ['scripts/content.js', 'scripts/web-capture.js']
     }).catch(() => {
       // Silently fail if injection is not allowed
     });

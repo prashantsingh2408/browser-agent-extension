@@ -28,13 +28,19 @@
   --gray-50: #f8f9fa;
   --white: #ffffff;
   
-  /* Enhanced Shadows - Visual hierarchy */
+  /* Enhanced Shadows - Visual hierarchy (Law of Proximity) */
   --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
   --shadow: 0 2px 4px 0 rgba(0,0,0,0.08);
   --shadow-md: 0 4px 8px 0 rgba(0,0,0,0.12);
   --shadow-lg: 0 8px 16px 0 rgba(0,0,0,0.15);
   --shadow-xl: 0 12px 24px 0 rgba(0,0,0,0.18);
   --shadow-glow: 0 0 20px rgba(66, 133, 244, 0.3);
+  --shadow-focus: 0 0 0 3px rgba(66, 133, 244, 0.2);
+  
+  /* Fitts's Law - Minimum touch targets */
+  --min-touch-target: 44px;
+  --button-padding: 12px 20px;
+  --icon-button-size: 40px;
   
   /* Spacing - Golden Ratio inspired */
   --spacing-xs: 4px;
@@ -1847,6 +1853,8 @@ body {
   border-bottom: 2px solid var(--gray-200);
   padding: 0 var(--spacing-lg);
   flex-shrink: 0;
+  /* Miller's Law - Currently 6 tabs (within 7±2 limit) */
+  /* Chunking - Grouped by functionality: Capture, Search, Chat, Gallery, Insights, Learning */
 }
 
 .memory-subtab {
@@ -1959,6 +1967,23 @@ body {
   min-height: 130px;
   position: relative;
   overflow: hidden;
+  /* Aesthetic-Usability Effect */
+  box-shadow: var(--shadow);
+}
+
+/* Von Restorff Effect - Highlight primary actions */
+.control-btn.primary-action {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  box-shadow: var(--shadow-glow);
+}
+
+.control-btn.primary-action:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-xl);
 }
 
 /* Fix click handling - all child elements should be unclickable except for close buttons */
@@ -8129,8 +8154,9 @@ body {
 
 .suggestion-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm);
 }
 
 .suggestion-card {
@@ -8503,23 +8529,29 @@ body {
 /* Memory Insights Styling */
 .insight-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-sm);
 }
 
 .insight-card {
   background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 20px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-xs);
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
   position: relative;
+  overflow: hidden;
 }
 
 .insight-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+  background: var(--primary-light);
 }
 
 .insight-header {
@@ -8577,23 +8609,29 @@ body {
 
 .connections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm);
 }
 
 .connection-card {
   background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-xs);
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
 }
 
 .connection-card:hover {
-  border-color: #667eea;
-  background: #f8f9fa;
-  transform: translateY(-1px);
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .connection-header {
@@ -8835,4 +8873,519 @@ body {
 
 .action-btn.secondary:hover {
   background: #e9ecef;
+}
+
+/* Learning Memory Styling */
+.learning-memory-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.learning-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.learning-title h3 {
+  margin: 0;
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+.learning-subtitle {
+  font-size: 0.9em;
+  opacity: 0.9;
+  margin-left: auto;
+}
+
+.learning-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.learning-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.learning-btn.primary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.learning-btn.primary:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.learning-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.learning-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.learning-features {
+  margin-bottom: var(--spacing-2xl);
+  padding: 0 var(--spacing);
+}
+
+.learning-features h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+  color: #495057;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.learning-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm);
+}
+
+.learning-feature-card {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-xs);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.learning-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.feature-icon {
+  font-size: 2em;
+  margin-bottom: 12px;
+}
+
+.learning-feature-card h5 {
+  margin: 0 0 8px 0;
+  color: #495057;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.learning-feature-card p {
+  color: #6c757d;
+  font-size: 0.9em;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.feature-shortcut {
+  background: #f8f9fa;
+  color: #667eea;
+  padding: 6px 10px;
+  border-radius: 15px;
+  font-size: 0.8em;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.learning-analytics {
+  margin-bottom: var(--spacing-2xl);
+  padding: 0 var(--spacing);
+}
+
+.learning-analytics h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+  color: #495057;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.learning-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-sm);
+}
+
+.learning-stat-card {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-xs);
+  text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.learning-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.stat-icon {
+  font-size: 2em;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  color: #6c757d;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.recent-learning h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px 0;
+  color: #495057;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.recent-learning-list {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.learning-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.empty-icon {
+  font-size: 3em;
+  margin-bottom: 16px;
+}
+
+.learning-empty p {
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.learning-empty small {
+  display: block;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.recent-learning-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f1f3f4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recent-learning-item:hover {
+  background: #f8f9fa;
+  transform: translateX(4px);
+}
+
+.recent-learning-item:last-child {
+  border-bottom: none;
+}
+
+.learning-item-icon {
+  font-size: 1.2em;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.learning-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.learning-item-title {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.learning-item-meta {
+  font-size: 0.8em;
+  color: #6c757d;
+  margin-bottom: 6px;
+}
+
+.learning-item-topics {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.topic-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7em;
+  font-weight: 500;
+}
+
+/* ============================================
+   GRID CONTAINER SPACING FIXES
+   ============================================ */
+
+/* Universal grid container spacing fix */
+.memory-subtab-content {
+  padding: var(--spacing);
+}
+
+.memory-subtab-content > * {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Ensure all grid containers have proper spacing */
+[class*="-grid"], [class*="-cards"] {
+  padding: var(--spacing-sm) !important;
+  box-sizing: border-box;
+}
+
+/* Ensure all cards have consistent spacing */
+[class*="-card"] {
+  margin: var(--spacing-xs) !important;
+  box-sizing: border-box;
+}
+
+/* ============================================
+   LAWS OF UX ENHANCEMENTS
+   ============================================ */
+
+/* Aesthetic-Usability Effect - Enhanced visual appeal */
+.memory-item {
+  transition: all 0.3s var(--easing);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.memory-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+}
+
+/* Serial Position Effect - Highlight first and last items */
+.memory-item:first-child {
+  border-left: 4px solid var(--primary);
+  background: linear-gradient(90deg, var(--primary-light) 0%, white 8%);
+  box-shadow: var(--shadow-glow);
+}
+
+.memory-item:last-child {
+  border-bottom: 3px solid var(--gray-300);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing);
+}
+
+/* Von Restorff Effect - Make important actions stand out */
+.control-btn[onclick*="captureScreenshotMemory"] {
+  background: linear-gradient(135deg, var(--primary-light) 0%, white 100%);
+  border-color: var(--primary);
+  position: relative;
+}
+
+.control-btn[onclick*="captureScreenshotMemory"]::before {
+  content: "⭐";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+  color: var(--primary);
+}
+
+/* Fitts's Law - Ensure all interactive elements meet minimum size */
+button, .clickable, .memory-subtab, .control-btn {
+  min-height: var(--min-touch-target);
+  min-width: var(--min-touch-target);
+}
+
+/* Focus states for accessibility and usability */
+button:focus, .control-btn:focus, .memory-subtab:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  transform: scale(1.02);
+}
+
+/* Doherty Threshold - Fast visual feedback */
+.loading-state {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Goal-Gradient Effect - Progress indicators */
+.progress-indicator {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+  height: 4px;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Chunking - Visual grouping of related elements */
+.memory-section {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  background: white;
+  box-shadow: var(--shadow);
+}
+
+.memory-section:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+}
+
+/* Law of Proximity - Group related elements closer */
+.memory-meta {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  margin-top: var(--spacing-xs);
+}
+
+.memory-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+/* Cognitive Load Reduction - Clear visual hierarchy */
+.memory-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--gray-900);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-xs);
+}
+
+.memory-content {
+  font-size: 0.9em;
+  color: var(--gray-700);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-sm);
+}
+
+.memory-timestamp {
+  font-size: 0.8em;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+/* Jakob's Law - Familiar interaction patterns */
+.memory-item:hover .memory-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.memory-actions {
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.2s ease;
+}
+
+/* Peak-End Rule - Smooth animations for better experience */
+* {
+  scroll-behavior: smooth;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tesler's Law - Hide complexity behind progressive disclosure */
+.advanced-options {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.advanced-options.expanded {
+  max-height: 500px;
+}
+
+/* Working Memory - Reduce cognitive load with clear states */
+.memory-item.selected {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.memory-item.processing {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.memory-item.processing::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(66, 133, 244, 0.1), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

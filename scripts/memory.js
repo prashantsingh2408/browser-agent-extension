@@ -46,7 +46,7 @@ async function initializeMemory() {
     setupMemoryKeyboardShortcuts();
     
     // Initialize default sub-tab
-    switchMemorySubtab('capture');
+    switchMemorySubtab('chat');
     
     // Render memories
     renderMemories();
@@ -2530,12 +2530,14 @@ function switchMemorySubtab(subtabName) {
   const chatSubtab = document.getElementById('chatSubtab');
   const gallerySubtab = document.getElementById('gallerySubtab');
   const laneSubtab = document.getElementById('laneSubtab');
+  const learningSubtab = document.getElementById('learningSubtab');
   
   if (captureSubtab) captureSubtab.style.display = 'none';
   if (searchSubtab) searchSubtab.style.display = 'none';
   if (chatSubtab) chatSubtab.style.display = 'none';
   if (gallerySubtab) gallerySubtab.style.display = 'none';
   if (laneSubtab) laneSubtab.style.display = 'none';
+  if (learningSubtab) learningSubtab.style.display = 'none';
   
   // Show selected subtab
   switch(subtabName) {
@@ -2556,6 +2558,10 @@ function switchMemorySubtab(subtabName) {
     case 'lane':
       if (laneSubtab) laneSubtab.style.display = 'flex';
       initializeMemoryLane();
+      break;
+    case 'learning':
+      if (learningSubtab) learningSubtab.style.display = 'flex';
+      updateLearningStats(); // Now handles browsing memory stats
       break;
   }
 }
@@ -4039,6 +4045,173 @@ window.closeConnectionModal = closeConnectionModal;
 window.searchByConnection = searchByConnection;
 window.createJourneyFromConnection = createJourneyFromConnection;
 window.viewMemoryDetails = viewMemoryDetails;
+
+  // ============================================
+// LEARNING MEMORY FUNCTIONS
+// ============================================
+
+function showBrowsingGuide() {
+  alert(`🌐 Browsing Memory Guide
+
+Browsing Memory captures content while you browse the web:
+
+📝 Text Selection: Select any text on any webpage to save
+🖱️ Right-Click Save: Right-click content to save directly
+🎥 YouTube Moments: Save video moments with Ctrl+Shift+Y
+🌐 Full Page Save: Save entire pages with Ctrl+Shift+L
+💬 AI Prompts: Save prompts from AI tools with Ctrl+Shift+P
+⚡ Auto-Capture: Get suggestions to save interesting content
+
+Start browsing and your web memories will be captured automatically!`);
+}
+
+// Keep old function for compatibility
+function showLearningGuide() {
+  showBrowsingGuide();
+}
+
+function viewBrowsingStats() {
+  // This would show detailed browsing analytics
+  alert(`📊 Browsing Memory Statistics
+
+This feature will show:
+• Web content saved over time
+• Most visited domains and sites
+• Types of content captured (text, video, prompts)
+• Browsing patterns and habits
+• Popular saved content
+
+Coming soon in the next update!`);
+}
+
+// Keep old function for compatibility
+function viewLearningStats() {
+  viewBrowsingStats();
+}
+
+function updateLearningStats() {
+  // Update browsing memory statistics in the UI
+  const browsingMemories = Array.from(memories.values()).filter(m => 
+    m.category === 'web' || m.type === 'web_selection' || m.type === 'youtube_learning' || 
+    m.type === 'prompt_capture' || m.type === 'page_capture' || m.source === 'web_capture'
+  );
+  
+  // Count different types of browsing memories
+  const textSelections = browsingMemories.filter(m => m.type === 'web_selection' || m.source === 'web_selection').length;
+  const videoMoments = browsingMemories.filter(m => m.type === 'youtube_learning' || m.source === 'youtube').length;
+  const aiPrompts = browsingMemories.filter(m => m.type === 'prompt_capture' || m.source === 'prompt_capture').length;
+  
+  // Update UI
+  const statsGrid = document.getElementById('learningStatsGrid');
+  if (statsGrid) {
+    const statCards = statsGrid.querySelectorAll('.learning-stat-card');
+    if (statCards[0]) statCards[0].querySelector('.stat-value').textContent = browsingMemories.length;
+    if (statCards[1]) statCards[1].querySelector('.stat-value').textContent = textSelections;
+    if (statCards[2]) statCards[2].querySelector('.stat-value').textContent = videoMoments;
+    if (statCards[3]) statCards[3].querySelector('.stat-value').textContent = aiPrompts;
+  }
+  
+  updateRecentLearning(browsingMemories);
+}
+
+function calculateLearningStreak() {
+  // Simple streak calculation - days with learning activity
+  const learningMemories = Array.from(memories.values()).filter(m => 
+    m.category === 'learning' || m.type === 'learning' || m.type === 'learning_note'
+  );
+  
+  if (learningMemories.length === 0) return 0;
+  
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const hasLearningToday = learningMemories.some(m => {
+    const memoryDate = new Date(m.createdAt);
+    return memoryDate.toDateString() === today.toDateString();
+  });
+  
+  const hasLearningYesterday = learningMemories.some(m => {
+    const memoryDate = new Date(m.createdAt);
+    return memoryDate.toDateString() === yesterday.toDateString();
+  });
+  
+  if (hasLearningToday && hasLearningYesterday) return 2;
+  if (hasLearningToday) return 1;
+  return 0;
+}
+
+function updateRecentLearning(learningMemories) {
+  const recentList = document.getElementById('recentLearningList');
+  if (!recentList) return;
+  
+  if (learningMemories.length === 0) {
+    recentList.innerHTML = `
+      <div class="learning-empty">
+        <div class="empty-icon">🎓</div>
+        <p>Start learning and your memories will appear here!</p>
+        <small>Visit any tutorial, documentation, or educational site to begin</small>
+      </div>
+    `;
+    return;
+  }
+  
+  // Show recent 5 learning memories
+  const recent = learningMemories
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+  
+  recentList.innerHTML = recent.map(memory => `
+    <div class="recent-learning-item" onclick="viewMemoryDetails('${memory.id}')">
+      <div class="learning-item-icon">${getMemoryTypeIcon(memory)}</div>
+      <div class="learning-item-content">
+        <div class="learning-item-title">${memory.title}</div>
+        <div class="learning-item-meta">
+          ${memory.learningData?.domain || 'Unknown'} • 
+          ${memory.learningData?.readingTime || 1}min read • 
+          ${formatRelativeTime(memory.createdAt)}
+        </div>
+        ${memory.learningData?.topics ? 
+          `<div class="learning-item-topics">
+            ${memory.learningData.topics.slice(0, 3).map(topic => 
+              `<span class="topic-tag">${topic}</span>`
+            ).join('')}
+          </div>` : ''
+        }
+      </div>
+    </div>
+  `).join('');
+}
+
+function getMemoryTypeIcon(memory) {
+  if (memory.type === 'video_learning') return '🎥';
+  if (memory.type === 'code_snippet') return '💻';
+  if (memory.type === 'learning_note') return '📝';
+  if (memory.learningData?.contentType === 'Video') return '🎥';
+  if (memory.learningData?.contentType === 'Code') return '💻';
+  if (memory.learningData?.contentType === 'Article') return '📄';
+  return '🎓';
+}
+
+function formatRelativeTime(timestamp) {
+  const now = new Date();
+  const time = new Date(timestamp);
+  const diffMs = now - time;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+// Export browsing memory functions
+window.showBrowsingGuide = showBrowsingGuide;
+window.viewBrowsingStats = viewBrowsingStats;
+window.showLearningGuide = showLearningGuide; // Compatibility
+window.viewLearningStats = viewLearningStats; // Compatibility
+window.updateLearningStats = updateLearningStats;
 
 // Demo helper exports
 window.clearAllMemories = clearAllMemories;

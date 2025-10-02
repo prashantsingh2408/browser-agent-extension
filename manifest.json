@@ -50,7 +50,9 @@
         "<all_urls>"
       ],
       "js": [
-        "scripts/content.js"
+        "scripts/content.js",
+        "scripts/web-capture.js",
+        "scripts/learning-memory.js"
       ],
       "run_at": "document_idle"
     }

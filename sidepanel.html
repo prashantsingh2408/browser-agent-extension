@@ -681,7 +681,16 @@
         
         <!-- Memory Sub-Tabs Navigation -->
         <div class="memory-subtabs">
-          <button class="memory-subtab active" data-subtab="capture">
+          <button class="memory-subtab active" data-subtab="chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <circle cx="9" cy="9" r="2"/>
+              <circle cx="15" cy="9" r="2"/>
+              <path d="M8 13s1.5 2 4 2 4-2 4-2"/>
+            </svg>
+            Agent
+          </button>
+          <button class="memory-subtab" data-subtab="capture">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 5v14M5 12h14"/>
             </svg>
@@ -693,12 +702,6 @@
               <path d="m21 21-4.35-4.35"/>
             </svg>
             Search
-          </button>
-          <button class="memory-subtab" data-subtab="chat">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            Chat
           </button>
           <button class="memory-subtab" data-subtab="gallery">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -714,10 +717,18 @@
             </svg>
             Insights
           </button>
+          <button class="memory-subtab" data-subtab="learning">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            Browsing
+          </button>
         </div>
         
         <!-- Capture Subtab -->
-        <div id="captureSubtab" class="memory-subtab-content" style="display: flex;">
+        <div id="captureSubtab" class="memory-subtab-content" style="display: none;">
         
         <!-- Memory Control Panel -->
         <div class="memory-control-panel">
@@ -732,7 +743,7 @@
               <span>Capture</span>
             </div>
             <div class="control-buttons">
-              <button onclick="captureScreenshotMemory()" class="control-btn screenshot-btn" data-tooltip="Capture current webpage instantly">
+              <button onclick="captureScreenshotMemory()" class="control-btn screenshot-btn primary-action" data-tooltip="Capture current webpage instantly">
                 <div class="btn-shortcut">Ctrl+S</div>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -1022,12 +1033,12 @@
         </div><!-- End Search Subtab -->
         
         <!-- Chat Subtab -->
-        <div id="chatSubtab" class="memory-subtab-content" style="display: none;">
+        <div id="chatSubtab" class="memory-subtab-content" style="display: flex;">
           <div class="chat-interface-container">
             <div class="chat-interface-header">
-              <div class="chat-header-icon">💬</div>
+              <div class="chat-header-icon">🤖</div>
               <div class="chat-header-text">
-                <h3>Chat with Your Memories</h3>
+                <h3>Memory Agent</h3>
                 <p>Ask questions and get instant answers from your stored knowledge</p>
               </div>
             </div>
@@ -1284,6 +1295,162 @@
           </div>
           
         </div><!-- End Memory Lane Subtab -->
+        
+        <!-- Browsing Memory Subtab -->
+        <div id="learningSubtab" class="memory-subtab-content" style="display: none;">
+          
+          <!-- Browsing Memory Header -->
+          <div class="learning-memory-header">
+            <div class="learning-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+              <h3>Browsing Memory</h3>
+              <span class="learning-subtitle">Save content while browsing the web</span>
+            </div>
+            
+            <!-- Browsing Controls -->
+            <div class="learning-controls">
+              <button class="learning-btn primary" onclick="showBrowsingGuide()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <path d="M12 17h.01"/>
+                </svg>
+                How It Works
+              </button>
+              <button class="learning-btn secondary" onclick="viewBrowsingStats()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3v18h18"/>
+                  <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+                </svg>
+                Browsing Stats
+              </button>
+            </div>
+          </div>
+          
+          <!-- Browsing Features -->
+          <div class="learning-features">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Smart Browsing Capture
+            </h4>
+            
+            <div class="learning-feature-grid">
+              
+              <!-- Text Selection -->
+              <div class="learning-feature-card">
+                <div class="feature-icon">📝</div>
+                <h5>Text Selection</h5>
+                <p>Select any text on any webpage to save with context and source information</p>
+                <div class="feature-shortcut">Select text + click popup</div>
+              </div>
+              
+              <!-- Right Click Save -->
+              <div class="learning-feature-card">
+                <div class="feature-icon">🖱️</div>
+                <h5>Right-Click Save</h5>
+                <p>Right-click on images, links, or content to save directly to your memories</p>
+                <div class="feature-shortcut">Right-click + Save to Memory</div>
+              </div>
+              
+              <!-- YouTube Capture -->
+              <div class="learning-feature-card">
+                <div class="feature-icon">🎥</div>
+                <h5>YouTube Moments</h5>
+                <p>Save YouTube video moments with timestamps while watching</p>
+                <div class="feature-shortcut">Ctrl+Shift+Y on YouTube</div>
+              </div>
+              
+              <!-- Page Capture -->
+              <div class="learning-feature-card">
+                <div class="feature-icon">🌐</div>
+                <h5>Full Page Save</h5>
+                <p>Save entire web pages with smart content extraction and analysis</p>
+                <div class="feature-shortcut">Ctrl+Shift+L</div>
+              </div>
+              
+              <!-- Prompt Capture -->
+              <div class="learning-feature-card">
+                <div class="feature-icon">💬</div>
+                <h5>AI Prompts</h5>
+                <p>Save prompts from ChatGPT, Claude, and other AI tools for reuse</p>
+                <div class="feature-shortcut">Ctrl+Shift+P on AI sites</div>
+              </div>
+              
+              <!-- Auto Capture -->
+              <div class="learning-feature-card">
+                <div class="feature-icon">⚡</div>
+                <h5>Smart Auto-Capture</h5>
+                <p>Automatically suggests saving interesting content while you browse</p>
+                <div class="feature-shortcut">Auto-prompts on relevant sites</div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <!-- Browsing Analytics -->
+          <div class="learning-analytics">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18"/>
+                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+              </svg>
+              Your Browsing Memory
+            </h4>
+            
+            <div class="learning-stats-grid" id="learningStatsGrid">
+              <!-- Dynamic browsing stats will be inserted here -->
+              <div class="learning-stat-card">
+                <div class="stat-icon">🌐</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Web Memories</div>
+              </div>
+              
+              <div class="learning-stat-card">
+                <div class="stat-icon">📝</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Text Selections</div>
+              </div>
+              
+              <div class="learning-stat-card">
+                <div class="stat-icon">🎥</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">Video Moments</div>
+              </div>
+              
+              <div class="learning-stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-value">0</div>
+                <div class="stat-label">AI Prompts</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Recent Browsing -->
+          <div class="recent-learning">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Recent Browsing Memory
+            </h4>
+            <div class="recent-learning-list" id="recentLearningList">
+              <!-- Recent browsing memories will be inserted here -->
+              <div class="learning-empty">
+                <div class="empty-icon">🌐</div>
+                <p>Start browsing and saving content - your memories will appear here!</p>
+                <small>Select text, save pages, or capture YouTube moments while browsing</small>
+              </div>
+            </div>
+          </div>
+          
+        </div><!-- End Learning Subtab -->
         
       </div>
       

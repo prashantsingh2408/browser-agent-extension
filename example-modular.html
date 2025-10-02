@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Agent - Modular Example</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 800px;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .demo-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 2px solid #f0f0f0;
+      border-radius: 10px;
+    }
+
+    .demo-section h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .output {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .status {
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(100px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .modules-status {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .module-badge {
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .module-badge.loaded {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .module-badge .icon {
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 Browser Agent - Modular Architecture</h1>
+      <p>Example demonstrating the new refactored module system</p>
+    </div>
+
+    <div class="content">
+      <!-- Module Status -->
+      <div class="demo-section">
+        <h3>📦 Module Status</h3>
+        <div class="modules-status" id="moduleStatus">
+          <div class="module-badge">
+            <div class="icon">⏳</div>
+            <div>Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Bus Demo -->
+      <div class="demo-section">
+        <h3>📡 Event Bus Demo</h3>
+        <p>Decoupled communication between modules using pub/sub pattern</p>
+        <div class="button-group">
+          <button onclick="testEventBus()">Emit Event</button>
+          <button onclick="testEventOnce()">Emit Once</button>
+          <button onclick="clearEventLog()">Clear Log</button>
+        </div>
+        <div class="output" id="eventOutput">Events will appear here...</div>
+      </div>
+
+      <!-- Storage Demo -->
+      <div class="demo-section">
+        <h3>💾 Storage Manager Demo</h3>
+        <p>Unified storage interface with caching and TTL support</p>
+        <div class="button-group">
+          <button onclick="testStorage()">Save Data</button>
+          <button onclick="testStorageGet()">Load Data</button>
+          <button onclick="testStorageTTL()">Save with TTL</button>
+          <button onclick="testStorageStats()">Show Stats</button>
+        </div>
+        <div class="output" id="storageOutput">Storage operations will appear here...</div>
+      </div>
+
+      <!-- Chat Manager Demo -->
+      <div class="demo-section">
+        <h3>💬 Chat Manager Demo</h3>
+        <p>Session and message management</p>
+        <div class="button-group">
+          <button onclick="testChatSession()">Create Session</button>
+          <button onclick="testAddMessage()">Add Message</button>
+          <button onclick="testChatStats()">Show Stats</button>
+          <button onclick="testExportSession()">Export Session</button>
+        </div>
+        <div class="output" id="chatOutput">Chat operations will appear here...</div>
+      </div>
+
+      <!-- Logger Demo -->
+      <div class="demo-section">
+        <h3>📝 Logger Demo</h3>
+        <p>Consistent logging with context and history</p>
+        <div class="button-group">
+          <button onclick="testLogger()">Test Logging</button>
+          <button onclick="testLogHistory()">Show History</button>
+          <button onclick="testLogGroups()">Group Logs</button>
+        </div>
+        <div class="output" id="loggerOutput">Check console for logs...</div>
+      </div>
+
+      <!-- DOM Helpers Demo -->
+      <div class="demo-section">
+        <h3>🎨 DOM Helpers Demo</h3>
+        <p>Utilities for DOM manipulation</p>
+        <div class="button-group">
+          <button onclick="testDOMCreate()">Create Element</button>
+          <button onclick="testDOMAnimate()">Animate</button>
+          <button onclick="testDOMCopy()">Copy to Clipboard</button>
+          <button onclick="testDOMFormat()">Format Utilities</button>
+        </div>
+        <div class="output" id="domOutput">DOM operations will appear here...</div>
+      </div>
+
+      <!-- App Status -->
+      <div class="demo-section">
+        <h3>ℹ️ Application Status</h3>
+        <div class="output" id="appStatus">Loading application status...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Modular Scripts -->
+  <script src="scripts/utils/logger.js"></script>
+  <script src="scripts/utils/event-bus.js"></script>
+  <script src="scripts/utils/storage.js"></script>
+  <script src="scripts/utils/dom-helpers.js"></script>
+  <script src="scripts/services/ai-service.js"></script>
+  <script src="scripts/features/chat/chat-manager.js"></script>
+  <script src="scripts/features/chat/chat-ui.js"></script>
+  <script src="scripts/core/app-controller.js"></script>
+  <script src="scripts/main.js"></script>
+
+  <script>
+    // Demo Functions
+    let eventCounter = 0;
+
+    // Event Bus Tests
+    function testEventBus() {
+      eventCounter++;
+      window.EventBus.emit('demo:event', { 
+        message: `Test event #${eventCounter}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    function testEventOnce() {
+      window.EventBus.once('demo:once', (data) => {
+        appendToOutput('eventOutput', '🎯 Once event received: ' + JSON.stringify(data));
+      });
+      window.EventBus.emit('demo:once', { message: 'This will only be received once' });
+    }
+
+    function clearEventLog() {
+      document.getElementById('eventOutput').textContent = 'Event log cleared';
+    }
+
+    // Storage Tests
+    async function testStorage() {
+      const data = { 
+        user: 'Demo User', 
+        timestamp: Date.now(),
+        preferences: { theme: 'dark' }
+      };
+      await window.StorageManager.set('demo_data', data);
+      appendToOutput('storageOutput', '✅ Saved: ' + JSON.stringify(data, null, 2));
+    }
+
+    async function testStorageGet() {
+      const data = await window.StorageManager.get('demo_data', { message: 'No data found' });
+      appendToOutput('storageOutput', '📥 Retrieved: ' + JSON.stringify(data, null, 2));
+    }
+
+    async function testStorageTTL() {
+      await window.StorageManager.set('temp_data', { expires: 'in 5 seconds' }, { ttl: 5000 });
+      appendToOutput('storageOutput', '⏰ Saved with 5 second TTL');
+    }
+
+    async function testStorageStats() {
+      const keys = await window.StorageManager.keys();
+      appendToOutput('storageOutput', `📊 Storage Keys (${keys.length}): ` + keys.join(', '));
+    }
+
+    // Chat Tests
+    function testChatSession() {
+      const session = window.ChatManager.createSession();
+      appendToOutput('chatOutput', '✅ Created session: ' + JSON.stringify(session, null, 2));
+    }
+
+    function testAddMessage() {
+      const current = window.ChatManager.getCurrentSession();
+      if (current) {
+        window.ChatManager.addMessage(current.id, 'user', 'Hello from demo!');
+        appendToOutput('chatOutput', '💬 Added message to session: ' + current.id);
+      } else {
+        appendToOutput('chatOutput', '❌ No active session. Create one first.');
+      }
+    }
+
+    function testChatStats() {
+      const stats = window.ChatManager.getChatStats();
+      appendToOutput('chatOutput', '📊 Chat Stats:\n' + JSON.stringify(stats, null, 2));
+    }
+
+    function testExportSession() {
+      const current = window.ChatManager.getCurrentSession();
+      if (current) {
+        const exported = window.ChatManager.exportSession(current.id);
+        appendToOutput('chatOutput', '📤 Exported session:\n' + JSON.stringify(exported, null, 2));
+      } else {
+        appendToOutput('chatOutput', '❌ No active session to export.');
+      }
+    }
+
+    // Logger Tests
+    function testLogger() {
+      window.Logger.debug('Debug message from demo');
+      window.Logger.info('Info message from demo');
+      window.Logger.warn('Warning message from demo');
+      window.Logger.error('Error message from demo');
+      window.Logger.success('Success message from demo');
+      appendToOutput('loggerOutput', '✅ Logged 5 messages at different levels. Check console.');
+    }
+
+    function testLogHistory() {
+      const history = window.Logger.getHistory();
+      appendToOutput('loggerOutput', `📜 Log History (${history.length} entries):\n` + 
+        JSON.stringify(history.slice(-5), null, 2));
+    }
+
+    function testLogGroups() {
+      window.Logger.group('Demo Group');
+      window.Logger.info('Message inside group');
+      window.Logger.info('Another message');
+      window.Logger.groupEnd();
+      appendToOutput('loggerOutput', '✅ Created log group. Check console.');
+    }
+
+    // DOM Helper Tests
+    function testDOMCreate() {
+      const el = window.DOMHelpers.createElement('div', {
+        className: 'demo-element',
+        style: 'padding: 10px; background: #e3f2fd; border-radius: 5px; margin-top: 10px;'
+      }, ['Created with DOMHelpers.createElement() 🎉']);
+      
+      document.getElementById('domOutput').appendChild(el);
+    }
+
+    function testDOMAnimate() {
+      const output = document.getElementById('domOutput');
+      window.DOMHelpers.animate(output, [
+        { transform: 'scale(1)', background: '#f8f9fa' },
+        { transform: 'scale(1.05)', background: '#e3f2fd' },
+        { transform: 'scale(1)', background: '#f8f9fa' }
+      ], { duration: 500 });
+    }
+
+    async function testDOMCopy() {
+      const success = await window.DOMHelpers.copyToClipboard('Copied from Browser Agent Demo!');
+      appendToOutput('domOutput', success ? '✅ Copied to clipboard!' : '❌ Copy failed');
+    }
+
+    function testDOMFormat() {
+      const size = window.DOMHelpers.formatFileSize(1234567);
+      const date = window.DOMHelpers.formatDate(new Date(), 'relative');
+      const id = window.DOMHelpers.generateId('demo');
+      
+      appendToOutput('domOutput', 
+        `File Size: ${size}\n` +
+        `Relative Time: ${date}\n` +
+        `Generated ID: ${id}`
+      );
+    }
+
+    // Helper function
+    function appendToOutput(id, text) {
+      const output = document.getElementById(id);
+      output.textContent = text + '\n\n' + output.textContent;
+    }
+
+    // Update module status
+    function updateModuleStatus() {
+      const modules = [
+        { name: 'Logger', icon: '📝', check: () => typeof window.Logger !== 'undefined' },
+        { name: 'EventBus', icon: '📡', check: () => typeof window.EventBus !== 'undefined' },
+        { name: 'Storage', icon: '💾', check: () => typeof window.StorageManager !== 'undefined' },
+        { name: 'DOMHelpers', icon: '🎨', check: () => typeof window.DOMHelpers !== 'undefined' },
+        { name: 'AIService', icon: '🤖', check: () => typeof window.AIService !== 'undefined' },
+        { name: 'ChatManager', icon: '💬', check: () => typeof window.ChatManager !== 'undefined' },
+        { name: 'AppController', icon: '🎯', check: () => typeof window.AppController !== 'undefined' }
+      ];
+
+      const statusHtml = modules.map(mod => {
+        const loaded = mod.check();
+        return `
+          <div class="module-badge ${loaded ? 'loaded' : ''}">
+            <div class="icon">${mod.icon}</div>
+            <div>${mod.name}</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('moduleStatus').innerHTML = statusHtml;
+    }
+
+    // Update app status
+    function updateAppStatus() {
+      if (window.APP && window.APP.ready) {
+        const status = window.AppController.getStatus();
+        document.getElementById('appStatus').textContent = JSON.stringify(status, null, 2);
+      } else {
+        setTimeout(updateAppStatus, 100);
+      }
+    }
+
+    // Subscribe to events
+    if (window.EventBus) {
+      window.EventBus.on('demo:event', (data) => {
+        appendToOutput('eventOutput', '📨 Received: ' + JSON.stringify(data));
+      });
+
+      window.EventBus.on('app:ready', () => {
+        console.log('🎉 Application is ready!');
+        updateModuleStatus();
+        updateAppStatus();
+      });
+    }
+
+    // Initialize
+    setTimeout(() => {
+      updateModuleStatus();
+      updateAppStatus();
+    }, 1000);
+
+    console.log('💡 Demo page loaded. Try the buttons to test each module!');
+    console.log('💡 All modules are accessible via window object (e.g., window.EventBus)');
+  </script>
+</body>
+</html>
+

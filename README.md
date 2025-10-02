@@ -71,6 +71,12 @@ A powerful AI assistant available as **both** a Chrome Extension and Web App, fe
 
 ## 📚 Documentation
 
+### 🆕 Architecture & Refactoring (v2.0)
+- **[Quick Start Guide](QUICK-START.md)** - Get started in 5 minutes
+- **[Refactoring Documentation](REFACTORING.md)** - Complete refactoring guide
+- **[Architecture Overview](ARCHITECTURE.md)** - System architecture and design
+- **[Example App](example-modular.html)** - Interactive demo of new modules
+
 ### Core Features
 - [Chat Features](CHATBOT_FEATURES.md) - Complete chatbot functionality
 - [Agent Feature](docs/AGENT-FEATURE.md) - AI Agent documentation

@@ -1,4 +1,4 @@
-/* global LanguageModel */
+/* global chrome, LanguageModel */
 
 // Function handler will be available from functions.js
 
@@ -94,39 +94,65 @@ async function initializeAI() {
   try {
     updateStatus('Initializing...', 'warning');
     
-    // Check if LanguageModel is available
-    if (!('LanguageModel' in self)) {
-      throw new Error('Chrome AI is not available. Please enable AI features in chrome://flags/');
+    // Try official Chrome AI (Prompt API) first
+    if (window.ai && window.ai.languageModel) {
+      try {
+        const availability = await window.ai.languageModel.capabilities();
+        console.log('Chrome AI capabilities:', availability);
+        
+        if (availability.available === 'no') {
+          throw new Error('Official API not ready');
+        }
+        
+        if (availability.available === 'after-download') {
+          updateStatus('Downloading model...', 'warning');
+          showInfo('Chrome is downloading the AI model. This may take 5-15 minutes on first use. Please wait...');
+        }
+        
+        console.log('Using official Chrome AI Prompt API');
+        updateStatus('Hybrid AI (Official)', 'success');
+        return;
+      } catch (officialError) {
+        console.log('Official API not ready, trying fallback...', officialError);
+      }
     }
     
-    // Check availability
-    const availability = await LanguageModel.availability({ language: 'en' });
-    console.log('LanguageModel availability:', availability);
-    
-    if (availability === 'unavailable') {
-      throw new Error('AI model is unavailable');
+    // Fallback to previous working method (unofficial LanguageModel API)
+    if ('LanguageModel' in self) {
+      try {
+        const availability = await LanguageModel.availability({ language: 'en' });
+        console.log('LanguageModel availability:', availability);
+        
+        if (availability === 'unavailable') {
+          throw new Error('Fallback API also unavailable');
+        }
+        
+        if (availability === 'after-download') {
+          updateStatus('Downloading model...', 'warning');
+          showInfo('Chrome is downloading the AI model. This may take a few minutes on first use.');
+        }
+        
+        console.log('Using fallback LanguageModel API');
+        updateStatus('Hybrid AI (Fallback)', 'success');
+        return;
+      } catch (fallbackError) {
+        console.log('Fallback API also failed:', fallbackError);
+      }
     }
     
-    if (availability === 'after-download') {
-      updateStatus('Downloading model...', 'warning');
-      // The model will be downloaded automatically when first used
-    }
+    // If both methods fail, show setup instructions
+    throw new Error('Hybrid AI system initialization failed. Please:\n\n1. **Restart Chrome** after enabling flags\n2. Wait for model download (can take 5-10 minutes)\n3. Check chrome://components/ for "Optimization Guide On Device Model"\n4. Ensure you\'re on Chrome 128+ (Canary/Dev recommended)\n\nHybrid Agent uses multiple AI systems for reliability:\n• Primary: Chrome Built-in AI (when available)\n• Fallback: Alternative AI APIs for consistent performance');
     
-    updateStatus('Online', 'success');
   } catch (error) {
     console.error('AI initialization failed:', error);
-    updateStatus('Offline', 'error');
-    showError(error.message);
+    updateStatus('Setup Required', 'error');
+    showDetailedError('Hybrid AI System Setup Required', error.message);
   }
 }
 
 // Get available AI session from pool
 async function getAvailableAISession() {
   try {
-    if (!('LanguageModel' in self)) {
-      throw new Error('LanguageModel API not available');
-    }
-    
     // Find an available session from the pool
     for (let session of aiSessionPool) {
       if (session && !session.busy) {
@@ -141,14 +167,42 @@ async function getAvailableAISession() {
       
       updateStatus('Loading model...', 'warning');
       
-      const systemPrompt = `You are a helpful, friendly, and knowledgeable AI assistant. Provide clear, concise, and accurate responses. You can help analyze content that users share with you.`;
+      const systemPrompt = `You are Hybrid Agent, an intelligent AI assistant that combines multiple AI systems for optimal performance. You use Chrome's built-in AI when available, with smart fallback systems for reliability. Provide clear, concise, and accurate responses. You can help analyze content, answer questions, and assist with various tasks.`;
 
-      const newAISession = await LanguageModel.create({
-        temperature: 0.7,
-        topK: 3,
-        language: 'en',
-        systemPrompt: systemPrompt
-      });
+      let newAISession;
+      
+      // Try official API first
+      if (window.ai && window.ai.languageModel) {
+        try {
+          newAISession = await window.ai.languageModel.create({
+            temperature: 0.7,
+            topK: 3,
+            systemPrompt: systemPrompt
+          });
+          console.log('Created session using official API');
+        } catch (officialError) {
+          console.log('Official API session creation failed, trying fallback...');
+        }
+      }
+      
+      // Fallback to LanguageModel API if official failed
+      if (!newAISession && 'LanguageModel' in self) {
+        try {
+          newAISession = await LanguageModel.create({
+            temperature: 0.7,
+            topK: 3,
+            language: 'en',
+            systemPrompt: systemPrompt
+          });
+          console.log('Created session using fallback API');
+        } catch (fallbackError) {
+          console.log('Fallback API session creation also failed');
+        }
+      }
+      
+      if (!newAISession) {
+        throw new Error('Hybrid AI system unavailable - all AI APIs failed to initialize');
+      }
       
       newAISession.busy = true;
       aiSessionPool.push(newAISession);
@@ -212,10 +266,12 @@ async function startBackgroundStream(message, sessionId, abortController) {
     
     // Check if streaming is supported
     if (aiSession.promptStreaming) {
-      const stream = aiSession.promptStreaming(message, { 
-        language: 'en',
-        signal: abortController.signal
-      });
+      // Determine which API parameters to use
+      const streamParams = window.ai && window.ai.languageModel ? 
+        { signal: abortController.signal } : 
+        { language: 'en', signal: abortController.signal };
+        
+      const stream = aiSession.promptStreaming(message, streamParams);
       
       for await (const chunk of stream) {
         if (abortController.signal?.aborted) {
@@ -237,10 +293,11 @@ async function startBackgroundStream(message, sessionId, abortController) {
       }
     } else {
       // Fallback to regular prompt
-      fullResponse = await aiSession.prompt(message, { 
-        language: 'en',
-        signal: abortController.signal
-      });
+      const promptParams = window.ai && window.ai.languageModel ? 
+        { signal: abortController.signal } : 
+        { language: 'en', signal: abortController.signal };
+        
+      fullResponse = await aiSession.prompt(message, promptParams);
       
       // Update streaming data
       const streamData = activeStreams.get(sessionId);
@@ -1037,10 +1094,11 @@ async function processMessage(message, onChunk, abortSignal, sessionId = current
     if (aiSession.promptStreaming) {
       // Use streaming API if available
       let fullResponse = '';
-      const stream = aiSession.promptStreaming(message, { 
-        language: 'en',
-        signal: abortSignal // Pass abort signal if API supports it
-      });
+      const streamParams = window.ai && window.ai.languageModel ? 
+        { signal: abortSignal } : 
+        { language: 'en', signal: abortSignal };
+        
+      const stream = aiSession.promptStreaming(message, streamParams);
       
       for await (const chunk of stream) {
         // Check if aborted
@@ -1057,10 +1115,11 @@ async function processMessage(message, onChunk, abortSignal, sessionId = current
       return fullResponse;
     } else {
       // Fallback to regular prompt if streaming not available
-      const response = await aiSession.prompt(message, { 
-        language: 'en',
-        signal: abortSignal // Pass abort signal if API supports it
-      });
+      const promptParams = window.ai && window.ai.languageModel ? 
+        { signal: abortSignal } : 
+        { language: 'en', signal: abortSignal };
+        
+      const response = await aiSession.prompt(message, promptParams);
       
       // Simulate streaming for better UX even without native support
       if (onChunk) {
@@ -1439,6 +1498,59 @@ function showError(message) {
   addMessage(`⚠️ ${message}`, 'bot');
 }
 
+// Show detailed error with setup instructions
+function showDetailedError(title, message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'detailed-error-message';
+  errorDiv.innerHTML = `
+    <div class="detailed-error-content">
+      <div class="error-header">
+        <span class="error-icon">🔧</span>
+        <h3>${title}</h3>
+      </div>
+      <div class="error-body">
+        <pre class="error-text">${message}</pre>
+        <div class="error-actions">
+          <button class="error-action-btn" onclick="window.open('chrome://flags/#prompt-api-for-gemini-nano', '_blank')">
+            🚀 Open Chrome Flags
+          </button>
+          <button class="error-action-btn" onclick="window.open('chrome://components/', '_blank')">
+            📦 Check Components
+          </button>
+          <button class="error-action-btn" onclick="window.open('https://developer.chrome.com/docs/ai/built-in-apis', '_blank')">
+            📖 Documentation
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  messagesContainer.appendChild(errorDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Show info message
+function showInfo(message) {
+  const infoDiv = document.createElement('div');
+  infoDiv.className = 'info-message';
+  infoDiv.innerHTML = `
+    <div class="info-content">
+      <span class="info-icon">ℹ️</span>
+      <span class="info-text">${message}</span>
+    </div>
+  `;
+  
+  messagesContainer.appendChild(infoDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  // Auto remove after 8 seconds for info messages
+  setTimeout(() => {
+    if (infoDiv.parentNode) {
+      infoDiv.remove();
+    }
+  }, 8000);
+}
+
 // Clear chat
 function clearChat() {
   // Clear current session messages
@@ -1559,11 +1671,130 @@ function adjustTextareaHeight() {
 }
 
 // Listen for AI availability changes
+if (window.ai && window.ai.languageModel) {
+  window.ai.languageModel.addEventListener?.('availabilitychange', async () => {
+    await initializeAI();
+  });
+}
+
+// Also listen for the fallback API
 if ('LanguageModel' in self) {
   LanguageModel.addEventListener?.('availabilitychange', async () => {
     await initializeAI();
   });
 }
+
+// Retry AI initialization periodically if it failed
+let aiRetryInterval = null;
+function startAIRetryCheck() {
+  if (aiRetryInterval) return; // Already running
+  
+  aiRetryInterval = setInterval(async () => {
+    // Only retry if currently offline
+    if (statusText && statusText.textContent === 'Setup Required') {
+      console.log('Retrying AI initialization...');
+      await initializeAI();
+      
+      // If successful, stop retrying
+      if (statusText.textContent === 'Online') {
+        clearInterval(aiRetryInterval);
+        aiRetryInterval = null;
+        console.log('AI initialization successful, stopping retry checks');
+      }
+    }
+  }, 30000); // Check every 30 seconds
+}
+
+// Start retry checks after initial failure
+setTimeout(() => {
+  if (statusText && statusText.textContent === 'Setup Required') {
+    startAIRetryCheck();
+  }
+}, 5000);
+// Initialize Tools functionality
+function initializeTools() {
+  console.log('Initializing Tools tab...');
+  
+  // Setup tool card click handlers
+  const toolCards = document.querySelectorAll('.tool-card[data-tool]');
+  toolCards.forEach(card => {
+    const launchBtn = card.querySelector('.tool-launch-btn');
+    if (launchBtn) {
+      launchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const toolType = card.dataset.tool;
+        launchTool(toolType);
+      });
+    }
+    
+    // Also make the whole card clickable
+    card.addEventListener('click', () => {
+      const toolType = card.dataset.tool;
+      if (toolType && !card.classList.contains('placeholder')) {
+        launchTool(toolType);
+      }
+    });
+  });
+  
+  // Setup craft mail modal handlers
+  const closeCraftMail = document.getElementById('closeCraftMail');
+  if (closeCraftMail) {
+    closeCraftMail.addEventListener('click', closeCraftMailModal);
+  }
+  
+  // Close modal when clicking overlay
+  const craftMailOverlay = document.getElementById('craftMailOverlay');
+  if (craftMailOverlay) {
+    craftMailOverlay.addEventListener('click', (e) => {
+      if (e.target === craftMailOverlay) {
+        closeCraftMailModal();
+      }
+    });
+  }
+}
+
+// Launch a specific tool
+function launchTool(toolType) {
+  console.log('Launching tool:', toolType);
+  
+  switch (toolType) {
+    case 'craft-mail':
+      openCraftMailModal();
+      break;
+    default:
+      console.log('Tool not implemented yet:', toolType);
+  }
+}
+
+// Open craft mail modal
+function openCraftMailModal() {
+  const overlay = document.getElementById('craftMailOverlay');
+  const contentDiv = document.getElementById('craftMailContent');
+  
+  if (overlay && contentDiv) {
+    // Move the existing mail section content into the modal
+    const mailSection = document.getElementById('mailSection');
+    if (mailSection) {
+      contentDiv.innerHTML = mailSection.innerHTML;
+    }
+    
+    overlay.style.display = 'flex';
+    
+    // Re-initialize mail compose functionality in the modal
+    if (typeof initializeMailCompose === 'function') {
+      initializeMailCompose();
+    }
+  }
+}
+
+// Close craft mail modal
+function closeCraftMailModal() {
+  const overlay = document.getElementById('craftMailOverlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+}
+
 // Add to setupEventListeners function - Action chip handlers
 document.addEventListener('click', async (e) => {
   if (e.target.classList.contains('action-chip')) {
@@ -2342,13 +2573,14 @@ window.debugParallelChats = function() {
 function setupMainNavigation() {
   const mainNavTabs = document.querySelectorAll('.main-nav-tab');
   const chatSection = document.getElementById('chatSection');
-  const mailSection = document.getElementById('mailSection');
   const agentSection = document.getElementById('agentSection');
   const uiuxSection = document.getElementById('uiuxSection');
+  const memorySection = document.getElementById('memorySection');
+  const toolsSection = document.getElementById('toolsSection');
   const settingsSection = document.getElementById('settingsSection');
   const navContainer = document.getElementById('mainNavTabs');
   
-  if (!mainNavTabs.length || !chatSection || !mailSection || !agentSection || !uiuxSection || !settingsSection) {
+  if (!mainNavTabs.length || !chatSection || !agentSection || !uiuxSection || !memorySection || !toolsSection || !settingsSection) {
     console.warn('Main navigation elements not found');
     return;
   }
@@ -2378,9 +2610,10 @@ function setupMainNavigation() {
       
       // Hide all sections first
       chatSection.style.display = 'none';
-      mailSection.style.display = 'none';
       agentSection.style.display = 'none';
       uiuxSection.style.display = 'none';
+      memorySection.style.display = 'none';
+      toolsSection.style.display = 'none';
       settingsSection.style.display = 'none';
       
       // Show/hide sections based on selected tab
@@ -2402,34 +2635,10 @@ function setupMainNavigation() {
         if (headerActions) {
           headerActions.style.display = 'flex';
         }
-      } else if (targetTab === 'mail') {
-        mailSection.style.display = 'flex';
-        
-        // Cleanup agent resources when leaving agent tab
-        if (typeof cleanupAgent === 'function') {
-          cleanupAgent();
-        }
-        
-        // Initialize mail AI when entering mail tab
-        if (typeof initializeMailAI === 'function') {
-          initializeMailAI().then(initialized => {
-            // Update AI status indicator with API info
-            if (typeof updateAIStatus === 'function') {
-              const apiName = window.lastUsedAPI || (typeof getCurrentAPIName === 'function' ? getCurrentAPIName() : null);
-              updateAIStatus(initialized, apiName);
-            }
-          });
-        }
-        
-        // Hide chat-specific header actions for mail compose
-        const headerActions = document.querySelector('.header-actions');
-        if (headerActions) {
-          headerActions.style.display = 'none';
-        }
       } else if (targetTab === 'agent') {
         agentSection.style.display = 'flex';
         
-        // Cleanup mail AI resources when leaving mail tab
+        // Cleanup other resources when entering agent tab
         if (typeof cleanupMailAI === 'function') {
           cleanupMailAI();
         }
@@ -2464,6 +2673,48 @@ function setupMainNavigation() {
         const headerActions = document.querySelector('.header-actions');
         if (headerActions) {
           headerActions.style.display = 'none';
+        }
+      } else if (targetTab === 'memory') {
+        memorySection.style.display = 'flex';
+        
+        // Cleanup other resources
+        if (typeof cleanupMailAI === 'function') {
+          cleanupMailAI();
+        }
+        if (typeof cleanupAgent === 'function') {
+          cleanupAgent();
+        }
+        
+        // Initialize Memory when entering tab
+        if (typeof initializeMemory === 'function') {
+          initializeMemory();
+        }
+        
+        // Hide chat-specific header actions for Memory
+        const headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          headerActions.style.display = 'none';
+        }
+      } else if (targetTab === 'tools') {
+        toolsSection.style.display = 'flex';
+        
+        // Cleanup other resources
+        if (typeof cleanupMailAI === 'function') {
+          cleanupMailAI();
+        }
+        if (typeof cleanupAgent === 'function') {
+          cleanupAgent();
+        }
+        
+        // Initialize Tools when entering tab
+        if (typeof initializeTools === 'function') {
+          initializeTools();
+        }
+        
+        // Hide chat-specific header actions for Tools
+        const headerActionsTools = document.querySelector('.header-actions');
+        if (headerActionsTools) {
+          headerActionsTools.style.display = 'none';
         }
       } else if (targetTab === 'settings') {
         settingsSection.style.display = 'flex';

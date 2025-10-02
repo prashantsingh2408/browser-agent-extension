@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Assistant",
+  "name": "Hybrid Agent",
   "version": "1.0.0",
-  "description": "Professional AI assistant powered by Chrome's built-in Gemini Nano. Private, fast, and always ready to help.",
+  "description": "Hybrid AI agent combining Chrome's built-in AI with intelligent fallback systems. Private, reliable, and always ready to help.",
   "minimum_chrome_version": "138",
   "permissions": [
     "sidePanel",

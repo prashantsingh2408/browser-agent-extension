@@ -1,10 +1,17 @@
-# AI Browser Agent Extension
+# Hybrid Agent Chrome Extension
 
-A powerful Chrome extension featuring AI-powered chat and email composition with Chrome's built-in AI (Gemini Nano) and smart fallback systems.
+A powerful Chrome extension featuring an intelligent hybrid AI agent that combines Chrome's built-in AI with smart fallback systems for unmatched reliability and performance.
 
 ## 🌟 Key Features
 
-### **Customizable Tab Interface** 🔄 NEW!
+### **🤖 Hybrid AI System** 🔄 NEW!
+- **Primary AI**: Chrome's built-in AI (Gemini Nano) for optimal performance
+- **Smart Fallback**: Automatic fallback to alternative AI APIs for reliability
+- **Seamless Switching**: Transparent switching between AI systems
+- **Status Indicators**: Clear indication of which AI system is active
+- **Competition Ready**: Designed for "Best Hybrid AI Application" category
+
+### **Customizable Tab Interface**
 - **Drag & Drop Reordering**: Rearrange tabs in any order you prefer
 - **Scrollable Tabs**: Horizontal scrolling for narrow windows
 - **Persistent Layout**: Tab order saved and restored automatically

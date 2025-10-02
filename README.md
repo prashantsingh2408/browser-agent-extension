@@ -1,6 +1,22 @@
-# Hybrid Agent Chrome Extension
+# Hybrid Agent - Chrome Extension & Web App
 
-A powerful Chrome extension featuring an intelligent hybrid AI agent that combines Chrome's built-in AI with smart fallback systems for unmatched reliability and performance.
+A powerful AI assistant available as **both** a Chrome Extension and Web App, featuring an intelligent hybrid AI agent that combines Chrome's built-in AI with smart fallback systems for unmatched reliability and performance.
+
+## 🌟 Two Ways to Use
+
+### 🔧 Chrome Extension (Recommended for Power Users)
+- Install in Chrome
+- Access via side panel
+- Full Chrome API integration
+- Unlimited storage
+
+### 🌐 Web App (Universal Access)
+- Open `index.html` in any browser
+- No installation needed
+- Works on mobile
+- Share with anyone
+
+**Same code, same features, zero duplication!** ✅
 
 ## 🌟 Key Features
 
@@ -110,11 +126,22 @@ browser-agent-extension/
 
 ## 🔧 Installation
 
-### Development Setup
+### As Chrome Extension (Development)
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable "Developer mode" in the top right
 3. Click "Load unpacked" and select the `browser-agent-extension` folder
 4. The extension will appear in your extensions list
+
+### As Web App (Local Testing)
+```bash
+cd browser-agent-extension
+python3 -m http.server 8000
+
+# Open http://localhost:8000 in any browser
+```
+
+**Or use Live Server in VS Code:**
+- Right-click `index.html` → "Open with Live Server"
 
 ### Chrome AI Setup (Optional but Recommended)
 1. Open `chrome://flags`

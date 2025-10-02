@@ -76,7 +76,7 @@
             <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             <path d="M9 12h6m-6 4h6"/>
           </svg>
-          <span class="tab-label">Memory</span>
+          <span class="tab-label">Memory Agent</span>
         </button>
         <button class="main-nav-tab" data-tab="tools" draggable="true">
           <span class="drag-handle">⋮⋮</span>
@@ -634,27 +634,158 @@
       <div class="memory-container">
         <!-- Memory Header -->
         <div class="memory-header">
-          <h2>🧠 Memory Bank</h2>
-          <div class="memory-actions">
-            <button class="add-memory-btn" id="addMemoryBtn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-              Add Memory
-            </button>
-            <button class="import-memory-btn" id="importMemoryBtn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Import
-            </button>
+          <div class="memory-header-left">
+            <h2>🤖 Memory Agent</h2>
+            <div class="memory-stats-row">
+              <div class="memory-counter">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/>
+                </svg>
+                <span id="memoryCount">0</span>
+                <span class="counter-label">total</span>
+              </div>
+              <div class="memory-stat-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span id="imageCount">0</span> images
+              </div>
+              <div class="memory-stat-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="23 7 16 12 23 17 23 7"/>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                <span id="videoCount">0</span> videos
+              </div>
+            </div>
           </div>
         </div>
         
+        <!-- Memory Sub-Tabs Navigation -->
+        <div class="memory-subtabs">
+          <button class="memory-subtab active" data-subtab="capture">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>Add Memory</span>
+          </button>
+          <button class="memory-subtab" data-subtab="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <span>Search</span>
+          </button>
+          <button class="memory-subtab" data-subtab="chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Chat</span>
+          </button>
+          <button class="memory-subtab" data-subtab="gallery">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>Gallery</span>
+          </button>
+        </div>
+        
+        <!-- Sub-Tab: Add Memory -->
+        <div class="memory-subtab-content" id="captureSubtab" style="display: flex;">
+        
+        <!-- Memory Control Panel -->
+        <div class="memory-control-panel">
+          <!-- Capture Section -->
+          <div class="control-section">
+            <div class="section-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span>Capture</span>
+            </div>
+            <div class="control-buttons">
+              <button onclick="captureScreenshotMemory()" class="control-btn screenshot-btn" data-tooltip="Capture current webpage instantly">
+                <div class="btn-shortcut">Ctrl+S</div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <span>Screenshot</span>
+                <small class="btn-description">Instant capture with AI caption</small>
+              </button>
+              <button onclick="recordVideoMemory()" class="control-btn video-btn" data-tooltip="Record screen or tab video">
+                <div class="btn-shortcut">Ctrl+R</div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="23 7 16 12 23 17 23 7"/>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                <span>Record Video</span>
+                <small class="btn-description">Screen recording with audio</small>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Connect Section -->
+          <div class="control-section">
+            <div class="section-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              <span>Import</span>
+            </div>
+            <div class="control-buttons">
+              <button onclick="connectGoogleDocs()" class="control-btn docs-btn" data-tooltip="Import notes from Google Docs">
+                <div class="btn-shortcut">Ctrl+D</div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span>Google Docs</span>
+                <small class="btn-description">Import documents & notes</small>
+              </button>
+              <button onclick="connectGoogleDrive()" class="control-btn images-btn" data-tooltip="Upload photos from Drive or device">
+                <div class="btn-shortcut">Ctrl+I</div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>Photos & Images</span>
+                <small class="btn-description">Upload with AI captions</small>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Live Action Feedback -->
+        <div id="memoryActionFeedback" class="memory-action-feedback" style="display: none;">
+          <div class="feedback-content">
+            <div class="feedback-icon"></div>
+            <div class="feedback-text"></div>
+            <div class="feedback-progress">
+              <div class="progress-bar"></div>
+            </div>
+          </div>
+        </div>
+        
+        </div>
+        <!-- End Sub-Tab: Add Memory -->
+        
+        <!-- Sub-Tab: Search -->
+        <div class="memory-subtab-content" id="searchSubtab" style="display: none;">
+
         <!-- Memory Introduction -->
-        <div class="memory-intro">
+        <div class="memory-intro" style="display: none;">
           <div class="memory-intro-content">
             <div class="intro-text">
               <h3>Your Personal Knowledge Base</h3>
@@ -714,9 +845,27 @@
               <div class="features-list">
                 <div class="feature-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                  <span><strong>🆕 AI-Powered:</strong> Semantic search & smart captions</span>
+                </div>
+                <div class="feature-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span><strong>🆕 Multimodal:</strong> Text, screenshots, images, voice notes</span>
+                </div>
+                <div class="feature-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                   </svg>
-                  <span><strong>Smart Search:</strong> Find memories instantly with intelligent search</span>
+                  <span><strong>Smart Search:</strong> Find memories by meaning, not just keywords</span>
+                </div>
+                <div class="feature-item">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                  </svg>
+                  <span><strong>🆕 Proactive:</strong> Suggests relevant memories as you browse</span>
                 </div>
                 <div class="feature-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -730,12 +879,6 @@
                   </svg>
                   <span><strong>Private & Secure:</strong> All data stored locally in your browser</span>
                 </div>
-                <div class="feature-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                  </svg>
-                  <span><strong>Import/Export:</strong> Backup and sync your memories</span>
-                </div>
               </div>
             </div>
             
@@ -747,7 +890,7 @@
           </div>
         </div>
         
-        <!-- Memory Search -->
+        <!-- Memory Search Bar -->
         <div class="memory-search-container">
           <div class="search-wrapper">
             <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -770,15 +913,166 @@
           <div class="memory-list" id="memoryList">
             <!-- Memory items will be populated here -->
             <div class="memory-empty-state" id="memoryEmptyState">
-              <div class="empty-icon">🧠</div>
-              <h3>No memories yet</h3>
-              <p>Start building your personal memory bank by adding important information, notes, and insights.</p>
-              <button class="add-first-memory-btn" onclick="document.getElementById('addMemoryBtn').click()">
-                Add Your First Memory
-              </button>
+              <div class="empty-icon-animated">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+              </div>
+              <h3>Your Memory Agent is Ready</h3>
+              <p class="empty-description">Choose an action above to start building your intelligent memory bank</p>
+              
+              <div class="empty-quick-actions">
+                <div class="empty-action-card" onclick="captureScreenshotMemory()">
+                  <div class="action-icon">📸</div>
+                  <div class="action-text">
+                    <strong>Capture Screenshot</strong>
+                    <span>Save current page</span>
+                  </div>
+                </div>
+                <div class="empty-action-card" onclick="connectGoogleDrive()">
+                  <div class="action-icon">📂</div>
+                  <div class="action-text">
+                    <strong>Upload Photos</strong>
+                    <span>Import from device</span>
+                  </div>
+                </div>
+                <div class="empty-action-card" onclick="document.getElementById('addMemoryBtn').click()">
+                  <div class="action-icon">✍️</div>
+                  <div class="action-text">
+                    <strong>Write Memory</strong>
+                    <span>Add text note</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="empty-tip">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>Pro tip: Use <kbd>Ctrl+S</kbd> to instantly capture any webpage</span>
+              </div>
             </div>
           </div>
         </div>
+        
+        </div>
+        <!-- End Sub-Tab: Search -->
+        
+        <!-- Sub-Tab: Chat -->
+        <div class="memory-subtab-content" id="chatSubtab" style="display: none;">
+          
+          <div class="chat-interface-container">
+            <div class="chat-interface-header">
+              <h3>💬 Chat with Your Memories</h3>
+              <p>Ask questions and get instant answers from your stored memories</p>
+            </div>
+            
+            <div class="chat-interface-messages" id="chatInterfaceMessages">
+              <div class="chat-welcome-message">
+                <div class="welcome-icon">🤖</div>
+                <p>Hi! I'm your Memory Agent. Ask me anything about your stored memories!</p>
+                <div class="chat-suggestions">
+                  <button class="chat-suggestion" onclick="askMemoryQuestionInline('What are my work tasks?')">What are my work tasks?</button>
+                  <button class="chat-suggestion" onclick="askMemoryQuestionInline('Show me my project deadlines')">Show me deadlines</button>
+                  <button class="chat-suggestion" onclick="askMemoryQuestionInline('What recipes do I have?')">What recipes do I have?</button>
+                  <button class="chat-suggestion" onclick="askMemoryQuestionInline('Tell me about my vacation plans')">Vacation plans</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="chat-interface-input">
+              <input type="text" id="chatInterfaceInput" placeholder="Ask about your memories..." onkeypress="if(event.key==='Enter') sendChatInterfaceMessage()">
+              <button class="chat-send-btn" onclick="sendChatInterfaceMessage()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+        </div>
+        <!-- End Sub-Tab: Chat -->
+        
+        <!-- Sub-Tab: Gallery -->
+        <div class="memory-subtab-content" id="gallerySubtab" style="display: none;">
+          
+          <div class="gallery-container">
+            <div class="gallery-header">
+              <h3>🖼️ Memory Gallery</h3>
+              <p>Visual memories: screenshots, photos, and videos</p>
+            </div>
+            
+            <div class="gallery-grid" id="galleryGrid">
+              <!-- Populated by JavaScript -->
+              <div class="gallery-empty-state" id="galleryEmptyState">
+                <div class="empty-icon">📸</div>
+                <h4>No visual memories yet</h4>
+                <p>Capture screenshots or upload photos to see them here</p>
+                <div class="gallery-empty-actions">
+                  <button class="btn-primary" onclick="captureScreenshotMemory()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    Take Screenshot
+                  </button>
+                  <button class="btn-secondary" onclick="connectGoogleDrive()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Upload Photos
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        <!-- End Sub-Tab: Gallery -->
+        
+      </div>
+      
+      <!-- 🆕 Memory Chat Panel (Legacy/Floating) -->
+      <div id="memoryChatPanel" class="memory-chat-panel" style="display: none;">
+        <div class="chat-panel-header">
+          <div class="chat-header-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Chat with Memories</span>
+          </div>
+          <button class="chat-close-btn" onclick="closeMemoryChat()">×</button>
+        </div>
+        <div class="chat-panel-messages" id="memoryChatMessages">
+          <div class="chat-welcome-message">
+            <div class="welcome-icon">🤖</div>
+            <p>Hi! I'm your Memory Agent. Ask me anything about your stored memories!</p>
+            <div class="chat-suggestions">
+              <button class="chat-suggestion" onclick="askMemoryQuestion('What are my work tasks?')">What are my work tasks?</button>
+              <button class="chat-suggestion" onclick="askMemoryQuestion('Show me my project deadlines')">Show me deadlines</button>
+              <button class="chat-suggestion" onclick="askMemoryQuestion('What recipes do I have?')">What recipes do I have?</button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-panel-input">
+          <input type="text" id="memoryChatInput" placeholder="Ask about your memories..." onkeypress="if(event.key==='Enter') sendMemoryChatMessage()">
+          <button class="chat-send-btn" onclick="sendMemoryChatMessage()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- 🆕 Memory Suggestions Panel (Floating) -->
+      <div id="memorySuggestionsPanel" class="memory-suggestions-panel" style="display: none;">
+        <!-- Populated dynamically by showMemorySuggestions() -->
       </div>
     </div>
     

@@ -64,13 +64,48 @@ Memories are stored locally using Chrome's storage API and persist across browse
 - **Search Functionality**: Quick search across all stored memories
 - **Data Persistence**: All memories are stored locally and persist across browser sessions
 
+## 🆕 New Features (Inspired by Memory Palace)
+
+### Multimodal Memory Support ✅
+- **Text Memories**: Traditional note-taking (existing)
+- **Screenshot Memories**: Capture webpage screenshots with AI-generated captions
+- **Audio Memories**: Voice notes with transcription (coming soon)
+- **Video Memories**: Screen recordings (coming soon)
+- **Image Memories**: Upload photos and images
+
+### AI-Powered Intelligence ✅
+- **Semantic Search**: Uses Chrome's AI to understand search intent beyond keywords
+- **Smart Captions**: Auto-generates descriptions for screenshots using AI
+- **Context Awareness**: Memories know what webpage they came from
+
+### Proactive Memory Surfacing ✅
+- **Automatic Suggestions**: Shows relevant memories based on current webpage
+- **Smart Matching**: Finds memories by domain, keywords, and relevance
+- **Relationship Discovery**: Finds similar, tagged, and temporally related memories
+
+### New Functions
+```javascript
+// Screenshot capture with AI caption
+await captureScreenshotMemory()
+
+// Show context-aware suggestions
+await showMemorySuggestions()
+
+// Find related memories
+await findRelatedMemories(memoryId)
+
+// Voice recording (coming soon)
+await recordVoiceNote()
+```
+
 ## Future Enhancements
 
-- **Memory Sharing**: Share memories between devices
-- **Advanced Search**: Full-text search with highlighting
-- **Memory Templates**: Pre-defined templates for common memory types
-- **Memory Linking**: Link related memories together
-- **Rich Text Support**: Markdown or rich text formatting in memories
-- **Memory Sharing**: Export and share individual memories
-- **Advanced Categories**: User-defined custom categories
+- **Voice Transcription**: Real-time audio-to-text using Web Speech API
+- **Memory Timeline**: Visual chronological view
+- **Memory Graph**: Network visualization of connections
+- **Batch Import**: Import multiple screenshots/photos at once
+- **Memory Narratives**: AI-generated stories from multiple memories
+- **Rich Text Editor**: Markdown support with live preview
 - **Memory Analytics**: Usage statistics and insights
+- **Custom Categories**: User-defined categories
+- **Collaborative Memories**: Share with team members (privacy-preserving)

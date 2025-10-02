@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Memory Insights</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .debug-btn { padding: 10px 15px; margin: 5px; background: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .debug-btn:hover { background: #3367d6; }
+        .debug-output { background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Memory Insights Debug Tool</h1>
+    
+    <div class="debug-section">
+        <h3>1. Load Sample Data</h3>
+        <button class="debug-btn" onclick="loadSampleData()">Load Sample Memories</button>
+        <div id="sampleOutput" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>2. Test Functions</h3>
+        <button class="debug-btn" onclick="testGenerateInsights()">Test Generate Insights</button>
+        <button class="debug-btn" onclick="testFindConnections()">Test Find Connections</button>
+        <button class="debug-btn" onclick="runFullDebug()">Run Full Debug</button>
+        <div id="testOutput" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>3. Check Elements</h3>
+        <button class="debug-btn" onclick="checkElements()">Check DOM Elements</button>
+        <div id="elementOutput" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>4. Manual Containers</h3>
+        <div id="memoryInsights" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+            <h4>Memory Insights Container</h4>
+            <p>Insights will appear here...</p>
+        </div>
+        
+        <div id="memoryConnections" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+            <h4>Memory Connections Container</h4>
+            <p>Connections will appear here...</p>
+        </div>
+        
+        <div id="journeyHistory" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+            <h4>Journey History Container</h4>
+            <p>Journey history will appear here...</p>
+        </div>
+    </div>
+
+    <!-- Load the memory system -->
+    <script src="scripts/chrome-adapter.js"></script>
+    <script src="data/sample-memories.js"></script>
+    <script src="scripts/memory.js"></script>
+    
+    <script>
+        function log(message) {
+            console.log(message);
+            return message;
+        }
+        
+        function loadSampleData() {
+            const output = document.getElementById('sampleOutput');
+            try {
+                if (typeof window.createSampleMemories === 'function') {
+                    window.createSampleMemories();
+                    output.textContent = log('✅ Sample memories loaded successfully!\nMemories count: ' + memories.size);
+                } else {
+                    output.textContent = log('❌ createSampleMemories function not found');
+                }
+            } catch (error) {
+                output.textContent = log('❌ Error loading sample data: ' + error.message);
+            }
+        }
+        
+        function testGenerateInsights() {
+            const output = document.getElementById('testOutput');
+            try {
+                if (typeof window.generateInsights === 'function') {
+                    window.generateInsights();
+                    output.textContent = log('✅ generateInsights executed successfully!');
+                } else {
+                    output.textContent = log('❌ generateInsights function not found');
+                }
+            } catch (error) {
+                output.textContent = log('❌ Error in generateInsights: ' + error.message);
+            }
+        }
+        
+        function testFindConnections() {
+            const output = document.getElementById('testOutput');
+            try {
+                if (typeof window.findConnections === 'function') {
+                    window.findConnections();
+                    output.textContent = log('✅ findConnections executed successfully!');
+                } else {
+                    output.textContent = log('❌ findConnections function not found');
+                }
+            } catch (error) {
+                output.textContent = log('❌ Error in findConnections: ' + error.message);
+            }
+        }
+        
+        function runFullDebug() {
+            const output = document.getElementById('testOutput');
+            try {
+                if (typeof window.debugInsights === 'function') {
+                    window.debugInsights();
+                    output.textContent = log('✅ Full debug executed - check console for details');
+                } else {
+                    output.textContent = log('❌ debugInsights function not found');
+                }
+            } catch (error) {
+                output.textContent = log('❌ Error in debug: ' + error.message);
+            }
+        }
+        
+        function checkElements() {
+            const output = document.getElementById('elementOutput');
+            const checks = [
+                'memoryInsights container: ' + !!document.getElementById('memoryInsights'),
+                'memoryConnections container: ' + !!document.getElementById('memoryConnections'),
+                'journeyHistory container: ' + !!document.getElementById('journeyHistory'),
+                'memories Map exists: ' + (typeof memories !== 'undefined'),
+                'memories count: ' + (typeof memories !== 'undefined' ? memories.size : 'N/A'),
+                'generateInsights function: ' + (typeof window.generateInsights),
+                'findConnections function: ' + (typeof window.findConnections),
+                'SAMPLE_MEMORIES exists: ' + (typeof window.SAMPLE_MEMORIES !== 'undefined'),
+                'SAMPLE_MEMORIES count: ' + (window.SAMPLE_MEMORIES ? window.SAMPLE_MEMORIES.length : 'N/A')
+            ];
+            output.textContent = checks.join('\n');
+        }
+        
+        // Auto-run checks on load
+        setTimeout(() => {
+            checkElements();
+            console.log('🔧 Debug page loaded - use buttons to test functionality');
+        }, 1000);
+    </script>
+</body>
+</html>

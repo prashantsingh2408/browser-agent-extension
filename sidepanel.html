@@ -708,6 +708,12 @@
             </svg>
             Gallery
           </button>
+          <button class="memory-subtab" data-subtab="lane">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+            Insights
+          </button>
         </div>
         
         <!-- Capture Subtab -->
@@ -1096,6 +1102,189 @@
           </div>
         </div><!-- End Gallery Subtab -->
         
+        <!-- Memory Lane Subtab -->
+        <div id="laneSubtab" class="memory-subtab-content" style="display: none;">
+          
+          <!-- Memory Insights Header -->
+          <div class="memory-lane-header">
+            <div class="lane-title">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11H1v3h8v3l3-4-3-4v2z"/>
+                <path d="M22 12h-6"/>
+                <path d="M16 16h6"/>
+                <path d="M16 8h6"/>
+              </svg>
+              <h3>Memory Insights</h3>
+              <span class="lane-subtitle">Smart Analysis & Connections</span>
+            </div>
+            
+            <!-- Insight Controls - Practical Actions -->
+            <div class="journey-controls">
+              <button class="journey-btn primary" onclick="generateInsights()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 11H1v3h8v3l3-4-3-4v2z"/>
+                  <path d="M22 12h-6"/>
+                </svg>
+                Analyze Patterns
+              </button>
+              <button class="journey-btn secondary" onclick="findConnections()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                </svg>
+                Find Connections
+              </button>
+            </div>
+            
+            <!-- Advanced Options (Hidden by default) -->
+            <div class="advanced-options" id="advancedOptions" style="display: none;">
+              <button class="journey-btn secondary" onclick="createCustomJourney()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Custom Journey
+              </button>
+              <button class="journey-btn secondary" onclick="showJourneySettings()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+                </svg>
+                Journey Settings
+              </button>
+              <button class="journey-btn demo-btn" onclick="loadDemoMemories()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+                Load Demo
+              </button>
+              <button class="journey-btn demo-btn secondary" onclick="clearAllMemories()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="m19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+                Clear All
+              </button>
+            </div>
+          </div>
+          
+          <!-- Journey Status -->
+          <div class="journey-status" id="journeyStatus" style="display: none;">
+            <div class="status-content">
+              <div class="status-icon">
+                <div class="loading-spinner"></div>
+              </div>
+              <div class="status-text">
+                <h4 id="journeyStatusTitle">Analyzing your memories...</h4>
+                <p id="journeyStatusDesc">Finding connections and crafting your narrative</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Smart Insights -->
+          <div class="proactive-suggestions">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+              Memory Patterns & Insights
+            </h4>
+            <div class="insight-grid" id="memoryInsights">
+              <!-- Dynamic insights will be inserted here -->
+            </div>
+          </div>
+          
+          <!-- Knowledge Connections -->
+          <div class="knowledge-connections">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              Related Memories & Connections
+            </h4>
+            <div class="connections-grid" id="memoryConnections">
+              <!-- Dynamic connections will be inserted here -->
+            </div>
+          </div>
+          
+          <!-- Journey Viewer -->
+          <div class="journey-viewer" id="journeyViewer" style="display: none;">
+            <div class="journey-header">
+              <h3 id="journeyTitle">Your Memory Journey</h3>
+              <div class="journey-controls-inline">
+                <button class="control-btn" onclick="pauseJourney()" id="pauseJourneyBtn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="4" width="4" height="16"/>
+                    <rect x="14" y="4" width="4" height="16"/>
+                  </svg>
+                </button>
+                <button class="control-btn" onclick="closeJourney()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Cinematic Display -->
+            <div class="cinematic-display">
+              <div class="memory-showcase" id="memoryShowcase">
+                <!-- Current memory display -->
+              </div>
+              <div class="narrative-text" id="narrativeText">
+                <!-- AI-generated narrative -->
+              </div>
+            </div>
+            
+            <!-- Journey Progress -->
+            <div class="journey-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" id="journeyProgressFill"></div>
+              </div>
+              <div class="progress-info">
+                <span id="journeyProgressText">Memory 1 of 5</span>
+                <span id="journeyDuration">2:30</span>
+              </div>
+            </div>
+            
+            <!-- Journey Navigation -->
+            <div class="journey-navigation">
+              <button class="nav-btn" onclick="previousMemoryInJourney()" id="prevMemoryBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Previous
+              </button>
+              <button class="nav-btn primary" onclick="nextMemoryInJourney()" id="nextMemoryBtn">
+                Next
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Journey History -->
+          <div class="journey-history">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Recent Journeys
+            </h4>
+            <div class="history-list" id="journeyHistory">
+              <!-- Journey history items will be inserted here -->
+            </div>
+          </div>
+          
+        </div><!-- End Memory Lane Subtab -->
+        
       </div>
       
       <!-- 🆕 Memory Chat Panel (Floating - deprecated in favor of inline chat) -->
@@ -1426,6 +1615,7 @@
 
   <script src="scripts/functions.js"></script>
   <script src="scripts/ai-apis.js"></script>
+  <script src="data/sample-memories.js"></script>
   <script src="scripts/sidepanel.js"></script>
   <script src="scripts/mail-compose.js"></script>
   <script src="scripts/agent.js"></script>

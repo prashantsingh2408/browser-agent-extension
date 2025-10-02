@@ -86,6 +86,85 @@ if (isWebApp) {
     }
   };
   
+  // Add Chrome AI APIs polyfill
+  window.ai = {
+    languageModel: {
+      create: async (options = {}) => {
+        console.log('🤖 AI Language Model (stub) - options:', options);
+        return {
+          prompt: async (text) => {
+            console.log('🤖 AI Prompt (stub):', text.substring(0, 100));
+            // Return a simple response for web app demo
+            if (text.includes('narrative') || text.includes('storyteller')) {
+              return `This beautiful memory captures a special moment in your journey. The way you've preserved this experience shows how much it means to you, and it's wonderful to revisit these precious moments that shape who you are.`;
+            }
+            return `This is a demo response to your query. In a real deployment, this would use an external AI API.`;
+          },
+          destroy: () => {
+            console.log('🤖 AI Session destroyed (stub)');
+          }
+        };
+      }
+    },
+    
+    // Chrome Summarizer API stub
+    summarizer: {
+      create: async (options = {}) => {
+        console.log('📝 AI Summarizer (stub) - options:', options);
+        return {
+          summarize: async (text) => {
+            console.log('📝 AI Summarize (stub):', text.substring(0, 100));
+            // Simple summarization for demo
+            const sentences = text.split('.').filter(s => s.trim().length > 0);
+            const summary = sentences.slice(0, 2).join('. ') + '.';
+            return summary || 'Summary of the provided text.';
+          },
+          destroy: () => {
+            console.log('📝 AI Summarizer destroyed (stub)');
+          }
+        };
+      }
+    },
+    
+    // Chrome Translator API stub  
+    translator: {
+      create: async (options = {}) => {
+        console.log('🌐 AI Translator (stub) - options:', options);
+        return {
+          translate: async (text) => {
+            console.log('🌐 AI Translate (stub):', text.substring(0, 50));
+            // Simple translation demo (just return original for now)
+            return `[Translated] ${text}`;
+          },
+          destroy: () => {
+            console.log('🌐 AI Translator destroyed (stub)');
+          }
+        };
+      }
+    },
+    
+    // Chrome Proofreader API stub
+    proofreader: {
+      create: async (options = {}) => {
+        console.log('✏️ AI Proofreader (stub) - options:', options);
+        return {
+          proofread: async (text) => {
+            console.log('✏️ AI Proofread (stub):', text.substring(0, 50));
+            // Simple proofreading demo
+            const corrected = text
+              .replace(/\bi\b/g, 'I')  // Capitalize 'i'
+              .replace(/\s+/g, ' ')    // Fix multiple spaces
+              .trim();
+            return corrected;
+          },
+          destroy: () => {
+            console.log('✏️ AI Proofreader destroyed (stub)');
+          }
+        };
+      }
+    }
+  };
+  
   console.log('✅ Chrome API polyfill created');
 }
 

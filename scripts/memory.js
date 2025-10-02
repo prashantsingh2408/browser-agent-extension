@@ -59,73 +59,168 @@ async function initializeMemory() {
 
 // Create sample memories for demo/testing
 async function createSampleMemories() {
-  console.log('Creating sample memories...');
+  console.log('Creating comprehensive sample memories for demo...');
   
-  const samples = [
+  // Load comprehensive sample data
+  let samples = [];
+  
+  // Try to load from external file first
+  if (typeof window !== 'undefined' && window.SAMPLE_MEMORIES) {
+    samples = window.SAMPLE_MEMORIES;
+  } else {
+    // Fallback to inline samples
+    samples = [
     {
-      title: 'Project Deadline',
-      content: 'The new website redesign project is due this Friday, October 6th. Need to complete final review and testing before submission.',
-      category: 'work',
-      tags: ['deadline', 'project', 'website']
-    },
-    {
-      title: 'React Hooks Best Practices',
-      content: 'Always use hooks at the top level of components. Don\'t call hooks inside loops, conditions, or nested functions. Custom hooks should start with "use".',
-      category: 'notes',
-      tags: ['react', 'programming', 'javascript']
-    },
-    {
-      title: 'Meeting Notes - Q4 Planning',
-      content: 'Team meeting discussed Q4 goals: increase user engagement by 20%, launch mobile app beta, and improve page load times. Action items assigned to dev team.',
-      category: 'work',
-      tags: ['meeting', 'planning', 'goals']
-    },
-    {
-      title: 'Recipe: Pasta Carbonara',
-      content: 'Ingredients: 400g spaghetti, 200g pancetta, 4 eggs, 100g parmesan, black pepper. Cook pasta, fry pancetta, mix eggs with cheese, combine while hot.',
+      title: '☕ Morning Coffee Ritual',
+      content: 'Had an amazing coffee this morning at the new café downtown. The barista made perfect latte art with a heart shape! Starting the day right with good coffee and positive vibes.',
       category: 'personal',
-      tags: ['recipe', 'cooking', 'italian']
+      tags: ['coffee', 'morning', 'café', 'latte art'],
+      type: 'text'
     },
     {
-      title: 'API Authentication Guide',
-      content: 'Use OAuth 2.0 for API authentication. Store tokens securely. Implement token refresh mechanism. Use HTTPS for all API calls. Add rate limiting.',
-      category: 'notes',
-      tags: ['api', 'security', 'development']
-    },
-    {
-      title: 'Vacation Ideas 2025',
-      content: 'Potential destinations: Japan (cherry blossoms in April), Iceland (Northern lights), New Zealand (hiking trails). Budget: $3000-4000. Duration: 2 weeks.',
+      title: '🌅 Beautiful Sunset View',
+      content: 'Captured this breathtaking sunset from my office window today. The sky was painted in shades of orange and pink - nature\'s daily masterpiece.',
       category: 'personal',
-      tags: ['travel', 'vacation', 'planning']
+      tags: ['sunset', 'office', 'nature', 'photography'],
+      type: 'image',
+      mediaData: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sunset" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1"/><stop offset="50%" style="stop-color:#FFE66D;stop-opacity:1"/><stop offset="100%" style="stop-color:#FF8E53;stop-opacity:1"/></linearGradient></defs><rect width="400" height="300" fill="url(#sunset)"/><circle cx="320" cy="80" r="40" fill="#FFF3A0" opacity="0.9"/><rect x="0" y="200" width="400" height="100" fill="#2C3E50"/><text x="200" y="250" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Beautiful Sunset</text></svg>`)
     },
     {
-      title: 'Git Commands Cheatsheet',
-      content: 'Common commands: git status, git add ., git commit -m "message", git push origin main, git pull, git checkout -b new-branch, git merge branch-name.',
-      category: 'notes',
-      tags: ['git', 'commands', 'development']
+      title: '🎯 Quarterly Report Success',
+      content: 'Finished the quarterly report ahead of deadline! Team collaboration was excellent this month - everyone contributed their best work. Feeling proud of what we accomplished together.',
+      category: 'work',
+      tags: ['success', 'collaboration', 'achievement', 'teamwork', 'deadline'],
+      type: 'text'
     },
     {
-      title: 'Book Recommendations',
-      content: 'To read: "Atomic Habits" by James Clear, "Deep Work" by Cal Newport, "Thinking Fast and Slow" by Daniel Kahneman. Focus on productivity and cognitive science.',
+      title: '🏔️ Mountain Hiking Adventure',
+      content: 'Weekend hiking trip to the mountains was incredible! Reached the summit after 3 hours of climbing. The view from the top made every step worth it.',
+      category: 'personal',
+      tags: ['hiking', 'mountains', 'adventure', 'fitness'],
+      type: 'image',
+      mediaData: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#87CEEB"/><polygon points="0,300 100,150 200,100 300,120 400,200 400,300" fill="#8FBC8F"/><polygon points="100,150 150,80 200,100" fill="#A0522D"/><polygon points="200,100 250,60 300,120" fill="#696969"/><circle cx="350" cy="50" r="25" fill="#FFD700"/><text x="200" y="280" text-anchor="middle" fill="white" font-family="Arial" font-size="14">Mountain Summit</text></svg>`)
+    },
+    {
+      title: '💡 AI Habit Tracker Idea',
+      content: 'New app idea: A habit tracker that uses AI to suggest personalized routines based on your lifestyle and goals. Could analyze patterns and recommend optimal timing for different habits.',
       category: 'ideas',
-      tags: ['books', 'reading', 'self-improvement']
+      tags: ['app', 'AI', 'habits', 'innovation', 'startup'],
+      type: 'text'
+    },
+    {
+      title: '🍝 Family Pasta Night',
+      content: 'Family dinner last Sunday was amazing - mom\'s homemade pasta was incredible! The whole family gathered around the table sharing stories and laughter. Need to get that secret recipe!',
+      category: 'personal',
+      tags: ['family', 'dinner', 'pasta', 'recipe', 'memories'],
+      type: 'image',
+      mediaData: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#F5F5DC"/><ellipse cx="200" cy="150" rx="150" ry="100" fill="#8B4513"/><ellipse cx="200" cy="140" rx="140" ry="90" fill="#DEB887"/><circle cx="180" cy="130" r="15" fill="#FF6347"/><circle cx="220" cy="135" r="12" fill="#FF6347"/><circle cx="200" cy="160" r="10" fill="#228B22"/><text x="200" y="250" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="16">Family Pasta Night</text></svg>`)
+    },
+    {
+      title: '🚀 Production Deployment Success',
+      content: 'Successfully deployed the new feature to production! Zero bugs reported so far - the extensive testing phase really paid off. The team collaboration and attention to detail made all the difference.',
+      category: 'work',
+      tags: ['deployment', 'success', 'collaboration', 'testing', 'achievement'],
+      type: 'text'
+    },
+    {
+      title: '🏃‍♀️ Morning Workout Routine',
+      content: 'Great morning workout session - 30 minutes of yoga followed by a 5km run. Feeling energized and ready to tackle the day! Consistency is key to building healthy habits.',
+      category: 'personal',
+      tags: ['workout', 'yoga', 'running', 'fitness', 'morning'],
+      type: 'text'
+    },
+    {
+      title: '🔐 Escape Room Victory',
+      content: 'Team building event at the escape room was fantastic! We solved all puzzles in record time through excellent collaboration. Great way to achieve success together with colleagues.',
+      category: 'work',
+      tags: ['team building', 'escape room', 'puzzles', 'collaboration', 'success'],
+      type: 'image',
+      mediaData: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#2C3E50"/><rect x="50" y="50" width="300" height="200" fill="#34495E" stroke="#E74C3C" stroke-width="3"/><circle cx="200" cy="100" r="20" fill="#F39C12"/><rect x="180" y="120" width="40" height="10" fill="#E74C3C"/><polygon points="150,180 200,160 250,180 200,200" fill="#3498DB"/><text x="200" y="270" text-anchor="middle" fill="#ECF0F1" font-family="Arial" font-size="14">Escape Room Victory</text></svg>`)
+    },
+    {
+      title: '🎨 UX Design Learning',
+      content: 'Learned about the importance of user experience design today. Small details make huge differences in user satisfaction. The Laws of UX provide excellent insights for better interfaces.',
+      category: 'notes',
+      tags: ['UX', 'design', 'learning', 'insights', 'user satisfaction'],
+      type: 'text'
+    },
+    {
+      title: '🐛 Late Night Debugging Success',
+      content: 'Late night coding session paid off - finally fixed that persistent bug that\'s been bothering me for weeks! Great learning experience about problem solving and persistence.',
+      category: 'work',
+      tags: ['coding', 'debugging', 'success', 'problem solving', 'learning'],
+      type: 'text'
+    },
+    {
+      title: '🍓 Fresh Market Finds',
+      content: 'Weekend farmers market visit was delightful! Got fresh strawberries and homemade bread from local vendors. Supporting local businesses while getting amazing fresh produce.',
+      category: 'personal',
+      tags: ['farmers market', 'strawberries', 'bread', 'local', 'weekend'],
+      type: 'image',
+      mediaData: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="300" fill="#98FB98"/><rect x="100" y="150" width="200" height="100" fill="#8B4513"/><ellipse cx="150" cy="130" rx="20" ry="15" fill="#FF1493"/><ellipse cx="180" cy="125" rx="18" ry="12" fill="#FF1493"/><ellipse cx="220" cy="130" rx="22" ry="16" fill="#FF1493"/><rect x="250" y="120" width="40" height="60" fill="#DEB887"/><text x="200" y="280" text-anchor="middle" fill="#2E8B57" font-family="Arial" font-size="14">Fresh Market Finds</text></svg>`)
+    },
+    // Additional samples for better insights patterns
+    {
+      title: '📚 JavaScript Learning Session',
+      content: 'Spent the evening learning advanced JavaScript concepts - async/await patterns and Promise handling. These insights will definitely improve my coding skills and project outcomes.',
+      category: 'notes',
+      tags: ['JavaScript', 'learning', 'async', 'promises', 'insights', 'coding'],
+      type: 'text'
+    },
+    {
+      title: '🎉 Client Presentation Success',
+      content: 'Nailed the client presentation today! Our team collaboration and preparation really showed. The client was impressed with our innovative approach and attention to detail.',
+      category: 'work',
+      tags: ['presentation', 'client', 'success', 'collaboration', 'innovation', 'achievement'],
+      type: 'text'
+    },
+    {
+      title: '🧠 Memory Agent Insights',
+      content: 'Working on improving the Memory Agent with practical insights instead of abstract features. Learning that users want actionable intelligence from their data, not just storytelling.',
+      category: 'notes',
+      tags: ['memory agent', 'insights', 'learning', 'user experience', 'intelligence'],
+      type: 'text'
     }
-  ];
+    ];
+  }
   
-  for (const sample of samples) {
+  console.log(`Loading ${samples.length} sample memories...`);
+  
+  for (let i = 0; i < samples.length; i++) {
+    const sample = samples[i];
+    
+    // Create strategic date groupings for better connections
+    let timestamp;
+    const baseTime = Date.now();
+    
+    if (i < 3) {
+      // First 3 memories: Today
+      timestamp = baseTime - (Math.random() * 12 * 60 * 60 * 1000); // Within last 12 hours
+    } else if (i < 6) {
+      // Next 3 memories: 2 days ago
+      timestamp = baseTime - (2 * 24 * 60 * 60 * 1000) - (Math.random() * 6 * 60 * 60 * 1000);
+    } else if (i < 9) {
+      // Next 3 memories: 1 week ago
+      timestamp = baseTime - (7 * 24 * 60 * 60 * 1000) - (Math.random() * 12 * 60 * 60 * 1000);
+    } else {
+      // Remaining memories: Random within last 30 days
+      const randomDays = Math.floor(Math.random() * 30) + 1;
+      timestamp = baseTime - (randomDays * 24 * 60 * 60 * 1000);
+    }
+    
     createMemory(
       sample.title,
       sample.content,
       sample.category,
       sample.tags,
-      'text',
-      null,
-      {}
+      sample.type || 'text',
+      sample.mediaData || null,
+      { timestamp: timestamp }
     );
   }
   
   await saveMemories();
-  console.log(`Created ${samples.length} sample memories`);
+  console.log(`Created ${samples.length} rich demo memories with images!`);
 }
 
 // Setup keyboard shortcuts (UX Law: Paradox of Active User)
@@ -279,6 +374,32 @@ function setupMemoryEventListeners() {
         console.log('Mobile button clicked via event listener!');
         connectMobile();
       });
+    }
+    
+    // Setup insight button listeners as backup to onclick
+    const analyzeBtn = document.querySelector('button[onclick="generateInsights()"]');
+    const connectionsBtn = document.querySelector('button[onclick="findConnections()"]');
+    
+    if (analyzeBtn) {
+      console.log('✅ Analyze Patterns button found, attaching listener');
+      analyzeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Analyze Patterns button clicked via event listener!');
+        generateInsights();
+      });
+    } else {
+      console.log('❌ Analyze Patterns button not found');
+    }
+    
+    if (connectionsBtn) {
+      console.log('✅ Find Connections button found, attaching listener');
+      connectionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Find Connections button clicked via event listener!');
+        findConnections();
+      });
+    } else {
+      console.log('❌ Find Connections button not found');
     }
   }, 500);
 }
@@ -2408,11 +2529,13 @@ function switchMemorySubtab(subtabName) {
   const searchSubtab = document.getElementById('searchSubtab');
   const chatSubtab = document.getElementById('chatSubtab');
   const gallerySubtab = document.getElementById('gallerySubtab');
+  const laneSubtab = document.getElementById('laneSubtab');
   
   if (captureSubtab) captureSubtab.style.display = 'none';
   if (searchSubtab) searchSubtab.style.display = 'none';
   if (chatSubtab) chatSubtab.style.display = 'none';
   if (gallerySubtab) gallerySubtab.style.display = 'none';
+  if (laneSubtab) laneSubtab.style.display = 'none';
   
   // Show selected subtab
   switch(subtabName) {
@@ -2429,6 +2552,10 @@ function switchMemorySubtab(subtabName) {
     case 'gallery':
       if (gallerySubtab) gallerySubtab.style.display = 'flex';
       renderGallery();
+      break;
+    case 'lane':
+      if (laneSubtab) laneSubtab.style.display = 'flex';
+      initializeMemoryLane();
       break;
   }
 }
@@ -2624,10 +2751,1351 @@ window.saveScanResult = saveScanResult;
 window.connectMobile = connectMobile;
 window.closeMobileUpload = closeMobileUpload;
 
+// ============================================
+// MEMORY LANE - AI-POWERED NARRATIVE JOURNEYS
+// ============================================
+
+// Memory Lane state
+let currentJourney = null;
+let journeyTimer = null;
+let journeyStartTime = null;
+
+// Initialize Memory Insights (formerly Memory Lane)
+function initializeMemoryLane() {
+  console.log('📊 Initializing Memory Insights...');
+  
+  // Generate practical insights automatically
+  setTimeout(() => {
+    generateMemoryInsights();
+    findConnections();
+  }, 500); // Small delay to ensure memories are loaded
+}
+
+// Load proactive suggestions based on context
+async function loadProactiveSuggestions() {
+  const suggestionsContainer = document.getElementById('proactiveSuggestions');
+  if (!suggestionsContainer) return;
+  
+  try {
+    // Get current context (time, date, etc.)
+    const now = new Date();
+    const timeOfDay = getTimeOfDay(now);
+    const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
+    
+    // Generate context-aware suggestions
+    const suggestions = await generateProactiveSuggestions(timeOfDay, dayOfWeek);
+    
+    // Render suggestions
+    suggestionsContainer.innerHTML = '';
+    suggestions.forEach(suggestion => {
+      const card = createSuggestionCard(suggestion);
+      suggestionsContainer.appendChild(card);
+    });
+    
+  } catch (error) {
+    console.error('Failed to load proactive suggestions:', error);
+    suggestionsContainer.innerHTML = `
+      <div class="journey-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h4>No suggestions available</h4>
+        <p>Add more memories to get personalized suggestions</p>
+      </div>
+    `;
+  }
+}
+
+// Generate proactive suggestions using AI
+async function generateProactiveSuggestions(timeOfDay, dayOfWeek) {
+  const memoryArray = Array.from(memories.values());
+  
+  if (memoryArray.length === 0) {
+    return [{
+      title: "Start Your Memory Journey",
+      preview: "Add your first memory to begin receiving personalized suggestions",
+      type: "onboarding",
+      count: 0,
+      action: () => switchMemorySubtab('capture')
+    }];
+  }
+  
+  const suggestions = [];
+  
+  // Time-based suggestions
+  if (timeOfDay === 'morning') {
+    const morningMemories = memoryArray.filter(m => 
+      m.content.toLowerCase().includes('morning') || 
+      m.content.toLowerCase().includes('breakfast') ||
+      m.content.toLowerCase().includes('coffee')
+    );
+    
+    if (morningMemories.length > 0) {
+      suggestions.push({
+        title: "Morning Memories",
+        preview: "Relive your favorite morning moments and routines",
+        type: "time-based",
+        count: morningMemories.length,
+        memories: morningMemories,
+        action: () => startJourneyWithMemories(morningMemories, "Morning Memories")
+      });
+    }
+  }
+  
+  // Recent memories
+  const recentMemories = memoryArray
+    .filter(m => Date.now() - m.timestamp < 7 * 24 * 60 * 60 * 1000) // Last 7 days
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 5);
+    
+  if (recentMemories.length > 0) {
+    suggestions.push({
+      title: "This Week's Highlights",
+      preview: "A journey through your recent memories and experiences",
+      type: "recent",
+      count: recentMemories.length,
+      memories: recentMemories,
+      action: () => startJourneyWithMemories(recentMemories, "This Week's Highlights")
+    });
+  }
+  
+  // Photo memories
+  const photoMemories = memoryArray.filter(m => m.type === 'image' || m.type === 'screenshot');
+  if (photoMemories.length > 0) {
+    suggestions.push({
+      title: "Visual Journey",
+      preview: "A cinematic experience through your photo memories",
+      type: "visual",
+      count: photoMemories.length,
+      memories: photoMemories,
+      action: () => startJourneyWithMemories(photoMemories, "Visual Journey")
+    });
+  }
+  
+  // Apply Choice Overload principle: limit to max 3 suggestions
+  return suggestions.slice(0, 3);
+}
+
+// Create suggestion card
+function createSuggestionCard(suggestion) {
+  const card = document.createElement('div');
+  card.className = 'suggestion-card';
+  card.onclick = suggestion.action;
+  
+  card.innerHTML = `
+    <div class="suggestion-title">${suggestion.title}</div>
+    <div class="suggestion-preview">${suggestion.preview}</div>
+    <div class="suggestion-meta">
+      <span>${getTimeOfDay(new Date())}</span>
+      <span class="suggestion-count">${suggestion.count} memories</span>
+    </div>
+  `;
+  
+  return card;
+}
+
+// Start proactive journey
+async function startProactiveJourney() {
+  console.log('🚀 Starting proactive journey...');
+  
+  // Show status
+  showJourneyStatus('Analyzing your memories...', 'Finding the perfect narrative for you');
+  
+  try {
+    // Get all memories
+    const memoryArray = Array.from(memories.values());
+    
+    if (memoryArray.length === 0) {
+      hideJourneyStatus();
+      alert('Add some memories first to start your journey!');
+      switchMemorySubtab('capture');
+      return;
+    }
+    
+    // Use AI to select and order memories for narrative
+    const selectedMemories = await selectMemoriesForJourney(memoryArray);
+    
+    // Start the journey
+    await startJourneyWithMemories(selectedMemories, 'Your Memory Journey');
+    
+  } catch (error) {
+    console.error('Failed to start proactive journey:', error);
+    hideJourneyStatus();
+    alert('Failed to start journey. Please try again.');
+  }
+}
+
+// Create custom journey
+async function createCustomJourney() {
+  console.log('🎨 Creating custom journey...');
+  
+  const memoryArray = Array.from(memories.values());
+  
+  if (memoryArray.length === 0) {
+    alert('Add some memories first to create a custom journey!');
+    switchMemorySubtab('capture');
+    return;
+  }
+  
+  // Simple selection for now - could be enhanced with a modal
+  const theme = prompt('What theme would you like for your journey?\n\nExamples:\n- "work achievements"\n- "family moments"\n- "travel adventures"\n- "recent photos"');
+  
+  if (!theme) return;
+  
+  showJourneyStatus('Creating your custom journey...', `Finding memories related to "${theme}"`);
+  
+  try {
+    // Filter memories by theme using simple keyword matching
+    const filteredMemories = memoryArray.filter(memory => 
+      memory.content.toLowerCase().includes(theme.toLowerCase()) ||
+      memory.category === theme.toLowerCase() ||
+      (memory.tags && memory.tags.some(tag => tag.toLowerCase().includes(theme.toLowerCase())))
+    );
+    
+    if (filteredMemories.length === 0) {
+      // Fallback to all memories if no matches
+      await startJourneyWithMemories(memoryArray.slice(0, 5), `Custom Journey: ${theme}`);
+    } else {
+      await startJourneyWithMemories(filteredMemories, `Custom Journey: ${theme}`);
+    }
+    
+  } catch (error) {
+    console.error('Failed to create custom journey:', error);
+    hideJourneyStatus();
+    alert('Failed to create custom journey. Please try again.');
+  }
+}
+
+// Select memories for journey using AI
+async function selectMemoriesForJourney(allMemories) {
+  // For now, use a simple algorithm - could be enhanced with AI
+  const selected = [];
+  
+  // Prioritize recent memories with media
+  const recentWithMedia = allMemories
+    .filter(m => m.type !== 'text' && Date.now() - m.timestamp < 30 * 24 * 60 * 60 * 1000)
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 3);
+  
+  selected.push(...recentWithMedia);
+  
+  // Add some text memories for narrative
+  const textMemories = allMemories
+    .filter(m => m.type === 'text' && !selected.includes(m))
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 2);
+  
+  selected.push(...textMemories);
+  
+  // Ensure we have at least 3 memories
+  if (selected.length < 3) {
+    const additional = allMemories
+      .filter(m => !selected.includes(m))
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, 3 - selected.length);
+    
+    selected.push(...additional);
+  }
+  
+  return selected.slice(0, 5); // Max 5 memories per journey (Miller's Law: 7±2)
+}
+
+// Start journey with specific memories
+async function startJourneyWithMemories(memoriesToUse, journeyTitle) {
+  console.log('🎬 Starting cinematic journey:', journeyTitle);
+  
+  if (memoriesToUse.length === 0) {
+    alert('No memories available for this journey!');
+    return;
+  }
+  
+  // Initialize journey state
+  currentJourney = {
+    title: journeyTitle,
+    memories: memoriesToUse,
+    currentIndex: 0,
+    startTime: Date.now()
+  };
+  
+  // Hide status and show journey viewer
+  hideJourneyStatus();
+  showJourneyViewer();
+  
+  // Start the narrative
+  await displayCurrentMemory();
+  
+  // Start timer
+  startJourneyTimer();
+  
+  // Save to history
+  saveJourneyToHistory(journeyTitle, memoriesToUse.length);
+}
+
+// Display current memory in journey
+async function displayCurrentMemory() {
+  if (!currentJourney || currentJourney.currentIndex >= currentJourney.memories.length) {
+    endJourney();
+    return;
+  }
+  
+  const memory = currentJourney.memories[currentJourney.currentIndex];
+  const showcase = document.getElementById('memoryShowcase');
+  const narrative = document.getElementById('narrativeText');
+  
+  if (!showcase || !narrative) return;
+  
+  // Display memory content
+  showcase.innerHTML = '';
+  
+  if (memory.type === 'image' || memory.type === 'screenshot') {
+    const img = document.createElement('img');
+    img.src = memory.mediaData;
+    img.alt = memory.content;
+    showcase.appendChild(img);
+  } else if (memory.type === 'video') {
+    const video = document.createElement('video');
+    video.src = memory.mediaData;
+    video.controls = true;
+    video.autoplay = true;
+    video.muted = true;
+    showcase.appendChild(video);
+  } else {
+    // Text memory - show as styled text
+    const textDiv = document.createElement('div');
+    textDiv.style.cssText = `
+      padding: 40px;
+      background: white;
+      border-radius: 12px;
+      border: 2px solid #e9ecef;
+      font-size: 1.2em;
+      line-height: 1.6;
+      color: #495057;
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto;
+    `;
+    textDiv.textContent = memory.content;
+    showcase.appendChild(textDiv);
+  }
+  
+  // Generate AI narrative
+  const narrativeText = await generateMemoryNarrative(memory, currentJourney.currentIndex, currentJourney.memories.length);
+  narrative.textContent = narrativeText;
+  
+  // Update progress
+  updateJourneyProgress();
+  
+  // Update navigation buttons
+  updateNavigationButtons();
+}
+
+// Generate AI narrative for memory
+async function generateMemoryNarrative(memory, index, total) {
+  try {
+    // Use Chrome AI if available
+    if (window.ai && window.ai.languageModel) {
+      const session = await window.ai.languageModel.create({
+        temperature: 0.8,
+        topK: 40
+      });
+      
+      const prompt = `You are a gentle, empathetic storyteller helping someone revisit their memories. 
+
+Memory ${index + 1} of ${total}:
+Content: "${memory.content}"
+Type: ${memory.type}
+Date: ${new Date(memory.timestamp).toLocaleDateString()}
+
+Create a warm, personal narrative (2-3 sentences) that:
+- Speaks directly to the person ("you", "your")
+- Highlights the emotional significance
+- Connects to the broader story of their life
+- Uses gentle, encouraging language
+
+Example tone: "This beautiful moment from your day shows how you find joy in simple things. The way you captured this memory tells a story of someone who appreciates life's precious details."`;
+
+      const response = await session.prompt(prompt);
+      session.destroy();
+      
+      return response || getDefaultNarrative(memory, index, total);
+    }
+  } catch (error) {
+    console.error('AI narrative generation failed:', error);
+  }
+  
+  // Fallback to simple narrative
+  return getDefaultNarrative(memory, index, total);
+}
+
+// Get default narrative when AI is not available
+function getDefaultNarrative(memory, index, total) {
+  const templates = [
+    `Here's a special memory from ${new Date(memory.timestamp).toLocaleDateString()}. ${memory.content}`,
+    `This moment captures something meaningful about your journey. ${memory.content}`,
+    `Looking back at this memory, you can see how it fits into your larger story. ${memory.content}`,
+    `This memory holds a special place in your collection of experiences. ${memory.content}`,
+    `Each memory tells a part of your unique story, and this one is particularly special. ${memory.content}`
+  ];
+  
+  return templates[index % templates.length];
+}
+
+// Journey control functions
+function pauseJourney() {
+  if (journeyTimer) {
+    clearInterval(journeyTimer);
+    journeyTimer = null;
+    
+    const btn = document.getElementById('pauseJourneyBtn');
+    if (btn) {
+      btn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      `;
+      btn.onclick = resumeJourney;
+    }
+  }
+}
+
+function resumeJourney() {
+  startJourneyTimer();
+  
+  const btn = document.getElementById('pauseJourneyBtn');
+  if (btn) {
+    btn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="6" y="4" width="4" height="16"/>
+        <rect x="14" y="4" width="4" height="16"/>
+      </svg>
+    `;
+    btn.onclick = pauseJourney;
+  }
+}
+
+function closeJourney() {
+  endJourney();
+}
+
+function previousMemoryInJourney() {
+  if (currentJourney && currentJourney.currentIndex > 0) {
+    currentJourney.currentIndex--;
+    displayCurrentMemory();
+  }
+}
+
+function nextMemoryInJourney() {
+  if (currentJourney && currentJourney.currentIndex < currentJourney.memories.length - 1) {
+    currentJourney.currentIndex++;
+    displayCurrentMemory();
+  } else {
+    endJourney();
+  }
+}
+
+// Journey UI functions
+function showJourneyStatus(title, description) {
+  const status = document.getElementById('journeyStatus');
+  const titleEl = document.getElementById('journeyStatusTitle');
+  const descEl = document.getElementById('journeyStatusDesc');
+  
+  if (status && titleEl && descEl) {
+    titleEl.textContent = title;
+    descEl.textContent = description;
+    status.style.display = 'block';
+  }
+}
+
+function hideJourneyStatus() {
+  const status = document.getElementById('journeyStatus');
+  if (status) {
+    status.style.display = 'none';
+  }
+}
+
+function showJourneyViewer() {
+  const viewer = document.getElementById('journeyViewer');
+  const title = document.getElementById('journeyTitle');
+  
+  if (viewer && title && currentJourney) {
+    title.textContent = currentJourney.title;
+    viewer.style.display = 'block';
+  }
+}
+
+function hideJourneyViewer() {
+  const viewer = document.getElementById('journeyViewer');
+  if (viewer) {
+    viewer.style.display = 'none';
+  }
+}
+
+function updateJourneyProgress() {
+  if (!currentJourney) return;
+  
+  const progressFill = document.getElementById('journeyProgressFill');
+  const progressText = document.getElementById('journeyProgressText');
+  
+  if (progressFill && progressText) {
+    const progress = ((currentJourney.currentIndex + 1) / currentJourney.memories.length) * 100;
+    
+    // Goal-Gradient Effect: Accelerate animation as user gets closer to end
+    const animationSpeed = progress > 60 ? '0.5s' : '0.3s';
+    progressFill.style.transition = `width ${animationSpeed} ease-out`;
+    progressFill.style.width = `${progress}%`;
+    
+    // Add completion motivation
+    if (progress >= 80) {
+      progressText.textContent = `Almost done! Memory ${currentJourney.currentIndex + 1} of ${currentJourney.memories.length}`;
+      progressFill.style.background = 'linear-gradient(90deg, #28a745, #20c997)'; // Green for near completion
+    } else {
+      progressText.textContent = `Memory ${currentJourney.currentIndex + 1} of ${currentJourney.memories.length}`;
+      progressFill.style.background = 'linear-gradient(90deg, #667eea, #764ba2)'; // Default gradient
+    }
+  }
+}
+
+function updateNavigationButtons() {
+  if (!currentJourney) return;
+  
+  const prevBtn = document.getElementById('prevMemoryBtn');
+  const nextBtn = document.getElementById('nextMemoryBtn');
+  
+  if (prevBtn) {
+    prevBtn.disabled = currentJourney.currentIndex === 0;
+  }
+  
+  if (nextBtn) {
+    if (currentJourney.currentIndex === currentJourney.memories.length - 1) {
+      nextBtn.textContent = 'Finish';
+      nextBtn.innerHTML = `
+        Finish
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      `;
+    } else {
+      nextBtn.innerHTML = `
+        Next
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      `;
+    }
+  }
+}
+
+function startJourneyTimer() {
+  if (journeyTimer) clearInterval(journeyTimer);
+  
+  journeyTimer = setInterval(() => {
+    if (currentJourney) {
+      const elapsed = Date.now() - currentJourney.startTime;
+      const minutes = Math.floor(elapsed / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      
+      const durationEl = document.getElementById('journeyDuration');
+      if (durationEl) {
+        durationEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }
+    }
+  }, 1000);
+}
+
+function endJourney() {
+  console.log('🏁 Journey ended');
+  
+  // Clear timer
+  if (journeyTimer) {
+    clearInterval(journeyTimer);
+    journeyTimer = null;
+  }
+  
+  // Hide viewer
+  hideJourneyViewer();
+  
+  // Clear current journey
+  currentJourney = null;
+  
+  // Show completion message
+  showActionFeedback('Journey completed! ✨', 'Thank you for taking this memory journey');
+  setTimeout(hideActionFeedback, 3000);
+  
+  // Refresh history
+  loadJourneyHistory();
+}
+
+// Journey history functions
+function saveJourneyToHistory(title, memoryCount) {
+  try {
+    const history = JSON.parse(localStorage.getItem('journeyHistory') || '[]');
+    
+    const journey = {
+      id: Date.now(),
+      title,
+      memoryCount,
+      timestamp: Date.now(),
+      duration: 0 // Will be updated when journey ends
+    };
+    
+    history.unshift(journey);
+    
+    // Keep only last 10 journeys
+    if (history.length > 10) {
+      history.splice(10);
+    }
+    
+    localStorage.setItem('journeyHistory', JSON.stringify(history));
+  } catch (error) {
+    console.error('Failed to save journey to history:', error);
+  }
+}
+
+function loadJourneyHistory() {
+  const historyContainer = document.getElementById('journeyHistory');
+  if (!historyContainer) return;
+  
+  try {
+    const history = JSON.parse(localStorage.getItem('journeyHistory') || '[]');
+    
+    if (history.length === 0) {
+      historyContainer.innerHTML = `
+        <div class="journey-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <h4>No journeys yet</h4>
+          <p>Start your first memory journey to see it here</p>
+        </div>
+      `;
+      return;
+    }
+    
+    historyContainer.innerHTML = '';
+    
+    history.forEach(journey => {
+      const item = createHistoryItem(journey);
+      historyContainer.appendChild(item);
+    });
+    
+  } catch (error) {
+    console.error('Failed to load journey history:', error);
+  }
+}
+
+function createHistoryItem(journey) {
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  
+  const timeAgo = getTimeAgo(journey.timestamp);
+  
+  item.innerHTML = `
+    <div class="history-icon">🛤️</div>
+    <div class="history-content">
+      <div class="history-title">${journey.title}</div>
+      <div class="history-meta">${journey.memoryCount} memories • ${timeAgo}</div>
+    </div>
+    <div class="history-duration">${formatDuration(journey.duration)}</div>
+  `;
+  
+  // Could add click handler to replay journey
+  item.onclick = () => {
+    console.log('Replay journey:', journey.title);
+    // TODO: Implement journey replay
+  };
+  
+  return item;
+}
+
+// Utility functions
+function getTimeOfDay(date) {
+  const hour = date.getHours();
+  if (hour < 12) return 'morning';
+  if (hour < 17) return 'afternoon';
+  return 'evening';
+}
+
+function getTimeAgo(timestamp) {
+  const now = Date.now();
+  const diff = now - timestamp;
+  
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if (days > 0) return `${days}d ago`;
+  if (hours > 0) return `${hours}h ago`;
+  if (minutes > 0) return `${minutes}m ago`;
+  return 'just now';
+}
+
+function formatDuration(ms) {
+  if (!ms) return '0:00';
+  
+  const minutes = Math.floor(ms / 60000);
+  const seconds = Math.floor((ms % 60000) / 1000);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Progressive Disclosure: Toggle advanced options
+function toggleAdvancedOptions() {
+  const advancedOptions = document.getElementById('advancedOptions');
+  const toggleBtn = document.getElementById('advancedToggle');
+  
+  if (advancedOptions && toggleBtn) {
+    const isVisible = advancedOptions.style.display !== 'none';
+    
+    if (isVisible) {
+      advancedOptions.style.display = 'none';
+      toggleBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="1"/>
+          <circle cx="12" cy="5" r="1"/>
+          <circle cx="12" cy="19" r="1"/>
+        </svg>
+        More Options
+      `;
+    } else {
+      advancedOptions.style.display = 'flex';
+      toggleBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Less Options
+      `;
+    }
+  }
+}
+
+// Journey Settings (placeholder for future enhancement)
+function showJourneySettings() {
+  alert('Journey Settings:\n\n• Narrative Speed: Adjustable\n• AI Personality: Empathetic (default)\n• Auto-advance: 5 seconds\n• Background Music: Disabled\n\nComing soon in future updates!');
+}
+
+// Demo helper functions
+function clearAllMemories() {
+  if (confirm('🗑️ Clear all memories?\n\nThis will delete all current memories and cannot be undone.')) {
+    memories.clear();
+    saveMemories();
+    renderMemories();
+    updateMemoryCount();
+    console.log('All memories cleared');
+    
+    // Show feedback
+    showActionFeedback('All memories cleared! 🗑️', 'Ready for fresh demo content');
+    setTimeout(hideActionFeedback, 2000);
+  }
+}
+
+function loadDemoMemories() {
+  const sampleCount = window.SAMPLE_MEMORIES ? window.SAMPLE_MEMORIES.length : 15;
+  if (confirm(`📝 Load demo memories?\n\nThis will add ${sampleCount} rich sample memories with images for demonstration purposes.`)) {
+    createSampleMemories();
+    console.log('Demo memories loaded');
+    
+    // Show feedback
+    showActionFeedback('Demo memories loaded! 🎉', `${sampleCount} rich memories with images added`);
+    setTimeout(() => {
+      hideActionFeedback();
+      renderMemories();
+      updateMemoryCount();
+      
+      // Auto-refresh insights if on insights tab
+      const currentTab = document.querySelector('.memory-subtab.active')?.dataset?.subtab;
+      if (currentTab === 'lane') {
+        generateMemoryInsights();
+        findConnections();
+      }
+    }, 2000);
+  }
+}
+
+// ============================================
+// MEMORY INSIGHTS - PRACTICAL ANALYSIS
+// ============================================
+
+// Generate actionable insights from memories
+function generateInsights() {
+  console.log('📊 Generating memory insights...');
+  
+  const insightsContainer = document.getElementById('memoryInsights');
+  if (!insightsContainer) return;
+  
+  const memoryArray = Array.from(memories.values());
+  
+  if (memoryArray.length === 0) {
+    insightsContainer.innerHTML = `
+      <div class="insight-empty">
+        <p>Add some memories to see patterns and insights!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const insights = analyzeMemoryPatterns(memoryArray);
+  
+  insightsContainer.innerHTML = '';
+  insights.forEach(insight => {
+    const card = createInsightCard(insight);
+    insightsContainer.appendChild(card);
+  });
+}
+
+// Analyze memory patterns for practical insights
+function analyzeMemoryPatterns(memoryArray) {
+  const insights = [];
+  
+  // 1. Productivity Patterns
+  const workMemories = memoryArray.filter(m => m.category === 'work');
+  const workSuccesses = workMemories.filter(m => 
+    m.content.toLowerCase().includes('success') || 
+    m.content.toLowerCase().includes('completed') ||
+    m.content.toLowerCase().includes('achieved')
+  );
+  
+  if (workSuccesses.length > 0) {
+    insights.push({
+      type: 'productivity',
+      title: 'Work Success Pattern',
+      description: `You've recorded ${workSuccesses.length} work achievements. Common themes: ${extractCommonWords(workSuccesses.map(m => m.content)).slice(0, 3).join(', ')}`,
+      actionable: 'Consider documenting what made these successful for future reference',
+      icon: '🎯',
+      color: '#28a745'
+    });
+  }
+  
+  // 2. Learning Insights
+  const learningMemories = memoryArray.filter(m => 
+    m.category === 'notes' || 
+    m.content.toLowerCase().includes('learn') ||
+    m.content.toLowerCase().includes('insight')
+  );
+  
+  if (learningMemories.length > 0) {
+    insights.push({
+      type: 'learning',
+      title: 'Knowledge Growth',
+      description: `${learningMemories.length} learning entries found. You're actively building knowledge in: ${extractCategories(learningMemories).join(', ')}`,
+      actionable: 'Create connections between related learnings for better retention',
+      icon: '🧠',
+      color: '#17a2b8'
+    });
+  }
+  
+  // 3. Time Patterns
+  const recentMemories = memoryArray.filter(m => 
+    Date.now() - m.timestamp < 7 * 24 * 60 * 60 * 1000
+  );
+  
+  if (recentMemories.length > 0) {
+    const avgPerDay = recentMemories.length / 7;
+    insights.push({
+      type: 'activity',
+      title: 'Memory Activity',
+      description: `You're averaging ${avgPerDay.toFixed(1)} memories per day this week`,
+      actionable: avgPerDay < 1 ? 'Consider capturing more daily moments' : 'Great memory capture habit!',
+      icon: '📈',
+      color: '#ffc107'
+    });
+  }
+  
+  // 4. Content Gaps
+  const categories = ['personal', 'work', 'ideas', 'notes'];
+  const missingCategories = categories.filter(cat => 
+    !memoryArray.some(m => m.category === cat)
+  );
+  
+  if (missingCategories.length > 0) {
+    insights.push({
+      type: 'gaps',
+      title: 'Memory Gaps',
+      description: `Missing memories in: ${missingCategories.join(', ')}`,
+      actionable: 'Consider adding memories from these areas for a complete picture',
+      icon: '🎯',
+      color: '#dc3545'
+    });
+  }
+  
+  return insights;
+}
+
+// Find connections between memories
+function findConnections() {
+  console.log('🔗 Finding memory connections...');
+  
+  const connectionsContainer = document.getElementById('memoryConnections');
+  if (!connectionsContainer) {
+    console.log('❌ memoryConnections container not found');
+    return;
+  }
+  
+  const memoryArray = Array.from(memories.values());
+  console.log(`📊 Found ${memoryArray.length} memories for connection analysis`);
+  
+  if (memoryArray.length < 2) {
+    connectionsContainer.innerHTML = `
+      <div class="connection-empty">
+        <p>Add more memories to discover connections!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const connections = findMemoryConnections(memoryArray);
+  console.log(`🔗 Found ${connections.length} connections`);
+  
+  connectionsContainer.innerHTML = '';
+  connections.forEach(connection => {
+    const card = createConnectionCard(connection);
+    connectionsContainer.appendChild(card);
+  });
+  
+  // Also populate Recent Journeys with sample data
+  populateRecentJourneys();
+}
+
+// Find actual connections between memories
+function findMemoryConnections(memoryArray) {
+  const connections = [];
+  
+  // 1. Tag-based connections
+  const tagGroups = {};
+  memoryArray.forEach(memory => {
+    if (memory.tags) {
+      memory.tags.forEach(tag => {
+        if (!tagGroups[tag]) tagGroups[tag] = [];
+        tagGroups[tag].push(memory);
+      });
+    }
+  });
+  
+  Object.entries(tagGroups).forEach(([tag, memories]) => {
+    if (memories.length > 1) {
+      connections.push({
+        type: 'tag',
+        title: `"${tag}" Connection`,
+        memories: memories.slice(0, 3), // Show max 3
+        description: `${memories.length} memories share this theme`,
+        strength: memories.length
+      });
+    }
+  });
+  
+  // 2. Time-based connections (same day/week)
+  const timeGroups = {};
+  memoryArray.forEach(memory => {
+    const date = new Date(memory.timestamp).toDateString();
+    if (!timeGroups[date]) timeGroups[date] = [];
+    timeGroups[date].push(memory);
+  });
+  
+  Object.entries(timeGroups).forEach(([date, memories]) => {
+    if (memories.length > 1) {
+      connections.push({
+        type: 'time',
+        title: `Same Day (${new Date(date).toLocaleDateString()})`,
+        memories: memories.slice(0, 3),
+        description: `${memories.length} memories from the same day`,
+        strength: memories.length
+      });
+    }
+  });
+  
+  // 3. Content similarity (simple keyword matching)
+  const contentConnections = findContentSimilarities(memoryArray);
+  connections.push(...contentConnections);
+  
+  // Sort by strength and return top connections
+  return connections
+    .sort((a, b) => b.strength - a.strength)
+    .slice(0, 6); // Max 6 connections
+}
+
+// Helper functions
+function extractCommonWords(texts) {
+  const words = texts.join(' ').toLowerCase()
+    .split(/\W+/)
+    .filter(word => word.length > 3)
+    .filter(word => !['this', 'that', 'with', 'have', 'been', 'were', 'they'].includes(word));
+  
+  const frequency = {};
+  words.forEach(word => {
+    frequency[word] = (frequency[word] || 0) + 1;
+  });
+  
+  return Object.entries(frequency)
+    .sort((a, b) => b[1] - a[1])
+    .map(([word]) => word);
+}
+
+function extractCategories(memories) {
+  const categories = [...new Set(memories.map(m => m.category))];
+  return categories;
+}
+
+function findContentSimilarities(memoryArray) {
+  const connections = [];
+  
+  // Simple keyword-based similarity
+  for (let i = 0; i < memoryArray.length - 1; i++) {
+    for (let j = i + 1; j < memoryArray.length; j++) {
+      const similarity = calculateTextSimilarity(
+        memoryArray[i].content, 
+        memoryArray[j].content
+      );
+      
+      if (similarity > 0.3) { // 30% similarity threshold
+        connections.push({
+          type: 'content',
+          title: 'Similar Content',
+          memories: [memoryArray[i], memoryArray[j]],
+          description: `${Math.round(similarity * 100)}% content similarity`,
+          strength: similarity
+        });
+      }
+    }
+  }
+  
+  return connections;
+}
+
+function calculateTextSimilarity(text1, text2) {
+  const words1 = new Set(text1.toLowerCase().split(/\W+/));
+  const words2 = new Set(text2.toLowerCase().split(/\W+/));
+  
+  const intersection = new Set([...words1].filter(x => words2.has(x)));
+  const union = new Set([...words1, ...words2]);
+  
+  return intersection.size / union.size;
+}
+
+// UI Creation functions
+function createInsightCard(insight) {
+  const card = document.createElement('div');
+  card.className = 'insight-card';
+  card.style.borderLeft = `4px solid ${insight.color}`;
+  
+  card.innerHTML = `
+    <div class="insight-header">
+      <span class="insight-icon">${insight.icon}</span>
+      <h4>${insight.title}</h4>
+    </div>
+    <p class="insight-description">${insight.description}</p>
+    <div class="insight-action">
+      <strong>💡 Action:</strong> ${insight.actionable}
+    </div>
+  `;
+  
+  return card;
+}
+
+function createConnectionCard(connection) {
+  const card = document.createElement('div');
+  card.className = 'connection-card';
+  
+  const memoryTitles = connection.memories
+    .map(m => m.title || m.content.substring(0, 30) + '...')
+    .join(' • ');
+  
+  card.innerHTML = `
+    <div class="connection-header">
+      <span class="connection-type">${getConnectionIcon(connection.type)}</span>
+      <h4>${connection.title}</h4>
+    </div>
+    <p class="connection-description">${connection.description}</p>
+    <div class="connection-memories">
+      <small>${memoryTitles}</small>
+    </div>
+  `;
+  
+  card.onclick = () => showConnectionDetails(connection);
+  
+  return card;
+}
+
+function getConnectionIcon(type) {
+  switch (type) {
+    case 'tag': return '🏷️';
+    case 'time': return '📅';
+    case 'content': return '📝';
+    default: return '🔗';
+  }
+}
+
+function showConnectionDetails(connection) {
+  console.log('Showing connection details:', connection);
+  
+  // Create and show connection details modal
+  const modal = document.createElement('div');
+  modal.className = 'memory-modal-overlay';
+  modal.style.display = 'flex';
+  
+  const modalContent = `
+    <div class="memory-modal-content connection-details-modal">
+      <div class="memory-modal-header">
+        <h3>${getConnectionIcon(connection.type)} ${connection.title}</h3>
+        <button class="close-btn" onclick="closeConnectionModal()">&times;</button>
+      </div>
+      
+      <div class="connection-details-body">
+        <p class="connection-description">${connection.description}</p>
+        
+        <div class="connected-memories">
+          <h4>Connected Memories (${connection.memories.length})</h4>
+          <div class="memory-list">
+            ${connection.memories.map(memory => `
+              <div class="connected-memory-item" onclick="viewMemoryDetails('${memory.id}')">
+                <div class="memory-item-header">
+                  <h5>${memory.title || memory.content.substring(0, 50) + '...'}</h5>
+                  <span class="memory-category">${memory.category}</span>
+                </div>
+                <p class="memory-preview">${memory.content.substring(0, 100)}${memory.content.length > 100 ? '...' : ''}</p>
+                <div class="memory-tags">
+                  ${(memory.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+                ${memory.mediaData ? '<div class="has-media">📷 Has Image</div>' : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="connection-actions">
+          <button class="action-btn primary" onclick="searchByConnection('${connection.type}', '${connection.title}')">
+            Search Similar
+          </button>
+          <button class="action-btn secondary" onclick="createJourneyFromConnection('${connection.title}')">
+            Create Journey
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  modal.innerHTML = modalContent;
+  document.body.appendChild(modal);
+  
+  // Close on overlay click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeConnectionModal();
+    }
+  });
+}
+
+// Close connection modal
+function closeConnectionModal() {
+  const modal = document.querySelector('.memory-modal-overlay');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Search by connection type
+function searchByConnection(type, title) {
+  console.log(`Searching by ${type}: ${title}`);
+  
+  // Switch to search tab and perform search
+  if (typeof window.switchMemorySubtab === 'function') {
+    window.switchMemorySubtab('search');
+    
+    // Set search input
+    setTimeout(() => {
+      const searchInput = document.querySelector('#memorySearchInput');
+      if (searchInput) {
+        // Extract search term from connection title
+        const searchTerm = title.replace(/['"]/g, '').replace(' Connection', '');
+        searchInput.value = searchTerm;
+        
+        // Trigger search
+        if (typeof window.handleMemorySearch === 'function') {
+          window.handleMemorySearch();
+        }
+      }
+    }, 100);
+  }
+  
+  closeConnectionModal();
+}
+
+// Create journey from connection
+function createJourneyFromConnection(connectionTitle) {
+  console.log(`Creating journey from connection: ${connectionTitle}`);
+  
+  // Show feedback
+  showActionFeedback('Journey Created! 🎬', `Created journey based on "${connectionTitle}" connection`);
+  setTimeout(hideActionFeedback, 3000);
+  
+  closeConnectionModal();
+}
+
+// View individual memory details
+function viewMemoryDetails(memoryId) {
+  console.log(`Viewing memory details: ${memoryId}`);
+  
+  const memory = memories.get(memoryId);
+  if (memory && typeof window.expandMemory === 'function') {
+    window.expandMemory(memoryId);
+  }
+  
+  closeConnectionModal();
+}
+
+// Generate insights automatically
+function generateMemoryInsights() {
+  generateInsights();
+}
+
+// Populate Recent Journeys with sample data
+function populateRecentJourneys() {
+  const journeyHistoryContainer = document.getElementById('journeyHistory');
+  if (!journeyHistoryContainer) {
+    console.log('❌ journeyHistory container not found');
+    return;
+  }
+  
+  const memoryArray = Array.from(memories.values());
+  if (memoryArray.length === 0) {
+    journeyHistoryContainer.innerHTML = `
+      <div class="journey-empty">
+        <p>No journeys yet</p>
+        <small>Start your first memory journey to see it here</small>
+      </div>
+    `;
+    return;
+  }
+  
+  // Create sample journey entries based on available memories
+  const sampleJourneys = [
+    {
+      title: 'Family Memories Journey',
+      description: 'A heartwarming collection of family moments and celebrations',
+      memoryCount: memoryArray.filter(m => m.tags && m.tags.includes('family')).length || 3,
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      duration: '4 min'
+    },
+    {
+      title: 'Work Success Story',
+      description: 'Career achievements and professional milestones',
+      memoryCount: memoryArray.filter(m => m.category === 'work').length || 4,
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+      duration: '6 min'
+    },
+    {
+      title: 'Learning & Growth',
+      description: 'Educational experiences and skill development',
+      memoryCount: memoryArray.filter(m => m.category === 'notes' || (m.tags && m.tags.includes('learning'))).length || 3,
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+      duration: '5 min'
+    }
+  ];
+  
+  journeyHistoryContainer.innerHTML = '';
+  sampleJourneys.forEach(journey => {
+    if (journey.memoryCount > 0) {
+      const journeyItem = createJourneyHistoryItem(journey);
+      journeyHistoryContainer.appendChild(journeyItem);
+    }
+  });
+}
+
+// Create journey history item
+function createJourneyHistoryItem(journey) {
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  
+  item.innerHTML = `
+    <div class="history-item-header">
+      <h5>${journey.title}</h5>
+      <span class="history-date">${getTimeAgo(journey.date)}</span>
+    </div>
+    <p class="history-description">${journey.description}</p>
+    <div class="history-meta">
+      <span class="history-count">${journey.memoryCount} memories</span>
+      <span class="history-duration">${journey.duration}</span>
+    </div>
+  `;
+  
+  item.onclick = () => {
+    console.log('Replaying journey:', journey.title);
+    // Could implement journey replay functionality here
+  };
+  
+  return item;
+}
+
+// Memory Lane exports (keeping for compatibility)
+window.initializeMemoryLane = initializeMemoryLane;
+window.generateInsights = generateInsights;
+window.findConnections = findConnections;
+window.generateMemoryInsights = generateMemoryInsights;
+window.findMemoryConnections = findMemoryConnections;
+window.populateRecentJourneys = populateRecentJourneys;
+window.showConnectionDetails = showConnectionDetails;
+window.closeConnectionModal = closeConnectionModal;
+window.searchByConnection = searchByConnection;
+window.createJourneyFromConnection = createJourneyFromConnection;
+window.viewMemoryDetails = viewMemoryDetails;
+
+// Demo helper exports
+window.clearAllMemories = clearAllMemories;
+window.loadDemoMemories = loadDemoMemories;
+
+// Debug helper for Memory Lane tab
+window.debugMemoryLane = function() {
+  console.log('🔧 Debug Memory Lane:');
+  console.log('- Memory Lane tab exists:', !!document.querySelector('[data-subtab="lane"]'));
+  console.log('- Memory Lane subtab exists:', !!document.getElementById('laneSubtab'));
+  console.log('- Current memories count:', memories.size);
+  console.log('- switchMemorySubtab function:', typeof window.switchMemorySubtab);
+  
+  // Try to switch to Memory Lane
+  if (typeof window.switchMemorySubtab === 'function') {
+    window.switchMemorySubtab('lane');
+    console.log('✅ Switched to Memory Lane tab');
+  } else {
+    console.log('❌ switchMemorySubtab function not available');
+  }
+};
+
+// Debug helper for insights buttons
+window.debugInsights = function() {
+  console.log('🔧 Debug Insights:');
+  console.log('- Memories count:', memories.size);
+  console.log('- memoryInsights container:', !!document.getElementById('memoryInsights'));
+  console.log('- memoryConnections container:', !!document.getElementById('memoryConnections'));
+  console.log('- journeyHistory container:', !!document.getElementById('journeyHistory'));
+  console.log('- generateInsights function:', typeof window.generateInsights);
+  console.log('- findConnections function:', typeof window.findConnections);
+  console.log('- Analyze button exists:', !!document.querySelector('button[onclick="generateInsights()"]'));
+  console.log('- Connections button exists:', !!document.querySelector('button[onclick="findConnections()"]'));
+  
+  // Test functions manually
+  console.log('🧪 Testing generateInsights...');
+  try {
+    generateInsights();
+    console.log('✅ generateInsights executed');
+  } catch (error) {
+    console.log('❌ generateInsights error:', error);
+  }
+  
+  console.log('🧪 Testing findConnections...');
+  try {
+    findConnections();
+    console.log('✅ findConnections executed');
+  } catch (error) {
+    console.log('❌ findConnections error:', error);
+  }
+};
+
 // Verify all functions are available
 console.log('✅ Memory Agent functions loaded:');
 console.log('  - captureScreenshotMemory:', typeof window.captureScreenshotMemory);
 console.log('  - recordVideoMemory:', typeof window.recordVideoMemory);
 console.log('  - connectGoogleDocs:', typeof window.connectGoogleDocs);
 console.log('  - connectGoogleDrive:', typeof window.connectGoogleDrive);
+console.log('  - startProactiveJourney:', typeof window.startProactiveJourney);
 console.log('🧠 Memory Agent script fully loaded!');

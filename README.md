@@ -25,12 +25,6 @@ python3 -m http.server 8000
 
 ## ✨ Key Features
 
-### 📱 Fully Mobile Responsive (NEW!)
-- **Perfect on All Devices**: Works seamlessly on phones, tablets, and desktops
-- **Touch Optimized**: 44px+ touch targets for easy tapping
-- **iOS & Android Ready**: Safe area support, no zoom issues
-- **PWA Capable**: Add to home screen for app-like experience
-
 ### 🤖 Hybrid AI System
 - **Primary AI**: Chrome's Gemini Nano (local, fast, private)
 - **Smart Fallback**: OpenAI, Anthropic, Google APIs

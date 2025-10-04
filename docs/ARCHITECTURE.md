@@ -1,6 +1,6 @@
-# Browser Agent Extension - Architecture Overview
+# Architecture Overview
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -49,7 +49,9 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 📊 Data Flow
+---
+
+## Data Flow
 
 ### Message Flow (Chat Feature)
 ```
@@ -84,7 +86,9 @@ Component A                  Event Bus              Component B
     │                           │                        │
 ```
 
-## 🎯 Core Principles
+---
+
+## Core Design Principles
 
 ### 1. Separation of Concerns
 - **Business Logic** → `features/*/manager.js`
@@ -106,7 +110,7 @@ eventBus.on('user:action', (data) => {
 });
 ```
 
-Benefits:
+**Benefits:**
 - ✅ Loose coupling
 - ✅ Easy to test
 - ✅ Easy to extend
@@ -162,7 +166,9 @@ class MyFeature {
 }
 ```
 
-## 🔄 Module Lifecycle
+---
+
+## Module Lifecycle
 
 ### 1. Initialization Phase
 ```
@@ -203,7 +209,9 @@ Resources released
 Storage saved
 ```
 
-## 📦 Module Dependencies
+---
+
+## Module Dependencies
 
 ### Dependency Graph
 ```
@@ -249,7 +257,9 @@ main.js
 5. **Main** (entry point)
    - main.js
 
-## 🔌 Extension Points
+---
+
+## Extension Points
 
 ### Adding a New Feature
 
@@ -334,75 +344,9 @@ if (typeof window !== 'undefined') {
 }
 ```
 
-## 🧪 Testing Strategy
+---
 
-### Unit Tests
-Test individual modules in isolation:
-
-```javascript
-import { createSession, addMessage } from './features/chat/chat-manager.js';
-
-describe('ChatManager', () => {
-  it('should create a new session', () => {
-    const session = createSession();
-    expect(session.id).toBeDefined();
-    expect(session.messages).toEqual([]);
-  });
-
-  it('should add message to session', () => {
-    const session = createSession();
-    addMessage(session.id, 'user', 'Hello');
-    expect(session.messages.length).toBe(1);
-  });
-});
-```
-
-### Integration Tests
-Test modules working together:
-
-```javascript
-import eventBus from './utils/event-bus.js';
-import { initializeSessions, addMessage } from './features/chat/chat-manager.js';
-
-describe('Chat Integration', () => {
-  it('should emit event when message added', (done) => {
-    eventBus.on('chat:message-added', (data) => {
-      expect(data.message).toBeDefined();
-      done();
-    });
-
-    const session = createSession();
-    addMessage(session.id, 'user', 'Test');
-  });
-});
-```
-
-### E2E Tests
-Test complete user flows:
-
-```javascript
-describe('Chat Flow', () => {
-  it('should allow user to send and receive messages', async () => {
-    // Open app
-    await page.goto('http://localhost:8000');
-    
-    // Type message
-    await page.type('#userInput', 'Hello AI');
-    
-    // Click send
-    await page.click('#sendBtn');
-    
-    // Wait for response
-    await page.waitForSelector('.assistant-message');
-    
-    // Verify
-    const messages = await page.$$('.message');
-    expect(messages.length).toBe(2);
-  });
-});
-```
-
-## 📈 Performance Considerations
+## Performance Considerations
 
 ### Lazy Loading
 Features load only when needed:
@@ -444,7 +388,9 @@ input.addEventListener('input', (e) => {
 });
 ```
 
-## 🔒 Security Considerations
+---
+
+## Security Considerations
 
 ### XSS Prevention
 ```javascript
@@ -476,16 +422,17 @@ script.src = 'safe-script.js';
 document.head.appendChild(script);
 ```
 
-## 📚 Additional Resources
+---
 
-- [Refactoring Guide](REFACTORING.md)
-- [API Documentation](docs/API.md)
-- [Contributing Guide](CONTRIBUTING.md)
-- [Example Code](example-modular.html)
+## Related Documentation
+
+- [Getting Started](GETTING-STARTED.md) - Installation and setup
+- [Features](FEATURES.md) - Feature documentation
+- [Development](DEVELOPMENT.md) - Development workflow
+- [API Guides](API-GUIDES.md) - AI API integration
+- [Experiments](EXPERIMENTS.md) - Interactive demos
 
 ---
 
-**Version:** 2.0.0  
-**Last Updated:** October 2, 2025
-
+**Last Updated:** October 4, 2025
 

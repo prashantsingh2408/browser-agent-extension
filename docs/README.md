@@ -57,6 +57,13 @@ Technical documentation for contributors:
    - Fallback system
    - Best practices
 
+7. **[Mobile Guide](MOBILE-GUIDE.md)** - Mobile responsiveness & optimization
+   - Responsive design features
+   - Mobile-specific optimizations
+   - Testing on mobile devices
+   - iOS and Android support
+   - Performance tips
+
 ---
 
 ## 🚀 Quick Navigation
@@ -72,6 +79,7 @@ Technical documentation for contributors:
 | Build a website with AI | [Features - Web Dev Agent](FEATURES.md#4-web-developer-agent-) |
 | Configure APIs | [Features - Settings](FEATURES.md#6-settings--configuration-) |
 | Try interactive demos | [Experiments](EXPERIMENTS.md) |
+| Test on mobile | [Mobile Guide](MOBILE-GUIDE.md) |
 | Understand the codebase | [Architecture](ARCHITECTURE.md) |
 | Contribute code | [Development Guide](DEVELOPMENT.md) |
 | Integrate AI APIs | [API Guides](API-GUIDES.md) |
@@ -166,6 +174,21 @@ Technical documentation for contributors:
 - Performance optimization
 
 **Time to read:** 25 minutes
+
+---
+
+### [Mobile Guide](MOBILE-GUIDE.md)
+**Best for:** Testing and optimizing for mobile devices
+
+**Contents:**
+- Responsive design features
+- Mobile-specific optimizations
+- iOS and Android support
+- Testing checklist
+- Performance tips
+- Common mobile issues & fixes
+
+**Time to read:** 20 minutes
 
 ---
 
@@ -269,6 +292,7 @@ For developers integrating AI APIs:
 | Architecture | Oct 4, 2025 | ✅ Current |
 | Development | Oct 4, 2025 | ✅ Current |
 | API Guides | Oct 4, 2025 | ✅ Current |
+| Mobile Guide | Oct 4, 2025 | ✅ Current |
 
 ---
 

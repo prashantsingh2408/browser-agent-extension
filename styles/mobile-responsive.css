@@ -1,0 +1,913 @@
+/* =================================
+   MOBILE RESPONSIVE STYLES
+   Comprehensive mobile optimization
+   ================================= */
+
+/* Base Mobile Optimizations */
+@media (max-width: 768px) {
+  /* CRITICAL: Hide all tab labels on mobile - ICONS ONLY */
+  .main-nav-tabs .main-nav-tab .tab-label,
+  .main-nav-tabs .main-nav-tab > .tab-label,
+  .main-nav-tabs button.main-nav-tab .tab-label,
+  .main-nav-tabs button.main-nav-tab > span.tab-label,
+  button.main-nav-tab span.tab-label,
+  [data-tab] .tab-label,
+  .tab-label {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+  }
+
+  /* Root variable adjustments for mobile */
+  :root {
+    --spacing: 12px;
+    --spacing-md: 10px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --min-touch-target: 48px; /* Increased for better mobile touch */
+  }
+
+  /* Body adjustments */
+  body {
+    font-size: 16px; /* Prevent zoom on iOS */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* App container */
+  .app {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    overflow: hidden;
+  }
+
+  /* Header optimizations */
+  .header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    flex-wrap: nowrap;
+  }
+
+  .header-left {
+    flex: 1;
+    min-width: 0; /* Allow text truncation */
+  }
+
+  .app-title {
+    font-size: 16px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .logo {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+  }
+
+  .status {
+    font-size: 11px !important;
+  }
+
+  .status-dot {
+    width: 6px !important;
+    height: 6px !important;
+  }
+
+  /* Header buttons - larger touch targets */
+  .header-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 10px !important;
+    margin-left: 4px !important;
+  }
+
+  .header-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Navigation tabs - Enhanced Mobile */
+  .main-nav-container {
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .main-nav-tabs {
+    gap: 4px;
+    padding: 8px 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    /* Show subtle scrollbar on mobile */
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-300) transparent;
+  }
+
+  /* Better touch scrolling for tabs */
+  .main-nav-tabs::-webkit-scrollbar {
+    height: 2px;
+    display: block;
+  }
+
+  .main-nav-tabs::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .main-nav-tabs::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: 2px;
+  }
+
+  .main-nav-tab {
+    padding: 10px !important;
+    font-size: 11px !important;
+    min-width: 44px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border-radius: 8px !important;
+    justify-content: center;
+  }
+
+  .main-nav-tab svg {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+  }
+
+  .tab-label {
+    font-size: 11px !important;
+    white-space: nowrap;
+  }
+
+  /* Mobile: HIDE ALL TEXT - Show ONLY icons */
+  .main-nav-tabs .main-nav-tab .tab-label,
+  .main-nav-tabs .main-nav-tab > .tab-label,
+  button.main-nav-tab .tab-label,
+  button.main-nav-tab > span.tab-label {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    clip: rect(0, 0, 0, 0) !important;
+  }
+
+  /* Active tab is more prominent with larger icon and background */
+  .main-nav-tab.active {
+    background: var(--primary) !important;
+    color: white !important;
+    padding: 12px !important;
+    box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+  }
+
+  .main-nav-tab.active svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  /* Non-active tabs are slightly smaller */
+  .main-nav-tab:not(.active) {
+    opacity: 0.7;
+    padding: 10px !important;
+  }
+
+  .main-nav-tab:not(.active):hover {
+    opacity: 1;
+    background: var(--gray-100) !important;
+  }
+
+  /* Hide drag handles on mobile */
+  .drag-handle {
+    display: none !important;
+  }
+
+  /* Scroll buttons - hide on mobile as touch scroll is better */
+  .nav-scroll-btn {
+    display: none !important;
+  }
+
+  /* Content area */
+  .content {
+    padding: var(--spacing-md);
+  }
+
+  /* Chat messages */
+  .messages {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+
+  .message {
+    max-width: 100% !important;
+  }
+
+  .message-content {
+    max-width: 85% !important;
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .message.user {
+    margin-left: auto;
+  }
+
+  .message.bot {
+    margin-right: auto;
+  }
+
+  /* Message actions */
+  .message-actions {
+    gap: 4px;
+  }
+
+  .message-action-btn {
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 6px !important;
+  }
+
+  .message-action-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Input area */
+  .input-container {
+    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+
+  .user-input {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    padding: 12px !important;
+    min-height: 48px;
+  }
+
+  .send-btn,
+  .send-btn-enhanced {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    flex-shrink: 0;
+  }
+
+  .send-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Quick actions */
+  .quick-actions {
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-sm);
+  }
+
+  .quick-action-btn {
+    min-height: 48px !important;
+    padding: var(--spacing-md);
+    font-size: 14px;
+  }
+
+  /* Settings page */
+  .settings-content {
+    padding: var(--spacing-md);
+  }
+
+  .settings-section {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+  }
+
+  .settings-group {
+    gap: var(--spacing-md);
+  }
+
+  .form-group {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .form-label {
+    font-size: 14px;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    padding: 12px !important;
+    min-height: 48px;
+  }
+
+  .form-textarea {
+    min-height: 120px;
+  }
+
+  /* Buttons */
+  .btn,
+  .primary-btn,
+  .secondary-btn {
+    min-height: 48px !important;
+    padding: 12px 20px !important;
+    font-size: 15px;
+  }
+
+  /* Memory page */
+  .memory-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--spacing-md);
+  }
+
+  .memory-card {
+    padding: var(--spacing-md);
+  }
+
+  .memory-meta {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .memory-actions {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .memory-action-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* Agent page */
+  .agent-container {
+    padding: var(--spacing-md);
+  }
+
+  .agent-input-area {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .agent-input {
+    font-size: 16px !important;
+    padding: 12px !important;
+    min-height: 48px;
+  }
+
+  .agent-selector {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .agent-btn {
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 13px;
+  }
+
+  /* Web Dev Agent */
+  .webdev-input-area {
+    flex-direction: column !important;
+    gap: var(--spacing-md) !important;
+  }
+
+  .webdev-input {
+    font-size: 16px !important;
+    padding: 12px !important;
+    min-height: 48px;
+  }
+
+  .webdev-actions {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .webdev-btn {
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+  }
+
+  /* Modals and dialogs */
+  .modal,
+  .dialog {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: var(--spacing-md);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header,
+  .dialog-header {
+    padding: var(--spacing-md);
+  }
+
+  .modal-body,
+  .dialog-body {
+    padding: var(--spacing-md);
+  }
+
+  .modal-footer,
+  .dialog-footer {
+    padding: var(--spacing-md);
+    flex-direction: column-reverse;
+    gap: var(--spacing-sm);
+  }
+
+  .modal-footer .btn,
+  .dialog-footer .btn {
+    width: 100%;
+  }
+
+  /* Cards */
+  .card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  /* Tabs */
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-btn {
+    min-width: auto;
+    padding: 10px 16px !important;
+    font-size: 13px;
+  }
+
+  /* Forms */
+  .form-row {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .form-col {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  /* Grid layouts */
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Sidebar/drawer */
+  .sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Navigation scroll buttons */
+  .nav-scroll-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .nav-scroll-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Code blocks */
+  pre {
+    font-size: 12px;
+    padding: var(--spacing-sm);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  code {
+    font-size: 12px;
+  }
+
+  /* Tables */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  th, td {
+    padding: var(--spacing-sm) !important;
+    font-size: 13px;
+  }
+
+  /* Toast notifications */
+  .toast,
+  .notification {
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+    left: 16px !important;
+    right: 16px !important;
+  }
+
+  /* Dropdowns */
+  .dropdown-menu {
+    max-width: calc(100vw - 32px);
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* Search bars */
+  .search-bar {
+    font-size: 16px !important;
+    padding: 12px !important;
+    min-height: 48px;
+  }
+
+  /* Status bar */
+  .status-bar {
+    font-size: 12px;
+    padding: var(--spacing-xs) var(--spacing-md);
+  }
+
+  /* Loading indicators */
+  .loading-spinner {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Badges */
+  .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  /* Avatars */
+  .avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Floating action buttons */
+  .fab {
+    width: 56px !important;
+    height: 56px !important;
+    bottom: 80px !important;
+    right: 16px !important;
+  }
+}
+
+/* Small mobile devices (max 480px) */
+@media (max-width: 480px) {
+  :root {
+    --spacing: 10px;
+    --spacing-sm: 6px;
+    --spacing-md: 8px;
+    --spacing-lg: 14px;
+  }
+
+  .header {
+    padding: var(--spacing-sm) var(--spacing-sm);
+  }
+
+  .app-title {
+    font-size: 14px !important;
+  }
+
+  .header-btn {
+    min-width: 40px !important;
+    min-height: 40px !important;
+    padding: 8px !important;
+    margin-left: 2px !important;
+  }
+
+  /* Extra compact tabs for small screens */
+  .main-nav-tabs {
+    gap: 4px;
+    padding: 6px 6px;
+  }
+
+  .main-nav-tab {
+    padding: 8px !important;
+    font-size: 10px !important;
+    gap: 4px !important;
+  }
+
+  .main-nav-tab svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* On very small screens, show only icons (even active tab) */
+  .main-nav-tabs .main-nav-tab .tab-label,
+  .main-nav-tabs .main-nav-tab > .tab-label,
+  button.main-nav-tab .tab-label,
+  button.main-nav-tab > span.tab-label {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    clip: rect(0, 0, 0, 0) !important;
+  }
+
+  /* Active tab still shows icon, just larger */
+  .main-nav-tab.active {
+    padding: 10px !important;
+    background: var(--primary);
+    color: white;
+  }
+
+  .main-nav-tab.active svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .main-nav-tab:not(.active) {
+    padding: 8px !important;
+    opacity: 0.7;
+  }
+
+  .message-content {
+    max-width: 90% !important;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .input-container {
+    padding: var(--spacing-sm);
+  }
+
+  .user-input {
+    padding: 10px !important;
+  }
+
+  .modal,
+  .dialog {
+    width: 98vw !important;
+    margin: var(--spacing-sm);
+  }
+}
+
+/* Medium screens - Still icon-only for consistency (481px to 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+  /* Tablets and larger phones - keep icons only */
+  .main-nav-tabs {
+    gap: 6px;
+    padding: 8px 12px;
+  }
+
+  .main-nav-tab {
+    padding: 10px !important;
+    min-width: 48px !important;
+  }
+
+  /* Keep labels hidden on medium screens too */
+  .main-nav-tabs .main-nav-tab .tab-label,
+  .main-nav-tabs .main-nav-tab > .tab-label,
+  button.main-nav-tab .tab-label,
+  button.main-nav-tab > span.tab-label {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    clip: rect(0, 0, 0, 0) !important;
+  }
+
+  .main-nav-tab svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Active tab with better visibility */
+  .main-nav-tab.active {
+    padding: 12px !important;
+    background: var(--primary) !important;
+    color: white !important;
+  }
+
+  .main-nav-tab.active svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+  .header {
+    padding: var(--spacing-xs) var(--spacing-md);
+  }
+
+  .app-title {
+    font-size: 13px !important;
+  }
+
+  .main-nav-tabs {
+    padding: 6px 4px;
+  }
+
+  .main-nav-tab {
+    padding: 6px 10px !important;
+  }
+
+  .messages {
+    padding: var(--spacing-sm);
+  }
+
+  .input-container {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .modal,
+  .dialog {
+    max-height: 85vh;
+  }
+}
+
+/* Tablet optimizations (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .message-content {
+    max-width: 70% !important;
+  }
+
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .sidebar {
+    width: 320px !important;
+  }
+
+  .modal,
+  .dialog {
+    width: 80vw !important;
+    max-width: 600px !important;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase all interactive elements slightly */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  /* Remove hover effects on touch devices */
+  .hover-effect:hover {
+    transform: none !important;
+  }
+
+  /* Improve scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent double-tap zoom */
+  * {
+    touch-action: manipulation;
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper borders */
+  .card,
+  .modal,
+  .dialog {
+    border-width: 0.5px;
+  }
+
+  /* Crisp text */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Dark mode adjustments for mobile */
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
+  body {
+    background: var(--dark);
+  }
+
+  .header {
+    background: var(--gray-900);
+    border-bottom-color: var(--gray-700);
+  }
+
+  .message-content {
+    background: var(--gray-900);
+    color: var(--gray-100);
+  }
+
+  .user-input {
+    background: var(--gray-900);
+    color: var(--gray-100);
+    border-color: var(--gray-700);
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-top)) {
+  .header {
+    padding-top: calc(var(--spacing-md) + env(safe-area-inset-top));
+  }
+
+  .input-container {
+    padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
+  }
+
+  .fab {
+    bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    right: calc(16px + env(safe-area-inset-right)) !important;
+  }
+
+  .sidebar {
+    padding-left: calc(var(--spacing) + env(safe-area-inset-left));
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Fix iOS Safari bottom bar issue */
+  .app {
+    height: -webkit-fill-available;
+  }
+
+  /* Fix iOS input zoom */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Prevent iOS scroll bounce on fixed elements */
+  .header,
+  .input-container {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+/* Print styles */
+@media print {
+  .header-actions,
+  .input-container,
+  .send-btn,
+  .quick-actions,
+  .nav-scroll-btn,
+  .fab {
+    display: none !important;
+  }
+
+  .app {
+    height: auto;
+  }
+
+  .messages {
+    padding: 0;
+  }
+
+  .message-content {
+    break-inside: avoid;
+  }
+}
+
+/* Accessibility: Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Force hardware acceleration on mobile */
+@media (max-width: 768px) {
+  .message,
+  .modal,
+  .dialog,
+  .card {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+}
+

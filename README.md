@@ -25,6 +25,12 @@ python3 -m http.server 8000
 
 ## ✨ Key Features
 
+### 📱 Fully Mobile Responsive (NEW!)
+- **Perfect on All Devices**: Works seamlessly on phones, tablets, and desktops
+- **Touch Optimized**: 44px+ touch targets for easy tapping
+- **iOS & Android Ready**: Safe area support, no zoom issues
+- **PWA Capable**: Add to home screen for app-like experience
+
 ### 🤖 Hybrid AI System
 - **Primary AI**: Chrome's Gemini Nano (local, fast, private)
 - **Smart Fallback**: OpenAI, Anthropic, Google APIs
@@ -69,6 +75,7 @@ python3 -m http.server 8000
 - **[Installation & Setup](docs/GETTING-STARTED.md)** - Get up and running in 5 minutes
 - **[Features Guide](docs/FEATURES.md)** - Comprehensive feature documentation
 - **[Experiments](docs/EXPERIMENTS.md)** - Interactive AI playgrounds and demos
+- **[Mobile Guide](docs/MOBILE-GUIDE.md)** - Mobile responsiveness & testing
 
 ### Development
 - **[Architecture](docs/ARCHITECTURE.md)** - System design and architecture
@@ -203,6 +210,13 @@ MIT License - see LICENSE file for details.
 ---
 
 ## 🌟 Recent Updates
+
+### v2.1 - Mobile Responsive (October 2025)
+- 📱 **Full Mobile Support**: Optimized for all screen sizes
+- 🎯 **Touch Optimized**: 44px+ touch targets (WCAG 2.1)
+- 📲 **iOS & Android**: Safe area support, no zoom issues
+- 🚀 **Performance**: Hardware accelerated, smooth animations
+- 📋 **Comprehensive Testing**: Detailed mobile testing guide
 
 ### v2.0 - Modular Architecture
 - Refactored to modular design (25+ focused modules)

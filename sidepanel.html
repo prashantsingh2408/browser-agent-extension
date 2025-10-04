@@ -2,10 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AI Assistant</title>
-  <link rel="stylesheet" href="styles/sidepanel.css">
-  <link rel="stylesheet" href="styles/ux-enhancements.css">
+  <link rel="stylesheet" href="styles/sidepanel.css?v=2.1.0">
+  <link rel="stylesheet" href="styles/ux-enhancements.css?v=2.1.0">
+  <link rel="stylesheet" href="styles/mobile-responsive.css?v=2.1.0">
+  
+  <style>
+    /* CRITICAL: Force hide tab text on mobile - inline for immediate effect */
+    @media (max-width: 768px) {
+      .main-nav-tab .tab-label,
+      .main-nav-tab > .tab-label,
+      button.main-nav-tab .tab-label,
+      span.tab-label {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+      }
+      .main-nav-tab {
+        padding: 10px !important;
+        min-width: 44px !important;
+      }
+      .main-nav-tab.active {
+        background: #4285f4 !important;
+        color: white !important;
+        padding: 12px !important;
+      }
+      .main-nav-tab svg {
+        width: 20px !important;
+        height: 20px !important;
+      }
+      .main-nav-tab.active svg {
+        width: 22px !important;
+        height: 22px !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -1835,5 +1874,44 @@
   <script src="scripts/webdev.js"></script>
   <script src="scripts/memory.js"></script>
   <script src="scripts/settings.js"></script>
-</body>
+  <script>
+    // FORCE HIDE TAB LABELS ON MOBILE - JavaScript solution
+    function forceHideTabLabelsOnMobile() {
+      if (window.innerWidth <= 768) {
+        const tabLabels = document.querySelectorAll('.tab-label, .main-nav-tab .tab-label, span.tab-label');
+        tabLabels.forEach(label => {
+          label.style.display = 'none';
+          label.style.visibility = 'hidden';
+          label.style.opacity = '0';
+          label.style.width = '0';
+          label.style.height = '0';
+          label.style.position = 'absolute';
+          label.style.left = '-9999px';
+        });
+        
+        // Style the tabs
+        const tabs = document.querySelectorAll('.main-nav-tab');
+        tabs.forEach(tab => {
+          tab.style.padding = '10px';
+          tab.style.minWidth = '44px';
+          
+          if (tab.classList.contains('active')) {
+            tab.style.background = '#4285f4';
+            tab.style.color = 'white';
+            tab.style.padding = '12px';
+          }
+        });
+      }
+    }
+    
+    // Run immediately
+    forceHideTabLabelsOnMobile();
+    
+    // Run when DOM is ready
+    document.addEventListener('DOMContentLoaded', forceHideTabLabelsOnMobile);
+    
+    // Run on window resize
+    window.addEventListener('resize', forceHideTabLabelsOnMobile);
+  </script>
+  </body>
 </html>
